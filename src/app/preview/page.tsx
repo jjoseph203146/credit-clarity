@@ -20,29 +20,6 @@ import type {
 
 const MONO = "font-[family-name:var(--font-jetbrains-mono)]";
 
-const toneClasses: Record<string, string> = {
-  bad: "bg-[#fbecec] text-[#a33232]",
-  warn: "bg-[#fdf3e7] text-[#9a6314]",
-  good: "bg-[#e6f5ef] text-teal-deep",
-};
-
-const lockedCards = [
-  {
-    t: "Full Account Analysis",
-    d: "Every account explained with a specific recommendation.",
-  },
-  {
-    t: "Personalized Improvement Plan",
-    d: "Your 90-day roadmap, sequenced by impact.",
-  },
-  { t: "Debt Strategy", d: "What to pay first, and exactly why." },
-  { t: "Dispute Guidance", d: "3 possible errors found on your report." },
-  {
-    t: "Communication Scripts",
-    d: "Letters and scripts written for your accounts.",
-  },
-];
-
 function scoreTier(score: number | null): { label: string; className: string } {
   if (score == null) return { label: "Not yet found", className: "text-muted" };
   if (score >= 800) return { label: "Excellent range", className: "text-teal-deep" };
@@ -156,9 +133,14 @@ function PreviewPageInner() {
 
   const score = report.credit_score;
   const tier = scoreTier(score);
+  const bureauName = bureauLabel(report.bureau);
 
   const openAccounts = accounts.filter((a) => a.status === "open").length;
   const collectionCount = collections.length;
+  const revolvingCount = accounts.filter(
+    (a) => a.type === "credit_card" || a.type === "retail_card",
+  ).length;
+  const recommendationsCount = accounts.length + collections.length;
 
   const lateAccounts = accounts.filter(
     (a) => a.payment_history && /late/i.test(a.payment_history),
@@ -175,8 +157,31 @@ function PreviewPageInner() {
 
   const factors = deriveScoreFactors(accounts, collections);
 
+  const lockedCards = [
+    {
+      t: "Full Account Analysis",
+      d: "Every account explained with a specific recommendation.",
+    },
+    {
+      t: "Personalized Improvement Plan",
+      d: "Your 90-day roadmap, sequenced by impact.",
+    },
+    { t: "Debt Strategy", d: "What to pay first, and exactly why." },
+    {
+      t: "Dispute Guidance",
+      d:
+        collectionCount > 0
+          ? `${collectionCount} item${collectionCount > 1 ? "s" : ""} worth reviewing for accuracy.`
+          : "We'll flag anything worth reviewing for accuracy.",
+    },
+    {
+      t: "Communication Scripts",
+      d: "Letters and scripts written for your accounts.",
+    },
+  ];
+
   const reportMeta = [
-    bureauLabel(report.bureau) === "Unknown bureau" ? "Credit report" : `${bureauLabel(report.bureau)} report`,
+    bureauName === "Unknown bureau" ? "Credit report" : `${bureauName} report`,
     report.report_date ? formatDate(report.report_date) : null,
   ]
     .filter(Boolean)
@@ -194,15 +199,50 @@ function PreviewPageInner() {
         </div>
         <h1 className="mb-7 text-[32px] tracking-[-.025em]">Here&apos;s your credit snapshot</h1>
 
+        {/* Step tracker: frames the preview as a finished analysis waiting to be revealed. */}
+        <div className="mb-6 flex items-center gap-2 text-[12.5px] font-semibold text-muted">
+          <span className="flex items-center gap-1.5 text-teal-deep">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-deep text-[9px] text-white">✓</span>
+            Analyzing report
+          </span>
+          <span className="h-px w-6 bg-border" />
+          <span className="flex items-center gap-1.5 text-teal-deep">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-deep text-[9px] text-white">✓</span>
+            Preview complete
+          </span>
+          <span className="h-px w-6 bg-border" />
+          <span className="flex items-center gap-1.5">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border text-[9px]">3</span>
+            Full analysis ready
+          </span>
+          <span className="h-px w-6 bg-border" />
+          <span className="flex items-center gap-1.5">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border text-[9px]">4</span>
+            Unlock to continue
+          </span>
+        </div>
+
         <div className="mb-4 grid grid-cols-4 gap-3.5 max-md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-white p-[22px]">
             <div className="text-[12.5px] font-medium text-muted">Credit Score</div>
-            <div className={`mt-1.5 text-[40px] font-semibold ${MONO}`}>
-              {score ?? "—"}
-            </div>
-            <div className={`mt-0.5 text-[12.5px] font-semibold ${tier.className}`}>
-              {tier.label}
-            </div>
+            {score != null ? (
+              <>
+                <div className={`mt-1.5 text-[40px] font-semibold ${MONO}`}>{score}</div>
+                <div className={`mt-0.5 text-[12.5px] font-semibold ${tier.className}`}>
+                  {tier.label}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-1.5 text-[19px] font-bold text-muted">
+                  Unavailable in this report
+                </div>
+                <div className="mt-1 text-[12.5px] leading-snug text-muted">
+                  Some {bureauName === "Unknown bureau" ? "credit" : bureauName} reports don&apos;t
+                  include a score. Your full analysis still works.
+                </div>
+              </>
+            )}
           </div>
           <div className="rounded-2xl border border-border bg-white p-[22px]">
             <div className="text-[12.5px] font-medium text-muted">Accounts</div>
@@ -223,40 +263,49 @@ function PreviewPageInner() {
                 lateAccounts > 0 ? "text-[#c2731a]" : "text-[#2c7a4b]"
               }`}
             >
-              {lateAccounts > 0 ? "Needs Attention" : "Looks Good"}
+              {lateAccounts > 0 ? "Needs Attention" : "Strong"}
             </div>
             <div className="mt-0.5 text-[12.5px] text-muted">
               {lateAccounts > 0
                 ? `${lateAccounts} late payment${lateAccounts > 1 ? "s" : ""} found`
-                : "No late payments found"}
+                : "✓ No late payments detected"}
             </div>
           </div>
           <div className="rounded-2xl border border-border bg-white p-[22px]">
-            <div className="text-[12.5px] font-medium text-muted">Utilization</div>
-            <div className={`mt-3 text-[19px] font-bold ${utilizationLabelClass[uTone]}`}>
-              {utilization != null
-                ? `${uTone === "bad" ? "High — " : uTone === "warn" ? "Moderate — " : ""}${utilization}%`
-                : "—"}
+            <div className="text-[12.5px] font-medium text-muted">
+              {utilization != null ? "Estimated Utilization" : "Utilization"}
             </div>
-            <div className="mt-0.5 text-[12.5px] text-muted">Goal: below 30%</div>
+            {utilization != null ? (
+              <>
+                <div className={`mt-3 text-[19px] font-bold ${utilizationLabelClass[uTone]}`}>
+                  {uTone === "bad" ? "High — " : uTone === "warn" ? "Moderate — " : ""}
+                  {utilization}%
+                </div>
+                <div className="mt-0.5 text-[12.5px] text-muted">Goal: below 30%</div>
+              </>
+            ) : (
+              <div className="mt-1.5 text-[12.5px] leading-snug text-muted">
+                We couldn&apos;t confidently calculate utilization from the uploaded report.
+                Your full analysis includes account-level estimates where available.
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="mb-9 rounded-2xl border border-border bg-white p-[22px] px-6">
+        <div className="mb-4 rounded-2xl border border-border bg-white p-[22px] px-6">
           <div className="mb-3 text-[15px] font-bold">
-            Major factors affecting your score
+            Top factors affecting your credit profile
           </div>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-col gap-2">
             {factors.length > 0 ? (
               factors.map((f) => (
-                <span
-                  key={f.title}
-                  className={`rounded-full px-3.5 py-[7px] text-sm font-semibold ${
-                    toneClasses[f.positive ? "good" : "bad"]
-                  }`}
-                >
-                  {f.title}
-                </span>
+                <div key={f.title} className="flex items-start gap-2.5 text-[13.5px]">
+                  <span className="mt-[1px]">{f.positive ? "🟢" : "🔴"}</span>
+                  <span>
+                    <span className="font-semibold">{f.title}</span>
+                    {f.detail ? <span className="text-muted"> — {f.detail}</span> : null}
+                  </span>
+                </div>
               ))
             ) : (
               <span className="text-[13.5px] text-muted">
@@ -265,6 +314,54 @@ function PreviewPageInner() {
             )}
           </div>
         </div>
+
+        <div className="mb-9 rounded-2xl border border-border bg-white p-[22px] px-6">
+          <div className="mb-3 text-[15px] font-bold">What Clarity AI discovered</div>
+          <div className="flex flex-col gap-2 text-[13.5px]">
+            <div>✓ {accounts.length} account{accounts.length === 1 ? "" : "s"} reviewed</div>
+            {collectionCount > 0 && (
+              <div>
+                ✓ {collectionCount} collection account{collectionCount > 1 ? "s" : ""} identified
+              </div>
+            )}
+            {revolvingCount > 0 && (
+              <div>
+                ✓ {revolvingCount} revolving credit account{revolvingCount > 1 ? "s" : ""}
+              </div>
+            )}
+            {collectionCount > 0 && (
+              <div>
+                ✓ {collectionCount} item{collectionCount > 1 ? "s" : ""} worth reviewing for
+                accuracy
+              </div>
+            )}
+            <div className="mt-1 font-semibold text-navy">
+              🔒 {recommendationsCount} personalized recommendation
+              {recommendationsCount === 1 ? "" : "s"} ready
+            </div>
+          </div>
+        </div>
+
+        {collectionCount > 0 || accounts.length > 0 ? (
+          <div className="mb-9 rounded-2xl border border-border bg-white p-[22px] px-6">
+            <div className="mb-2 text-[13px] font-bold text-muted">Your Highest Priority</div>
+            <div className="flex items-start gap-2">
+              <span className="text-sm">🔒</span>
+              <div>
+                <div className="text-[15px] font-bold">
+                  {collectionCount > 0
+                    ? "Address your highest-impact collection account"
+                    : "Reduce revolving credit utilization"}
+                </div>
+                <div className="mt-1 text-[13.5px] leading-relaxed text-muted">
+                  We&apos;ve identified one action that may have a meaningful impact on your
+                  credit profile. Unlock to see the recommended accounts, suggested order, and
+                  reasoning.
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <h2 className="mb-4 text-xl tracking-[-.015em]">Your full analysis is ready</h2>
         <div className="mb-7 grid grid-cols-3 gap-3.5 max-md:grid-cols-1">
@@ -287,7 +384,7 @@ function PreviewPageInner() {
         <div className="flex flex-wrap items-center justify-between gap-6 rounded-[18px] bg-[linear-gradient(135deg,#0b1f3a,#134066)] px-8 py-7 text-white">
           <div>
             <div className="text-[19px] font-bold tracking-[-.01em]">
-              Unlock your full analysis, roadmap &amp; scripts
+              See my personalized action plan
             </div>
             <div className="mt-1 text-sm text-[#b9c8da]">
               One-time payment · Secure Stripe checkout · Instant access
@@ -297,7 +394,7 @@ function PreviewPageInner() {
             href={`/checkout?reportId=${report.id}`}
             className="flex-none rounded-xl bg-teal px-[26px] py-[15px] text-base font-semibold text-white shadow-[0_8px_24px_rgba(14,159,119,.4)] transition-colors hover:bg-[#0b8663]"
           >
-            Unlock Full Analysis — $5
+            Unlock My Complete Credit Roadmap — $5
           </Link>
         </div>
       </div>
