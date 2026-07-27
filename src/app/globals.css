@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Credit Clarity brand palette (see BUILD.md / design references) */
+    --navy: #0b1f3a;
+    --navy-deep: #081527;
+    --blue: #155a8a;
+    --teal: #0e9f77;
+    --teal-deep: #0b7d5e;
+    --mint: #2ee6a8;
+    --mint-light: #5bd6a9;
+    --ink: #0f2540;
+    --muted: #5a6b80;
+    --border: #e4e9f0;
+    --bg: #f4f6f9;
+
+    /* shadcn/ui tokens (slate base, new-york style) */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 210 76% 30%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --input: 214 32% 91%;
+    --ring: 210 76% 30%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

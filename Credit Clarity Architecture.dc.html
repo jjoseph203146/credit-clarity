@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9edf2;font-family:'Instrument Sans',system-ui,sans-serif;color:#0f2540;-webkit-font-smoothing:antialiased}
+a{color:#0e9f77;text-decoration:none}a:hover{color:#0b7d5e}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div style="padding:48px 56px;display:flex;flex-direction:column;gap:44px">
+
+<!-- ===== ERD ===== -->
+<div data-screen-label="Database ERD">
+  <div style="margin-bottom:6px;font-weight:700;font-size:20px;letter-spacing:-.02em">Database — Entity Relationships</div>
+  <div style="font-size:13px;color:#5a6b80;margin-bottom:18px">Conceptual (Supabase / PostgreSQL, RLS on every table keyed to user_id). Chips show foreign keys: <span style="background:#e6f5ef;color:#0b7d5e;border-radius:6px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600">→ table</span> = belongs-to.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,270px);gap:18px;align-items:start">
+    <sc-for list="{{ erdCols }}" as="col" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:#8fa3ba">{{ col.t }}</div>
+        <sc-for list="{{ col.ents }}" as="e">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(10,25,50,.05)">
+            <div style="{{ e.hdSt }}"><span style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13.5px">{{ e.name }}</span></div>
+            <div style="padding:6px 16px 8px;font-size:11px;color:#8fa3ba;border-bottom:1px solid #eef2f7">{{ e.desc }}</div>
+            <div style="padding:8px 16px 12px;display:flex;flex-direction:column">
+              <sc-for list="{{ e.fields }}" as="f">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:4.5px 0;border-bottom:1px dashed #f0f3f7">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#22354d">{{ f.n }}</span>
+                  <sc-if value="{{ f.tag }}" hint-placeholder-val="{{ false }}"><span style="{{ f.tagSt }}">{{ f.tag }}</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<!-- ===== NAV MAP ===== -->
+<div data-screen-label="Navigation Map">
+  <div style="margin-bottom:6px;font-weight:700;font-size:20px;letter-spacing:-.02em">Application Navigation Map</div>
+  <div style="font-size:13px;color:#5a6b80;margin-bottom:18px">Every route in the product, grouped by access level.</div>
+  <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+    <sc-for list="{{ sitemap }}" as="g" hint-placeholder-count="4">
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px 22px;width:300px">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+          <div style="{{ g.icSt }}">{{ g.ic }}</div>
+          <div><div style="font-weight:700;font-size:15px">{{ g.t }}</div><div style="font-size:11.5px;color:#8fa3ba">{{ g.sub }}</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ g.items }}" as="i">
+            <div style="{{ i.st }}"><span style="{{ i.dot }}"></span>{{ i.label }}<sc-if value="{{ i.note }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-size:10px;font-weight:700;color:#8fa3ba;background:#f4f6f9;border-radius:6px;padding:2px 7px">{{ i.note }}</span></sc-if></div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const hd = tone => `padding:11px 16px 8px;color:#fff;background:${tone === 'navy' ? 'linear-gradient(135deg,#0b1f3a,#155a8a)' : tone === 'teal' ? 'linear-gradient(135deg,#0b7d5e,#0e9f77)' : tone === 'gold' ? 'linear-gradient(135deg,#8a5a14,#c2871a)' : 'linear-gradient(135deg,#123a5c,#155a8a)'}`;
+    const fld = ([n, tag]) => ({ n, tag, tagSt: `font-size:10px;font-weight:600;border-radius:6px;padding:2px 7px;white-space:nowrap;font-family:'JetBrains Mono',monospace;${String(tag).startsWith('→') ? 'background:#e6f5ef;color:#0b7d5e' : 'background:#f4f6f9;color:#5a6b80'}` });
+    const ent = (name, tone, desc, fields) => ({ name, desc, hdSt: hd(tone), fields: fields.map(fld) });
+    const col1 = [
+      ent('users', 'navy', 'Supabase Auth + profile', [['id', 'uuid PK'], ['email', ''], ['full_name', ''], ['goal', 'enum'], ['timeline', 'enum'], ['challenge', 'enum'], ['org_id', '→ organizations'], ['created_at', '']]),
+      ent('organizations', 'navy', 'Future: schools, employers, churches', [['id', 'uuid PK'], ['name', ''], ['type', 'enum'], ['seat_limit', 'int'], ['aggregate_only', 'bool']]),
+    ];
+    const col2 = [
+      ent('reports', 'teal', 'One row per uploaded PDF', [['id', 'uuid PK'], ['user_id', '→ users'], ['bureau', 'enum EXP/EQF/TU'], ['report_date', ''], ['credit_score', 'int'], ['clarity_score', 'int'], ['status', 'enum uploaded→analyzed'], ['storage_path', 'encrypted'], ['deleted_at', 'nullable']]),
+      ent('payments', 'gold', 'Stripe checkout sessions', [['id', 'uuid PK'], ['user_id', '→ users'], ['report_id', '→ reports'], ['stripe_session_id', ''], ['amount_cents', 'int'], ['status', 'enum']]),
+    ];
+    const col3 = [
+      ent('report_accounts', 'teal', '8 rows for Jordan\'s report', [['id', 'uuid PK'], ['report_id', '→ reports'], ['name / type / status', ''], ['balance / limit', 'int'], ['utilization', 'numeric'], ['ai_summary', 'text'], ['recommended_action', 'text'], ['confidence', '1-5']]),
+      ent('report_collections', 'teal', 'Collection detail + dates', [['id', 'uuid PK'], ['report_id', '→ reports'], ['account_id', '→ report_accounts'], ['original_creditor', ''], ['amount / dates', ''], ['validation_status', 'enum']]),
+      ent('report_inquiries', 'teal', 'Hard inquiries', [['id', 'uuid PK'], ['report_id', '→ reports'], ['lender / type', ''], ['inquiry_date', ''], ['impact', 'enum']]),
+    ];
+    const col4 = [
+      ent('action_plans', 'green', '90-day plan + tasks (jsonb)', [['id', 'uuid PK'], ['report_id', '→ reports'], ['user_id', '→ users'], ['goal_snapshot', 'enum'], ['tasks', 'jsonb: month/week/done']]),
+      ent('ai_conversations', 'green', 'Clarity AI chat threads', [['id', 'uuid PK'], ['user_id', '→ users'], ['report_id', '→ reports'], ['messages', 'jsonb'], ['tokens_used', 'int']]),
+      ent('learning_progress', 'green', 'Lesson completion', [['id', 'uuid PK'], ['user_id', '→ users'], ['lesson_slug', ''], ['completed_at', '']]),
+      ent('notifications', 'green', 'Deadlines, nudges, reminders', [['id', 'uuid PK'], ['user_id', '→ users'], ['kind', 'enum'], ['due_at / read_at', '']]),
+    ];
+
+    const dot = c => `width:7px;height:7px;border-radius:50%;background:${c};margin-right:9px;flex:none`;
+    const row = (label, depth, note, active) => ({ label, note, st: `display:flex;align-items:center;font-size:13px;font-weight:${depth ? 500 : 600};padding:7px 0 7px ${depth * 22}px;border-left:${depth ? '2px solid #e4e9f0' : 'none'};margin-left:${depth ? '3px' : '0'};color:${depth ? '#3d5068' : '#0f2540'}`, dot: dot(active ? '#0e9f77' : depth ? '#c7d2df' : '#0b1f3a') });
+    const ic = bg => `width:32px;height:32px;border-radius:10px;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none`;
+    const sitemap = [
+      { t: 'Marketing', sub: 'public · no auth', ic: 'M', icSt: ic('linear-gradient(135deg,#0b1f3a,#155a8a)'), items: [
+        row('Home', 0, '', true), row('How It Works', 1), row('Pricing', 1), row('Security', 1), row('FAQ', 1, 'on Home'), row('Upload → Free Preview', 1, 'no account'), row('Checkout ($5)', 1, 'Stripe'), row('Login / Signup / Reset', 1) ] },
+      { t: 'Authenticated App', sub: 'user · RLS-scoped', ic: 'A', icSt: ic('linear-gradient(135deg,#0e9f77,#2ee6a8)'), items: [
+        row('Dashboard', 0, '', true), row('My Reports', 0), row('Report Viewer', 1), row('Overview / Accounts / Collections', 2), row('Inquiries / Recommendations', 2), row('Letters / Timeline / PDF Export', 2), row('Compare Reports', 1), row('Action Plan', 0), row('Clarity AI', 0), row('Progress', 0), row('Learning Center', 0), row('Goals & Simulator', 0), row('Notifications', 0), row('Profile / Settings / Billing', 0) ] },
+      { t: 'Admin', sub: 'internal staff only', ic: '◆', icSt: ic('#161d29'), items: [
+        row('Analytics Overview', 0, '', true), row('Users', 1), row('Reports & Processing', 1), row('Retry queue', 2), row('AI Usage & Costs', 1), row('Revenue / Stripe', 1), row('Infrastructure', 1), row('Support Queue', 1) ] },
+      { t: 'Organizations', sub: 'future · aggregate only', ic: 'O', icSt: ic('#155a8a'), items: [
+        row('Org Dashboard', 0, '', true), row('Members & Invites', 1), row('Literacy Progress', 1), row('Cohort Health', 1, 'no PII'), row('Billing (seats)', 1) ] },
+    ];
+    return { erdCols: [{ t: 'IDENTITY', ents: col1 }, { t: 'REPORTS & MONEY', ents: col2 }, { t: 'REPORT DETAIL', ents: col3 }, { t: 'ENGAGEMENT', ents: col4 }], sitemap };
+  }
+}
+</script>
+</body>
+</html>

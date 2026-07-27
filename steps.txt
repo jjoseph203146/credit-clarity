@@ -1,0 +1,183 @@
+CREDIT CLARITY — PATH TO A PRODUCTION-READY BUILD
+Generated 2026-07-26
+
+===============================================================================
+CURRENT STATE (verified this session)
+===============================================================================
+- All app routes exist and `next build` compiles cleanly (29 routes):
+  marketing: /how-it-works, /pricing, /security
+  onboarding/auth: /login, /signup, /upload, /questionnaire, /processing,
+                   /preview, /checkout
+  authenticated app: /dashboard, /reports, /reports/[id], /reports/compare,
+                     /reports/[id]/pdf-report, /plan, /chat, /progress,
+                     /learn, /goals, /notifications, /settings
+  API routes: /api/upload, /api/parse, /api/analyze, /api/checkout,
+              /api/webhooks/stripe, /api/reports/[id]
+- The dashboard/reports/report-viewer/compare screens (my build) render
+  STATIC DEMO DATA (src/lib/demo-data.ts) — no live Supabase reads yet.
+  Unverified whether the other app screens are wired to real data either.
+- DB schema is defined in supabase-schema.sql and supabase/migrations/0001_init.sql,
+  but NOT confirmed to be applied to the live Supabase project.
+- Supabase client/server/admin helpers + middleware.ts (session refresh) are
+  already coded and read the standard env var names.
+- Local .env (gitignored, this environment only) currently has:
+    ANTHROPIC_API_KEY            [x] present
+    NEXT_PUBLIC_SUPABASE_URL     [x] present (added this session)
+    NEXT_PUBLIC_SUPABASE_ANON_KEY[x] present (added this session)
+    SUPABASE_SERVICE_ROLE_KEY    [x] present (added this session)
+    STRIPE_SECRET_KEY            [ ] MISSING
+    STRIPE_PUBLISHABLE_KEY       [ ] MISSING
+    STRIPE_WEBHOOK_SECRET        [ ] MISSING
+  These values exist only in this local environment — they have not been
+  set in any real hosting platform (Vercel, etc.), and .env is (correctly)
+  gitignored so it will never deploy on its own.
+- No automated tests exist anywhere in the repo (no test files, no "test"
+  script in package.json).
+- No CI/CD config (no GitHub Actions workflow, no vercel.json).
+- Git remote is set (github.com/jjoseph203146/credit-clarity) but nothing
+  has been pushed/committed beyond the initial commit — everything built
+  so far is still untracked locally.
+
+===============================================================================
+STEP 1 — Stand up the real database
+===============================================================================
+1. Confirm whether supabase-schema.sql / supabase/migrations/0001_init.sql
+   have actually been run against kcgwpswxammenmlxsube.supabase.co. If not:
+     supabase link --project-ref kcgwpswxammenmlxsube
+     supabase db push
+   or paste supabase-schema.sql into the Supabase SQL editor directly.
+2. Verify Row-Level-Security is enabled and scoped to user_id on every
+   table (users, reports, payments, report_accounts, report_collections,
+   report_inquiries, action_plans, ai_conversations, learning_progress,
+   notifications) — BUILD.md requires this on every table.
+3. Create a Supabase Storage bucket for uploaded PDFs with a signed-upload
+   policy (anonymous pre-signup uploads must still land somewhere secure).
+4. Smoke-test: insert a row through the Supabase dashboard and confirm the
+   app's Supabase client (src/lib/supabase/client.ts) can read it.
+
+===============================================================================
+STEP 2 — Finish and verify the core data pipeline (BUILD.md's own order)
+===============================================================================
+5. Anonymous upload -> signed Storage upload -> `reports` row (status
+   "uploaded"). Confirm /api/upload actually performs this against the
+   live project, not a stub.
+6. Server-side parse job (pdf-parse) that populates report_accounts /
+   report_collections / report_inquiries and sets status "parsed".
+   Confirm /api/parse is fully implemented (it existed but wasn't reviewed
+   for completeness this session).
+7. Free preview must render straight from parsed Postgres data, no AI call,
+   no paywall — verify /preview does this.
+8. Replace ALL static demo data with live Supabase queries in the app
+   screens (dashboard, reports list, report viewer tabs, comparison, plan,
+   progress, chat, learn, goals, notifications, settings). This includes
+   the screens built in this session — src/lib/demo-data.ts should become
+   fallback/seed data only, not what renders in production.
+
+===============================================================================
+STEP 3 — Payments
+===============================================================================
+9. Create a Stripe account/product for the $5 report analysis, get test
+   keys, and fill in STRIPE_SECRET_KEY / STRIPE_PUBLISHABLE_KEY in .env.
+10. Wire /api/checkout to create a real Checkout Session; confirm the
+    success/cancel redirect URLs point at real routes (/checkout,
+    /processing, etc.).
+11. Register a webhook endpoint (Stripe CLI locally, Stripe Dashboard in
+    prod) pointed at /api/webhooks/stripe, capture the signing secret into
+    STRIPE_WEBHOOK_SECRET, and verify the handler flips reports.status to
+    "paid" and payments.status to "succeeded".
+12. Test the full $5 purchase path end-to-end in Stripe test mode before
+    ever touching live keys.
+
+===============================================================================
+STEP 4 — AI analysis + chat
+===============================================================================
+13. Confirm ANTHROPIC_API_KEY is valid and /api/analyze produces the
+    structured JSON (ai_summary / recommended_action / confidence per
+    account, action_plans.tasks, collection scripts) as described in
+    BUILD.md, and that it only runs after payment succeeds.
+14. Wire the Clarity AI chat screen to real Claude calls scoped with the
+    user's report JSON + conversation history, logged to ai_conversations
+    (per BUILD.md step 9) — currently likely still demo/static.
+15. Add basic rate limiting / cost guardrails on the Claude endpoints
+    before this is public (a $ leak on 10k concurrent chat requests is a
+    real risk).
+
+===============================================================================
+STEP 5 — Auth end-to-end
+===============================================================================
+16. Verify Supabase Auth signup/login actually creates a session and that
+    middleware.ts correctly refreshes/protects the (app) route group route
+    group (redirect unauthenticated users away from /dashboard etc.).
+17. Implement "claim anonymous report on signup" (BUILD.md step 6) —
+    confirm src/app/signup/actions.ts sets reports.user_id correctly.
+18. Confirm account deletion (reports + user data) is implemented and
+    actually removes data with no retention period, per BUILD.md's
+    product rules.
+
+===============================================================================
+STEP 6 — Compliance / product-rule guardrails
+===============================================================================
+19. Every AI-facing surface must avoid claiming guaranteed score
+    improvement or "we'll dispute this for you" — audit generated/AI copy,
+    not just the static demo copy.
+20. Every PDF/report page footer must read: "Educational Report ·
+    Generated by Clarity AI · Not legal, financial, or credit repair
+    advice" — confirm this is present on the actual PDF export
+    (/reports/[id]/pdf-report), not just described in BUILD.md.
+21. Confirm no SSN fields and no real credit-pull integration exist
+    anywhere in the upload/questionnaire flow.
+
+===============================================================================
+STEP 7 — Testing
+===============================================================================
+22. Add a test runner (Vitest or Jest + React Testing Library) and a
+    "test" script to package.json — none exists today.
+23. At minimum: unit tests for the parse logic (pdf-parse extraction),
+    the Stripe webhook handler, and the Claude structured-output parsing
+    (these are the highest-value/highest-risk paths).
+24. Add a couple of Playwright/e2e smoke tests for the critical path:
+    upload -> free preview -> checkout (Stripe test mode) -> signup ->
+    dashboard.
+
+===============================================================================
+STEP 8 — Build, CI, and deploy
+===============================================================================
+25. Commit the work — nothing beyond the initial commit has been pushed;
+    `git status` shows the whole src/ tree, package.json, configs, etc.
+    still untracked.
+26. Add a CI workflow (GitHub Actions) that runs `npx tsc --noEmit`,
+    `npx next build`, and the new test suite on every PR — none exists.
+27. Create the Vercel project (or chosen host) and set ALL env vars there
+    directly in project settings — Supabase URL/anon/service-role,
+    Stripe secret/publishable/webhook secret, Anthropic key. Local .env
+    will not carry over automatically.
+28. Set up separate Stripe (test vs live) and Supabase (staging vs prod,
+    if desired) environments so production keys are never used in dev.
+29. Do a full production build + deploy to a preview URL and manually
+    walk the entire funnel once (upload through PDF export) before
+    pointing a real domain at it.
+
+===============================================================================
+STEP 9 — Ops basics before real users touch it
+===============================================================================
+30. Error monitoring (Sentry or similar) on both the Next.js app and the
+    API routes — a failed Claude call or Stripe webhook should page
+    someone, not silently 500.
+31. Basic uptime/health check endpoint.
+32. Backups/point-in-time-recovery confirmed enabled on the Supabase
+    project (it's holding financial report data).
+33. A privacy policy / terms page reflecting the "no SSN, no credit pull,
+    delete anytime" rules already promised in BUILD.md.
+
+===============================================================================
+NOT YET DONE FROM THIS SESSION'S SCOPE
+===============================================================================
+- I (this session) only built: (app) layout/sidebar, /dashboard, /reports,
+  /reports/[id] (+ inner tabs), /reports/compare — all on static demo data,
+  per explicit instruction not to wire real Supabase queries.
+- I added the 3 Supabase env vars you provided to local .env only.
+- I have not reviewed the implementation quality of /plan, /chat,
+  /progress, /learn, /goals, /notifications, /settings, /reports/[id]/pdf-report,
+  or any of the marketing/auth pages/API routes — only confirmed they exist
+  and the whole project builds. Steps above that touch those areas should be
+  re-verified by whoever owns them, not assumed complete.

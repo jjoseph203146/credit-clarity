@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f6f9;font-family:'Instrument Sans',system-ui,sans-serif;color:#0f2540;-webkit-font-smoothing:antialiased}
+a{color:#0e9f77;text-decoration:none}a:hover{color:#0b7d5e}
+*{box-sizing:border-box}
+button,input{font-family:'Instrument Sans',system-ui,sans-serif}
+@keyframes ccpulse{0%,100%{opacity:1}50%{opacity:.45}}
+input[type=range]{accent-color:#0e9f77}
+::selection{background:#d5efe5}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh">
+  <!-- ===== APP SIDEBAR ===== -->
+  <div style="width:224px;flex:none;background:#081527;color:#b9c8da;display:flex;flex-direction:column;padding:18px 12px;position:sticky;top:0;height:100vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;gap:9px;padding:6px 10px;margin-bottom:18px">
+      <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:#fff"></div></div>
+      <span style="font-weight:700;font-size:15px;color:#fff;letter-spacing:-.01em">Credit Clarity</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ navMain }}" as="n" hint-placeholder-count="9">
+        <div onClick="{{ n.on }}" style="{{ n.st }}"><span style="width:18px;display:inline-block;text-align:center;margin-right:8px;opacity:.8">{{ n.ic }}</span>{{ n.label }}<sc-if value="{{ n.dot }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;background:#d05252;color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 7px">{{ n.dot }}</span></sc-if></div>
+      </sc-for>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:#5b6f89;padding:18px 12px 6px">ACCOUNT</div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ navAcct }}" as="n" hint-placeholder-count="3">
+        <div onClick="{{ n.on }}" style="{{ n.st }}"><span style="width:18px;display:inline-block;text-align:center;margin-right:8px;opacity:.8">{{ n.ic }}</span>{{ n.label }}</div>
+      </sc-for>
+    </div>
+    <div style="margin-top:auto;padding:12px 10px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px">
+      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#155a8a,#0e9f77);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff">JE</div>
+      <div><div style="font-size:13px;font-weight:600;color:#fff">Jordan Ellis</div><div style="font-size:11px;color:#8fa3ba">Pay per report</div></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <div style="flex:1;min-width:0">
+
+    <!-- DASHBOARD -->
+    <sc-if value="{{ pDashboard }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="App Dashboard" style="padding:28px 36px 72px;max-width:1080px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px">
+        <div><h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">Good morning, Jordan</h1><div style="font-size:13px;color:#5a6b80">Experian · Apr 12, 2026 · <span style="color:#0e9f77;font-weight:600">next upload Jul 11</span></div></div>
+        <button onClick="{{ goReports }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">My Reports</button>
+      </div>
+      <div style="display:grid;grid-template-columns:360px 1fr;gap:14px;margin-bottom:14px">
+        <div style="background:linear-gradient(160deg,#0b1f3a,#134066);border-radius:18px;padding:24px;color:#fff;display:flex;gap:20px;align-items:center">
+          <svg width="116" height="116" viewBox="0 0 128 128">
+            <circle cx="64" cy="64" r="54" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"></circle>
+            <circle cx="64" cy="64" r="54" fill="none" stroke="#2ee6a8" stroke-width="10" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="88.2" transform="rotate(-90 64 64)"></circle>
+            <text x="64" y="60" text-anchor="middle" fill="#fff" font-size="30" font-weight="700" font-family="JetBrains Mono,monospace">74</text>
+            <text x="64" y="80" text-anchor="middle" fill="#8fa3ba" font-size="12">/ 100</text>
+          </svg>
+          <div><div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5bd6a9;margin-bottom:5px">CLARITY SCORE</div><div style="font-size:13.5px;line-height:1.5;color:#d6e1ee">Improving. Focus on utilization and your collection account.</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12.5px"><span style="color:#8fa3ba">Experian</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">642</span><span style="color:#5bd6a9;font-weight:600">▲ +14</span></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+          <div onClick="{{ goSim }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:20px;cursor:pointer" style-hover="border-color:#0e9f77"><div style="font-size:12px;color:#5a6b80">Card Utilization</div><div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin-top:8px;color:#c23e3e">72%</div><div style="font-size:12px;color:#0e9f77;font-weight:600;margin-top:2px">Simulate a payment →</div></div>
+          <div onClick="{{ goPlan }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:20px;cursor:pointer" style-hover="border-color:#0e9f77"><div style="font-size:12px;color:#5a6b80">Plan Progress</div><div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin-top:8px">{{ planDone }}<span style="font-size:17px;color:#8fa3ba">/9</span></div><div style="font-size:12px;color:#0e9f77;font-weight:600;margin-top:2px">Open planner →</div></div>
+          <div onClick="{{ goProgress }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:20px;cursor:pointer" style-hover="border-color:#0e9f77"><div style="font-size:12px;color:#5a6b80">Score Trend</div><div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin-top:8px;color:#0b7d5e">+31</div><div style="font-size:12px;color:#0e9f77;font-weight:600;margin-top:2px">since October →</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.15fr .85fr;gap:14px">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px"><span style="font-weight:700;font-size:16px">Today's actions</span><span onClick="{{ goPlan }}" style="font-size:12.5px;font-weight:600;color:#0e9f77;cursor:pointer">Full plan →</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ todayTasks }}" as="t" hint-placeholder-count="3">
+              <div onClick="{{ t.on }}" style="display:flex;gap:11px;align-items:center;padding:12px 14px;background:#f8fafc;border-radius:12px;cursor:pointer" style-hover="background:#eef4f1">
+                <span style="{{ t.ck }}">{{ t.mk }}</span><span style="{{ t.txt }}">{{ t.label }}</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:#8fa3ba">{{ t.tag }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px"><span style="font-weight:700;font-size:16px">Notifications</span><span onClick="{{ goNotif }}" style="font-size:12.5px;font-weight:600;color:#0e9f77;cursor:pointer">All →</span></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:11px"><div style="width:30px;height:30px;border-radius:10px;background:#e6f5ef;color:#0b7d5e;display:flex;align-items:center;justify-content:center;font-size:13px;flex:none">✉</div><div><div style="font-size:13px;font-weight:600">Validation letter — day 12 of 30</div><div style="font-size:11.5px;color:#8fa3ba">Midland must respond by May 26</div></div></div>
+            <div style="display:flex;gap:11px"><div style="width:30px;height:30px;border-radius:10px;background:#fdf3e7;color:#9a6314;display:flex;align-items:center;justify-content:center;font-size:13px;flex:none">!</div><div><div style="font-size:13px;font-weight:600">Task overdue: Chase payment</div><div style="font-size:11.5px;color:#8fa3ba">Planned for Apr 20</div></div></div>
+            <div style="display:flex;gap:11px"><div style="width:30px;height:30px;border-radius:10px;background:#eef2f7;color:#3d5068;display:flex;align-items:center;justify-content:center;font-size:13px;flex:none">↻</div><div><div style="font-size:13px;font-weight:600">Re-upload opens Jul 11</div><div style="font-size:11.5px;color:#8fa3ba">Track your progress next quarter</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- MY REPORTS -->
+    <sc-if value="{{ pReports }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="My Reports" style="padding:28px 36px 72px;max-width:980px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px">
+        <div><h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">My Reports</h1><div style="font-size:13px;color:#5a6b80">Upload a new report every 90 days to track progress · <span onClick="{{ toggleEmptyReports }}" style="color:#0e9f77;font-weight:600;cursor:pointer">{{ emptyReportsLabel }}</span></div></div>
+        <button style="background:#0b1f3a;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer" style-hover="background:#123152">+ Upload Report</button>
+      </div>
+      <sc-if value="{{ emptyReports }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #c7d2df;border-radius:20px;padding:64px 32px;text-align:center">
+          <div style="width:56px;height:56px;border-radius:16px;background:#eef2f7;display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px">📄</div>
+          <div style="font-weight:700;font-size:17px;margin-bottom:6px">No reports yet</div>
+          <div style="font-size:14px;color:#5a6b80;max-width:380px;margin:0 auto 20px;line-height:1.6">Upload your first credit report to get your free snapshot and unlock your personalized analysis.</div>
+          <button style="background:#0e9f77;color:#fff;border:0;border-radius:11px;padding:13px 22px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="background:#0b8663">Upload Your First Report</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notEmptyReports }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ reportRows }}" as="r" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px 24px;display:grid;grid-template-columns:44px 1.3fr .8fr .8fr .9fr auto;gap:16px;align-items:center">
+              <div style="{{ r.logoSt }}">{{ r.logo }}</div>
+              <div><div style="font-weight:700;font-size:14.5px">{{ r.d }}</div><div style="font-size:12px;color:#8fa3ba">{{ r.b }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">SCORE</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:17px;margin-top:2px">{{ r.s }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">CHANGE</div><div style="{{ r.chgSt }}">{{ r.chg }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">STATUS</div><div style="font-size:12.5px;font-weight:600;margin-top:2px;color:#0b7d5e">{{ r.st }}</div></div>
+              <div style="display:flex;gap:8px"><button onClick="{{ goViewer }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Open</button><button onClick="{{ goCompare }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Compare</button></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- REPORT VIEWER (Linear-style: inner rail + content) -->
+    <sc-if value="{{ pViewer }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Report Viewer" style="display:flex;min-height:100vh">
+      <div style="width:208px;flex:none;background:#fff;border-right:1px solid #e4e9f0;padding:22px 10px;position:sticky;top:0;height:100vh">
+        <div style="padding:0 12px 14px"><div style="font-weight:700;font-size:14px">Apr 2026 Report</div><div style="font-size:11.5px;color:#8fa3ba">Experian · analyzed</div></div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ vrail }}" as="n" hint-placeholder-count="8">
+            <div onClick="{{ n.on }}" style="{{ n.st }}">{{ n.label }}<sc-if value="{{ n.count }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-size:11px;color:#8fa3ba;font-family:'JetBrains Mono',monospace">{{ n.count }}</span></sc-if></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0;padding:28px 36px 72px;max-width:900px">
+
+        <sc-if value="{{ vsOverview }}" hint-placeholder-val="{{ true }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 18px">Overview</h1>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px;margin-bottom:14px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:10px">EXECUTIVE SUMMARY</div>
+            <p style="font-size:14.5px;line-height:1.7;margin:0;text-wrap:pretty">Your profile is <strong>fair (642)</strong> and trending up — +31 since October. Two factors outweigh everything else: <strong>card utilization (72%)</strong> and <strong>one collection ($684)</strong>. Account age and mix are strong, so your score responds quickly once balances drop.</p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <sc-for list="{{ scoreWhy }}" as="w" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;padding:16px;background:#fff;border:1px solid #e4e9f0;border-radius:14px">
+                <div style="{{ w.dotSt }}">{{ w.sign }}</div>
+                <div><div style="font-weight:600;font-size:13.5px">{{ w.t }}</div><div style="font-size:12.5px;color:#5a6b80;line-height:1.5;margin-top:2px">{{ w.d }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ vsAccounts }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ noAcctSel }}" hint-placeholder-val="{{ true }}">
+            <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 6px">Accounts</h1>
+            <div style="font-size:13px;color:#5a6b80;margin-bottom:18px">Click any account for its full analysis page.</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ acctRows }}" as="a" hint-placeholder-count="8">
+                <div onClick="{{ a.on }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:1.5fr .7fr .6fr .8fr auto;gap:14px;align-items:center;cursor:pointer" style-hover="border-color:#0e9f77">
+                  <div><div style="font-weight:700;font-size:14px">{{ a.name }}</div><div style="font-size:11.5px;color:#8fa3ba">{{ a.type }}</div></div>
+                  <div><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">BALANCE</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13.5px;margin-top:2px">{{ a.bal }}</div></div>
+                  <div><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">UTIL.</div><div style="{{ a.utilSt }}">{{ a.util }}</div></div>
+                  <div><span style="{{ a.pillSt }}">{{ a.pill }}</span></div>
+                  <div style="color:#8fa3ba;font-size:15px">›</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ acctSel }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ backToAccts }}" style="font-size:13px;font-weight:600;color:#0e9f77;cursor:pointer;margin-bottom:14px">← All accounts</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+              <div><h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">{{ selName }}</h1><div style="font-size:13px;color:#5a6b80">{{ selType }}</div></div>
+              <span style="{{ selPillSt }}">{{ selPill }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:13px;padding:14px"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">BALANCE</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:17px;margin-top:5px">{{ selBal }}</div></div>
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:13px;padding:14px"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">LIMIT</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:17px;margin-top:5px">{{ selLimit }}</div></div>
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:13px;padding:14px"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600;display:flex;align-items:center">UTILIZATION<span onClick="{{ infoUtilization }}" style="display:inline-flex;width:15px;height:15px;border-radius:50%;background:#e6f5ef;color:#0b7d5e;font-size:10px;font-weight:700;align-items:center;justify-content:center;cursor:pointer;margin-left:5px;flex:none">i</span></div><div style="{{ selUtilSt }}">{{ selUtil }}</div></div>
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:13px;padding:14px"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">HISTORY</div><div style="font-weight:600;font-size:13px;margin-top:7px">{{ selHist }}</div></div>
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:13px;padding:14px"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">SCORE IMPACT</div><div style="{{ selImpSt }}">{{ selImp }}</div></div>
+            </div>
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center"><div style="width:8px;height:8px;border-radius:50%;background:#fff"></div></div><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#0e9f77">CLARITY AI SUMMARY</span></div>
+              <p style="font-size:14.5px;line-height:1.7;margin:0;text-wrap:pretty">{{ selAi }}</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div style="background:#e6f5ef;border-radius:16px;padding:20px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#0b7d5e;margin-bottom:8px">RECOMMENDED ACTION</div>
+                <div style="font-weight:700;font-size:16px;margin-bottom:4px">{{ selAction }}</div>
+                <div style="font-size:13px;color:#22354d;line-height:1.55">{{ selActionD }}</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#5a6b80">EXPECTED BENEFIT</span><span style="font-weight:700;font-size:13px;color:#0b7d5e">{{ selBenefit }}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#5a6b80">AI CONFIDENCE</span><span style="color:#e0a23a;font-size:14px;letter-spacing:2px">{{ selConf }}</span></div>
+                <div style="font-size:12.5px;color:#5a6b80;line-height:1.55">{{ selConfWhy }}</div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ vsCollections }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 18px;display:flex;align-items:center">Collections<span onClick="{{ infoCollection }}" style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:#e6f5ef;color:#0b7d5e;font-size:11px;font-weight:700;align-items:center;justify-content:center;cursor:pointer;margin-left:8px">i</span></h1>
+          <div style="background:#fff;border:1px solid #f0d4d4;border-radius:16px;padding:24px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+              <div><div style="font-weight:700;font-size:17px">Midland Credit Management</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">Original: Synchrony Bank · $684 · opened Aug 2024 · falls off Feb 2031</div></div>
+              <span style="background:#fbecec;color:#a33232;font-size:11px;font-weight:700;border-radius:99px;padding:5px 12px">NEEDS ATTENTION</span>
+            </div>
+            <div onClick="{{ toggleExplain }}" style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border-radius:12px;padding:14px 16px;cursor:pointer" style-hover="background:#eef4f1">
+              <span style="font-weight:600;font-size:14px">What does this mean?</span><span style="color:#0e9f77;font-weight:700">{{ explainChev }}</span>
+            </div>
+            <sc-if value="{{ explainOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:12px;border-left:3px solid #0e9f77;padding:4px 0 4px 16px">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px"><div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#0e9f77,#2ee6a8)"></div><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#0e9f77">CLARITY AI EXPLAINS</span></div>
+                <p style="font-size:14px;line-height:1.7;margin:0 0 10px;color:#22354d;text-wrap:pretty">A collection means your original debt (an Amazon Store Card from Synchrony) was sold to a collection agency after going unpaid. Midland now owns it and reports it monthly, which suppresses your score.</p>
+                <p style="font-size:14px;line-height:1.7;margin:0 0 12px;color:#22354d;text-wrap:pretty">Important: <strong>don't pay it yet.</strong> You have a legal right to demand proof they own the debt and that the amount is correct — and we found a <strong>$72 mismatch</strong> between what Midland claims and the original charge-off. About 1 in 3 collections contain errors like this.</p>
+                <div style="display:flex;gap:8px"><button onClick="{{ goLetters }}" style="background:#0e9f77;color:#fff;border:0;border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="background:#0b8663">Open Validation Letter</button><button onClick="{{ goChat }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Ask a Follow-up</button></div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ vsInquiries }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 18px;display:flex;align-items:center">Hard Inquiries<span onClick="{{ infoInquiry }}" style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:#e6f5ef;color:#0b7d5e;font-size:11px;font-weight:700;align-items:center;justify-content:center;cursor:pointer;margin-left:8px">i</span></h1>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;font-size:14px">Chase Bank</div><div style="font-size:12px;color:#8fa3ba">Credit card application · Nov 2025</div></div><span style="background:#fdf3e7;color:#9a6314;font-size:11px;font-weight:700;border-radius:99px;padding:4px 11px">SMALL · FADING</span></div>
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;font-size:14px">Toyota Financial Services</div><div style="font-size:12px;color:#8fa3ba">Auto loan · Mar 2023</div></div><span style="background:#e6f5ef;color:#0b7d5e;font-size:11px;font-weight:700;border-radius:99px;padding:4px 11px">NO EFFECT</span></div>
+            <div style="background:#e6f5ef;border-radius:12px;padding:14px 18px;font-size:13px;color:#22354d;line-height:1.6">✓ <strong>No action needed.</strong> Inquiries stop affecting your score after 12 months and fall off after 24.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ vsRecs }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 18px">Recommendations</h1>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ recRows }}" as="r" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px;display:grid;grid-template-columns:1fr auto;gap:18px">
+                <div><div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#0e9f77;margin-bottom:6px">{{ r.cat }}</div><div style="font-weight:700;font-size:15.5px;margin-bottom:6px">{{ r.t }}</div><div style="font-size:13.5px;color:#5a6b80;line-height:1.6;max-width:560px">{{ r.d }}</div></div>
+                <div style="text-align:right;flex:none"><div style="font-size:10.5px;font-weight:700;color:#8fa3ba;margin-bottom:4px">CONFIDENCE</div><div style="color:#e0a23a;font-size:14px;letter-spacing:2px">{{ r.conf }}</div><div style="font-size:11.5px;color:#8fa3ba;margin-top:4px;max-width:130px">{{ r.why }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ vsLetters }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 14px">Letters &amp; Scripts</h1>
+          <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+            <sc-for list="{{ scriptTabs }}" as="s" hint-placeholder-count="4"><button onClick="{{ s.on }}" style="{{ s.st }}">{{ s.label }}</button></sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <div><div style="font-weight:700;font-size:16px">{{ scriptTitle }}</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">{{ scriptSub }}</div></div>
+              <button style="background:#fff;border:1.5px solid #dbe3ec;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Copy</button>
+            </div>
+            <div style="background:#f8fafc;border-radius:13px;padding:22px;font-size:13px;line-height:1.8;color:#22354d;white-space:pre-line;font-family:'JetBrains Mono',monospace">{{ scriptBody }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ vsTimeline }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 18px">Timeline</h1>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="6">
+              <div style="display:grid;grid-template-columns:36px 1fr;gap:16px">
+                <div style="display:flex;flex-direction:column;align-items:center"><div style="{{ t.dotSt }}"></div><sc-if value="{{ t.line }}" hint-placeholder-val="{{ true }}"><div style="width:2px;flex:1;background:#e4e9f0;margin:4px 0"></div></sc-if></div>
+                <div style="padding-bottom:22px"><div style="font-size:11.5px;font-weight:700;color:#8fa3ba;font-family:'JetBrains Mono',monospace">{{ t.d }}</div><div style="font-weight:700;font-size:14.5px;margin-top:3px">{{ t.t }}</div><div style="font-size:13px;color:#5a6b80;margin-top:2px;line-height:1.55">{{ t.desc }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ vsPdf }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size:22px;letter-spacing:-.02em;margin:0 0 6px">PDF Export</h1>
+          <div style="font-size:13px;color:#5a6b80;margin-bottom:18px">Your full analysis as a professional credit counselor report — 12 pages.</div>
+          <div style="display:flex;gap:14px;margin-bottom:18px">
+            <div style="width:150px;aspect-ratio:8.5/11;background:linear-gradient(160deg,#0b1f3a,#134066);border-radius:8px;padding:16px;color:#fff;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(10,25,50,.18)"><div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);margin-bottom:auto"></div><div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:#5bd6a9">CREDIT ANALYSIS</div><div style="font-size:13px;font-weight:700;line-height:1.3;margin-top:4px">Jordan Ellis</div><div style="font-size:8.5px;color:#8fa3ba;margin-top:3px">April 2026 · Experian</div></div>
+            <div style="width:150px;aspect-ratio:8.5/11;background:#fff;border:1px solid #e4e9f0;border-radius:8px;padding:14px;box-shadow:0 8px 24px rgba(10,25,50,.08)"><div style="font-size:8px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:6px">EXECUTIVE SUMMARY</div><div style="height:5px;background:#eef2f7;border-radius:99px;margin-bottom:4px"></div><div style="height:5px;background:#eef2f7;border-radius:99px;width:85%;margin-bottom:4px"></div><div style="height:5px;background:#eef2f7;border-radius:99px;width:90%;margin-bottom:10px"></div><div style="display:flex;gap:5px"><div style="flex:1;height:34px;background:#f4f6f9;border-radius:5px"></div><div style="flex:1;height:34px;background:#f4f6f9;border-radius:5px"></div></div></div>
+            <div style="width:150px;aspect-ratio:8.5/11;background:#fff;border:1px solid #e4e9f0;border-radius:8px;padding:14px;box-shadow:0 8px 24px rgba(10,25,50,.08)"><div style="font-size:8px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:6px">90-DAY ROADMAP</div><div style="display:flex;flex-direction:column;gap:5px"><div style="height:22px;background:#f4f6f9;border-radius:5px"></div><div style="height:22px;background:#f4f6f9;border-radius:5px"></div><div style="height:22px;background:#f4f6f9;border-radius:5px"></div></div></div>
+          </div>
+          <button style="background:#0b1f3a;color:#fff;border:0;border-radius:11px;padding:13px 22px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="background:#123152">↓ Download PDF Report</button>
+          <div style="font-size:12px;color:#8fa3ba;margin-top:10px">Full page-by-page PDF design coming in the next design round.</div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- COMPARISON -->
+    <sc-if value="{{ pCompare }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Report Comparison" style="padding:28px 36px 72px;max-width:980px">
+      <div onClick="{{ goReports }}" style="font-size:13px;font-weight:600;color:#0e9f77;cursor:pointer;margin-bottom:12px">← My Reports</div>
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">January vs. April</h1>
+      <div style="font-size:13px;color:#5a6b80;margin-bottom:22px">What changed between your last two reports.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ compareRows }}" as="c" hint-placeholder-count="5">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:18px 24px;display:grid;grid-template-columns:1.2fr 1fr 40px 1fr .9fr;gap:14px;align-items:center">
+            <div style="font-weight:700;font-size:14px">{{ c.t }}</div>
+            <div style="text-align:center"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">JAN</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;margin-top:2px">{{ c.a }}</div></div>
+            <div style="text-align:center;color:#8fa3ba">→</div>
+            <div style="text-align:center"><div style="font-size:10.5px;color:#8fa3ba;font-weight:600">APR</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;margin-top:2px">{{ c.b }}</div></div>
+            <div style="text-align:right"><span style="{{ c.pillSt }}">{{ c.pill }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:16px;background:#e6f5ef;border-radius:14px;padding:18px 22px;font-size:14px;color:#22354d;line-height:1.65"><strong>Clarity AI:</strong> Your January-to-April change was driven almost entirely by paying Discover down and zero new lates. Keep the same pattern on Chase and the next comparison should show your biggest jump yet.</div>
+    </div>
+    </sc-if>
+
+    <!-- ACTION PLAN -->
+    <sc-if value="{{ pPlan }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Action Plan" style="padding:28px 36px 72px;max-width:1040px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px">
+        <div><h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">Action Plan</h1><div style="font-size:13px;color:#5a6b80">{{ planDone }} of 9 done · built for your goal: <strong>{{ goalLabel }}</strong></div></div>
+        <div style="display:flex;gap:8px"><button onClick="{{ goGoals }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Change Goal</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <sc-for list="{{ planCols }}" as="col" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#0f2540">{{ col.t }}</span><span style="font-size:11.5px;font-weight:700;color:#8fa3ba;font-family:'JetBrains Mono',monospace">{{ col.count }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ col.items }}" as="t">
+                <div onClick="{{ t.on }}" style="display:flex;gap:10px;align-items:flex-start;padding:12px 13px;background:#f8fafc;border-radius:11px;cursor:pointer" style-hover="background:#eef4f1">
+                  <span style="{{ t.ck }}">{{ t.mk }}</span>
+                  <div style="flex:1"><div style="{{ t.txt }}">{{ t.label }}</div><div style="font-size:11.5px;color:#8fa3ba;margin-top:2px">{{ t.sub }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- PROGRESS -->
+    <sc-if value="{{ pProgress }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Progress" style="padding:28px 36px 72px;max-width:980px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">Progress</h1>
+      <div style="font-size:13px;color:#5a6b80;margin-bottom:22px">Score across your reports, and what moved it.</div>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:26px;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-end;gap:32px;height:180px;padding:0 8px">
+          <sc-for list="{{ progBars }}" as="b" hint-placeholder-count="4">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end">
+              <div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:15px">{{ b.s }}</div>
+              <div style="{{ b.st }}"></div>
+              <div style="font-size:12px;font-weight:600;color:#5a6b80">{{ b.m }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px">What improved</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+            <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Utilization</span><span style="font-weight:700;color:#0b7d5e">81% → 72%</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">New late payments</span><span style="font-weight:700;color:#0b7d5e">0 since Mar 2024</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Discover balance</span><span style="font-weight:700;color:#0b7d5e">$980 → $410</span></div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px">Still to address</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+            <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Collection (Midland)</span><span style="font-weight:700;color:#c23e3e">Validation pending</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Chase utilization</span><span style="font-weight:700;color:#c2731a">82%</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Capital One late (Mar 2024)</span><span style="font-weight:700;color:#c2731a">Goodwill letter queued</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- AI CHAT (full screen) -->
+    <sc-if value="{{ pChat }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Clarity AI Chat" style="display:flex;flex-direction:column;height:100vh">
+      <div style="padding:16px 28px;background:#fff;border-bottom:1px solid #e4e9f0;display:flex;align-items:center;gap:12px">
+        <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center"><div style="width:12px;height:12px;border-radius:50%;background:#fff"></div></div>
+        <div><div style="font-weight:700;font-size:15px">Clarity AI</div><div style="font-size:12px;color:#0e9f77;font-weight:600">● Knows your April report, plan, and goal</div></div>
+        <span onClick="{{ toggleConvo }}" style="margin-left:auto;font-size:12.5px;font-weight:600;color:#0e9f77;cursor:pointer">{{ convoToggleLabel }}</span>
+      </div>
+      <sc-if value="{{ chatEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+          <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 12px 32px rgba(14,159,119,.3)"><div style="width:22px;height:22px;border-radius:50%;background:#fff"></div></div>
+          <div style="font-weight:700;font-size:22px;letter-spacing:-.02em;margin-bottom:6px">Meet Clarity AI</div>
+          <div style="font-size:14.5px;color:#5a6b80;margin-bottom:26px">Ask anything about your report — answers use your real accounts.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:520px;max-width:100%">
+            <div onClick="{{ toggleConvo }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0e9f77">Why is utilization important?</div>
+            <div onClick="{{ toggleConvo }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0e9f77">What should I pay first?</div>
+            <div onClick="{{ toggleConvo }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0e9f77">Will paying my collection help?</div>
+            <div onClick="{{ toggleConvo }}" style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0e9f77">Explain my Capital One account</div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ chatFull }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;overflow-y:auto;padding:26px 0">
+          <div style="max-width:680px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ chat }}" as="m" hint-placeholder-count="5">
+              <div style="{{ m.wrapSt }}"><div style="{{ m.bubSt }}">{{ m.text }}</div></div>
+            </sc-for>
+            <div style="display:flex"><div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:16px;max-width:85%;width:85%">
+              <div style="font-size:11px;font-weight:700;color:#0e9f77;letter-spacing:.06em;margin-bottom:10px">SOURCES FROM YOUR REPORT</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <span onClick="{{ openChase }}" style="background:#f4f6f9;border:1px solid #e4e9f0;border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer" style-hover="border-color:#0e9f77">Chase Freedom · 82%</span>
+                <span onClick="{{ openCapOne }}" style="background:#f4f6f9;border:1px solid #e4e9f0;border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer" style-hover="border-color:#0e9f77">Capital One · 72%</span>
+                <span onClick="{{ goLearnUtil }}" style="background:#e6f5ef;border:1px solid #cdeade;border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;color:#0b7d5e;cursor:pointer">Lesson: Utilization →</span>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </sc-if>
+      <div style="padding:16px 24px 22px;background:#fff;border-top:1px solid #e4e9f0">
+        <div style="max-width:680px;margin:0 auto;display:flex;gap:10px">
+          <input placeholder="Ask anything about your credit…" style="flex:1;border:1.5px solid #dbe3ec;border-radius:13px;padding:14px 16px;font-size:14px;outline:none" style-focus="border-color:#0e9f77">
+          <button style="background:#0e9f77;color:#fff;border:0;border-radius:13px;width:52px;font-size:17px;font-weight:700;cursor:pointer" style-hover="background:#0b8663">↑</button>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- LEARN -->
+    <sc-if value="{{ pLearn }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Learning Center" style="padding:28px 36px 72px;max-width:1040px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">Learning Center</h1>
+      <div style="font-size:13px;color:#5a6b80;margin-bottom:18px">Short, plain-English lessons. Clarity AI links here when it explains your report.</div>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:18px 20px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><div style="width:20px;height:20px;border-radius:7px;background:linear-gradient(135deg,#0e9f77,#2ee6a8)"></div><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#0e9f77">EXPLAIN THIS — TAP ANY TERM</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ termChips }}" as="c" hint-placeholder-count="10">
+            <span onClick="{{ c.on }}" style="background:#f4f6f9;border:1px solid #e4e9f0;border-radius:99px;padding:8px 14px;font-size:12.5px;font-weight:600;color:#3d5068;cursor:pointer;display:inline-flex;align-items:center;gap:6px" style-hover="border-color:#0e9f77">{{ c.label }}<span style="display:inline-flex;width:14px;height:14px;border-radius:50%;background:#e6f5ef;color:#0b7d5e;font-size:9.5px;font-weight:700;align-items:center;justify-content:center">i</span></span>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <sc-for list="{{ lessons }}" as="l" hint-placeholder-count="10">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px;cursor:pointer" style-hover="border-color:#0e9f77">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="{{ l.tagSt }}">{{ l.tag }}</span><span style="font-size:11.5px;color:#8fa3ba;font-family:'JetBrains Mono',monospace">{{ l.min }} min</span></div>
+            <div style="font-weight:700;font-size:15px;margin-bottom:5px">{{ l.t }}</div>
+            <div style="font-size:13px;color:#5a6b80;line-height:1.55">{{ l.d }}</div>
+            <sc-if value="{{ l.rel }}" hint-placeholder-val="{{ false }}"><div style="margin-top:10px;font-size:11.5px;font-weight:700;color:#0e9f77">● Relevant to your report</div></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- GOALS -->
+    <sc-if value="{{ pGoals }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Goal Engine" style="padding:28px 36px 72px;max-width:940px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">Your Goal</h1>
+      <div style="font-size:13px;color:#5a6b80;margin-bottom:22px">Your roadmap re-prioritizes around what you're working toward.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px">
+        <sc-for list="{{ goalCards }}" as="g" hint-placeholder-count="3">
+          <div onClick="{{ g.on }}" style="{{ g.st }}">
+            <div style="font-size:22px;margin-bottom:8px">{{ g.ic }}</div>
+            <div style="font-weight:700;font-size:15.5px;margin-bottom:4px">{{ g.t }}</div>
+            <div style="font-size:12.5px;line-height:1.5;opacity:.85">{{ g.d }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:26px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><div style="width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#0e9f77,#2ee6a8)"></div><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#0e9f77">HOW YOUR ROADMAP CHANGES — {{ goalUpper }}</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <sc-for list="{{ goalRecs }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;padding:14px;background:#f8fafc;border-radius:13px">
+              <div style="width:26px;height:26px;border-radius:9px;background:#0b1f3a;color:#5bd6a9;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none">{{ r.n }}</div>
+              <div><div style="font-weight:600;font-size:13.5px">{{ r.t }}</div><div style="font-size:12.5px;color:#5a6b80;line-height:1.5;margin-top:2px">{{ r.d }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ goPlan }}" style="margin-top:18px;background:#0e9f77;color:#fff;border:0;border-radius:11px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer" style-hover="background:#0b8663">Apply to My Plan</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- SIMULATOR -->
+    <sc-if value="{{ pSim }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Simulator" style="padding:28px 36px 72px;max-width:880px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px">What happens if…</h1>
+      <div style="font-size:13px;color:#5a6b80;margin-bottom:22px">Directional estimates only — not a score prediction. Payments apply to your highest-utilization cards first.</div>
+      <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:26px">
+          <div style="font-weight:700;font-size:16px;margin-bottom:4px">I pay down my cards by…</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;color:#0e9f77;margin:10px 0 4px">{{ simAmt }}</div>
+          <input type="range" min="0" max="5000" step="100" value="{{ simPay }}" onChange="{{ simChange }}" style="width:100%;margin:10px 0 18px">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#8fa3ba;font-family:'JetBrains Mono',monospace;margin-top:-12px;margin-bottom:18px"><span>$0</span><span>$2,500</span><span>$5,000</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#5a6b80">Applied to Chase Freedom (82%)</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">{{ simChase }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#5a6b80">Applied to Capital One (72%)</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">{{ simCap }}</span></div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(160deg,#0b1f3a,#134066);border-radius:18px;padding:26px;color:#fff">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5bd6a9;margin-bottom:14px">ESTIMATED RESULT</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;color:#b9c8da">Overall utilization</span><span style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600">72% → <span style="color:#2ee6a8">{{ simUtil }}</span></span></div>
+          <div style="height:9px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-bottom:18px"><div style="{{ simBarSt }}"></div></div>
+          <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#5bd6a9;margin-bottom:5px">LIKELY DIRECTION</div>
+            <div style="font-weight:700;font-size:17px;margin-bottom:4px">{{ simVerdict }}</div>
+            <div style="font-size:12.5px;color:#b9c8da;line-height:1.55">{{ simWhy }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- NOTIFICATIONS -->
+    <sc-if value="{{ pNotif }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Notifications" style="padding:28px 36px 72px;max-width:760px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px">
+        <h1 style="font-size:24px;letter-spacing:-.02em;margin:0">Notifications</h1>
+        <span onClick="{{ clearNotifs }}" style="font-size:13px;font-weight:600;color:#0e9f77;cursor:pointer">Mark all read</span>
+      </div>
+      <sc-if value="{{ notifsCleared }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #c7d2df;border-radius:18px;padding:56px 32px;text-align:center">
+          <div style="width:52px;height:52px;border-radius:16px;background:#e6f5ef;color:#0b7d5e;display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin-bottom:14px">✓</div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:4px">All caught up</div>
+          <div style="font-size:13.5px;color:#5a6b80">We'll nudge you when a letter deadline, task, or re-upload window comes due.</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notifsVisible }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px 20px;display:flex;gap:14px;align-items:center">
+              <div style="{{ n.icSt }}">{{ n.ic }}</div>
+              <div style="flex:1"><div style="font-weight:600;font-size:14px">{{ n.t }}</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">{{ n.d }}</div></div>
+              <div style="font-size:11.5px;color:#8fa3ba;flex:none">{{ n.when }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- PROFILE -->
+    <sc-if value="{{ pProfile }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Profile" style="padding:28px 36px 72px;max-width:680px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 20px">Profile</h1>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:26px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px">
+          <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#155a8a,#0e9f77);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;color:#fff">JE</div>
+          <div><div style="font-weight:700;font-size:17px">Jordan Ellis</div><div style="font-size:13px;color:#5a6b80">Member since April 2026</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><div style="font-size:12px;font-weight:600;color:#3d5068;margin-bottom:5px">Full name</div><input value="Jordan Ellis" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none" style-focus="border-color:#0e9f77"></div>
+          <div><div style="font-size:12px;font-weight:600;color:#3d5068;margin-bottom:5px">Email</div><input value="jordan.ellis@gmail.com" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none" style-focus="border-color:#0e9f77"></div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:26px">
+        <div style="font-weight:700;font-size:15px;margin-bottom:14px">Your context</div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+          <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Financial goal</span><span style="font-weight:700">{{ goalLabel }} <span onClick="{{ goGoals }}" style="color:#0e9f77;cursor:pointer;font-weight:600">· change</span></span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Timeline</span><span style="font-weight:700">90 days</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Biggest challenge</span><span style="font-weight:700">Debt</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Reports on file</span><span style="font-weight:700">3 (Experian)</span></div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- SETTINGS -->
+    <sc-if value="{{ pSettings }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Settings" style="padding:28px 36px 72px;max-width:680px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 20px">Settings</h1>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:26px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:15px;margin-bottom:16px">Security</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ settingRows }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><div style="font-weight:600;font-size:14px">{{ r.t }}</div><div style="font-size:12.5px;color:#5a6b80">{{ r.d }}</div></div>
+              <div onClick="{{ r.on }}" style="{{ r.st }}"><div style="{{ r.knob }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #f0d4d4;border-radius:18px;padding:26px">
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Your data</div>
+        <div style="font-size:13.5px;color:#5a6b80;line-height:1.6;margin-bottom:16px">Deleting removes your reports, analysis, chat history, and account permanently. No retention period.</div>
+        <div style="display:flex;gap:10px">
+          <button style="background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Export My Data</button>
+          <button style="background:#fbecec;color:#a33232;border:0;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#f6dcdc">Delete All Reports &amp; Account</button>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- BILLING -->
+    <sc-if value="{{ pBilling }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Billing" style="padding:28px 36px 72px;max-width:680px">
+      <h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 20px">Billing</h1>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:24px">
+          <div style="font-size:12px;color:#5a6b80;font-weight:500;margin-bottom:6px">Current plan</div>
+          <div style="font-weight:700;font-size:17px">Pay per report</div>
+          <div style="font-size:13px;color:#5a6b80;margin-top:4px">$5 per analysis · no subscription</div>
+        </div>
+        <div style="background:linear-gradient(160deg,#0b1f3a,#134066);border-radius:18px;padding:24px;color:#fff">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:12px;color:#8fa3ba">Upgrade</span><span style="background:#0e9f77;font-size:10px;font-weight:700;border-radius:99px;padding:3px 8px">SOON</span></div>
+          <div style="font-weight:700;font-size:17px">Clarity Plus — $9/mo</div>
+          <div style="font-size:13px;color:#b9c8da;margin-top:4px">Quarterly re-analysis + unlimited chat</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-weight:700;font-size:15px">Payment history</span><span style="font-size:11.5px;font-weight:600;color:#5a6b80;background:#f4f6f9;border-radius:8px;padding:4px 10px">via Stripe</span></div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ invoices }}" as="i" hint-placeholder-count="3">
+            <div style="display:grid;grid-template-columns:1.2fr 1fr .6fr auto;gap:12px;padding:13px 4px;border-bottom:1px solid #eef2f7;align-items:center;font-size:13.5px">
+              <span style="font-weight:600">{{ i.d }}</span><span style="color:#5a6b80">{{ i.item }}</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">{{ i.amt }}</span><span style="font-size:12px;font-weight:600;color:#0e9f77;cursor:pointer">Receipt</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+
+  <!-- EXPLAIN THIS panel -->
+  <sc-if value="{{ infoOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;right:24px;bottom:24px;width:380px;max-width:calc(100vw - 48px);z-index:90;background:#fff;border:1px solid #e4e9f0;border-radius:18px;box-shadow:0 24px 64px rgba(8,21,39,.25);overflow:hidden">
+    <div style="background:linear-gradient(135deg,#0b1f3a,#134066);padding:16px 20px;display:flex;align-items:center;gap:11px">
+      <div style="width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:10px;height:10px;border-radius:50%;background:#fff"></div></div>
+      <div style="flex:1"><div style="font-weight:700;font-size:15px;color:#fff">{{ infoTitle }}</div><div style="font-size:11px;color:#8fa3ba;font-weight:600">Explained by Clarity AI</div></div>
+      <div onClick="{{ closeInfo }}" style="cursor:pointer;color:#8fa3ba;font-size:17px;font-weight:600;padding:2px 6px" style-hover="color:#fff">✕</div>
+    </div>
+    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:13px;max-height:52vh;overflow-y:auto">
+      <div><div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:4px">WHAT IT MEANS</div><div style="font-size:13px;line-height:1.6;color:#22354d">{{ infoWhat }}</div></div>
+      <div><div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:4px">WHY IT MATTERS</div><div style="font-size:13px;line-height:1.6;color:#22354d">{{ infoWhy }}</div></div>
+      <div><div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:4px">ACTION RECOMMENDED?</div><div style="font-size:13px;line-height:1.6;color:#22354d">{{ infoAct }}</div></div>
+      <div style="background:#fdf3e7;border-radius:11px;padding:11px 13px"><div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#9a6314;margin-bottom:4px">COMMON MISCONCEPTION</div><div style="font-size:12.5px;line-height:1.6;color:#22354d">{{ infoMisc }}</div></div>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ goLearnUtil }}" style="background:#e6f5ef;color:#0b7d5e;border:0;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer">Lesson: {{ infoLesson }} →</button>
+        <button onClick="{{ goChat }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Ask a follow-up</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startPage&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;dashboard&quot;, &quot;options&quot;: [&quot;dashboard&quot;, &quot;reports&quot;, &quot;viewer&quot;, &quot;plan&quot;, &quot;progress&quot;, &quot;chat&quot;, &quot;learn&quot;, &quot;goals&quot;, &quot;sim&quot;, &quot;notif&quot;, &quot;profile&quot;, &quot;settings&quot;, &quot;billing&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Prototype&quot;}}">
+class Component extends DCLogic {
+  glossary = {
+    utilization: { t: 'Utilization', what: "The share of your credit limits you're currently using — per card and overall. Yours: 72% overall, 82% on Chase Freedom.", why: "About 30% of your score. High utilization reads as financial stress even with perfect payments.", act: 'Yes — pay revolving balances under 30% of each limit. Your fastest available lift.', misc: '"Carrying a small balance builds credit" — false. Paying in full is best; utilization is measured from your statement balance.', lesson: 'Understanding Utilization' },
+    collection: { t: 'Collection', what: 'A debt your original creditor sold to a collection agency after non-payment. The agency now owns it and reports it monthly.', why: 'One of the heaviest negative marks — it caps how high your score can climb until resolved.', act: 'Yes — demand written validation before paying anything. ~1 in 3 contain errors.', misc: '"Paying it instantly removes it" — paid collections still report for 7 years unless you negotiate deletion in writing.', lesson: 'Collections, Explained' },
+    inquiry: { t: 'Hard Inquiry', what: 'A lender checking your full report because you applied for credit. Yours: 2 in the last 12 months.', why: 'Small (~3-5 points), fades within 12 months, falls off after 24.', act: 'Rarely — only dispute inquiries you never authorized.', misc: '"Checking my own score hurts it" — no. Self-checks are soft pulls and never affect your score.', lesson: 'Hard Inquiries' },
+    chargeoff: { t: 'Charge-Off', what: "A creditor declaring your debt a loss after ~180 days of non-payment. An accounting step — not forgiveness.", why: 'A severe derogatory that reports for 7 years from first delinquency.', act: 'Sometimes — the debt is still collectible; settlement or pay-for-delete may apply.', misc: '"Charged off means I don\'t owe it" — false. It can still be collected or sold to an agency.', lesson: 'Charge-Offs' },
+    closed: { t: 'Closed Account', what: 'An account no longer active — closed by you or the issuer. Your Wells Fargo card closed in good standing in 2022.', why: 'Positive closed accounts keep helping your history for up to 10 years.', act: 'No — good closed accounts need nothing from you.', misc: '"Closing cards helps my score" — usually the opposite: it shrinks available credit and raises utilization.', lesson: 'Understanding Utilization' },
+    derogatory: { t: 'Derogatory Mark', what: 'Umbrella term for serious negatives: collections, charge-offs, repossessions, bankruptcies, 60+ day lates.', why: 'These weigh more than everything else — one derogatory can outweigh years of on-time payments.', act: 'Yes — each type has a specific playbook. Yours: one collection, in progress.', misc: '"Derogatories are permanent" — no. Most fall off after 7 years, and their impact fades before that.', lesson: 'Disputes That Work' },
+    revolving: { t: 'Revolving Credit', what: 'Credit with a limit you borrow against repeatedly — credit cards, store cards. Balance and payment vary monthly.', why: 'Revolving balances drive utilization, which is ~30% of your score.', act: 'Indirectly — manage balances, not the accounts themselves.', misc: '"All debt is equal" — revolving balances hurt far more per dollar than installment balances.', lesson: 'Understanding Utilization' },
+    installment: { t: 'Installment Loan', what: 'Fixed amount, fixed payments, set end date — your auto loan and student loan.', why: 'Balances matter much less than revolving; what counts is on-time payment history.', act: 'Rarely — autopay is the whole playbook.', misc: '"Paying off a loan early boosts my score" — it usually changes little, and can slightly reduce mix.', lesson: 'Credit Mix' },
+    available: { t: 'Available Credit', what: 'Your total limits minus current balances. Yours: $3,910 of $11,500 card limits.', why: "It's the denominator of utilization — more available credit at the same balance means lower utilization.", act: 'Yes — limit increases (soft pull) raise it without new debt.', misc: '"Unused credit looks bad to lenders" — no. High available credit with low balances is the healthiest pattern.', lesson: 'Understanding Utilization' },
+    mix: { t: 'Credit Mix', what: 'The variety of account types on your file. You have 4: cards, retail, auto, student loan.', why: 'About 10% of your score — a helpful bonus, not a driver.', act: 'No — never open accounts just for mix.', misc: '"I need one of everything" — false. Mix is the weakest factor; don\'t chase it.', lesson: 'Credit Mix' },
+  };
+  state = { page: (this.props && this.props.startPage) || 'dashboard', vsec: 'overview', acct: null, stab: 0, explain: false, goal: 'house', simPay: 1200, convo: false, emptyReports: false, notifsCleared: false, term: null, checks: { t1: true, t2: false, t3: false, w1: false, w2: true, w3: false, m1: false, m2: false, m3: false }, twoFa: true, emailNudge: true, smsNudge: false };
+  go(p, extra) { return () => { window.scrollTo(0, 0); this.setState({ page: p, ...(extra || {}) }); }; }
+  toggle(id) { return () => this.setState(s => ({ checks: { ...s.checks, [id]: !s.checks[id] } })); }
+
+  renderVals() {
+    const s = this.state, p = s.page;
+    const navSt = (k, cur) => `display:flex;align-items:center;border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:600;cursor:pointer;${cur ? 'background:rgba(46,230,168,.12);color:#5bd6a9' : 'color:#b9c8da'}`;
+    const mkNav = (arr) => arr.map(([k, label, ic, dot]) => ({ label, ic, dot, on: this.go(k), st: navSt(k, p === k || (k === 'viewer' && p === 'compare')) }));
+    const navMain = mkNav([['dashboard', 'Dashboard', '◧'], ['reports', 'My Reports', '⧉'], ['viewer', 'Report Viewer', '≣'], ['plan', 'Action Plan', '☑'], ['progress', 'Progress', '↗'], ['chat', 'Clarity AI', '✦'], ['learn', 'Learn', '◈'], ['goals', 'Goals', '◎'], ['sim', 'Simulator', '⇄'], ['notif', 'Notifications', '◍', s.notifsCleared ? 0 : 5]]);
+    const navAcct = mkNav([['profile', 'Profile', '○'], ['settings', 'Settings', '⚙'], ['billing', 'Billing', '$']]);
+
+    // plan tasks
+    const ck = d => d ? 'width:18px;height:18px;border-radius:6px;background:#0e9f77;color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-top:1px' : 'width:18px;height:18px;border-radius:6px;border:1.5px solid #c7d2df;flex:none;margin-top:1px;background:#fff';
+    const task = (id, label, sub, tag) => ({ label, sub, tag, on: this.toggle(id), mk: s.checks[id] ? '✓' : '', ck: ck(s.checks[id]), txt: `font-size:13.5px;font-weight:600;${s.checks[id] ? 'text-decoration:line-through;color:#8fa3ba' : ''}` });
+    const today = [task('t1', 'Verify your mailing address', 'Needed before sending letters'), task('t2', 'Download your Equifax + TransUnion reports', 'annualcreditreport.com — free'), task('t3', 'Review your collection account', '5 min · opens the walkthrough')];
+    const week = [task('w1', 'Call Capital One about goodwill adjustment', 'Script ready in Letters'), task('w2', 'Pay Chase Freedom $300', 'Autopay scheduled Apr 24'), task('w3', 'Mail dispute for Toledo address', 'Certified mail recommended')];
+    const month = [task('m1', 'Bring Chase under 30% utilization', 'Target: $1,050 balance'), task('m2', 'Continue $210/mo extra payments', 'On pace for 8 weeks'), task('m3', 'Request Capital One limit increase', 'Soft pull only — after balances drop')];
+    const planCols = [{ t: 'TODAY', items: today }, { t: 'THIS WEEK', items: week }, { t: 'THIS MONTH', items: month }].map(c => ({ ...c, count: c.items.filter(t => t.mk).length + '/' + c.items.length }));
+    const planDone = Object.values(s.checks).filter(Boolean).length;
+    const todayTasks = today.map(t => ({ ...t, tag: 'TODAY' }));
+
+    // viewer rail
+    const vsecs = [['overview', 'Overview'], ['accounts', 'Accounts', 8], ['collections', 'Collections', 1], ['inquiries', 'Inquiries', 2], ['recs', 'Recommendations', 4], ['letters', 'Letters', 4], ['timeline', 'Timeline'], ['pdf', 'PDF Export']];
+    const vrail = vsecs.map(([k, label, count]) => ({ label, count, on: () => { window.scrollTo(0, 0); this.setState({ vsec: k, acct: null }); }, st: `display:flex;align-items:center;border-radius:9px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;${s.vsec === k ? 'background:#eef4f1;color:#0b7d5e' : 'color:#3d5068'}` }));
+
+    const wdot = pos => `width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;${pos ? 'background:#e6f5ef;color:#0b7d5e' : 'background:#fbecec;color:#a33232'}`;
+    const scoreWhy = [
+      { sign: '–', dotSt: wdot(false), t: 'High utilization (72%)', d: 'Biggest drag. Responds within 1-2 statement cycles of paying down.' },
+      { sign: '–', dotSt: wdot(false), t: 'Collection ($684)', d: 'Caps your ceiling until validated or resolved.' },
+      { sign: '+', dotSt: wdot(true), t: 'Account age (6.2 yrs)', d: 'Oldest card from 2017 — keep it open.' },
+      { sign: '+', dotSt: wdot(true), t: 'Mix & inquiries', d: '4 account types, only 2 recent inquiries.' },
+    ];
+
+    // accounts with detail pages
+    const pill = tone => `font-size:10.5px;font-weight:700;border-radius:99px;padding:4px 10px;${tone === 'bad' ? 'background:#fbecec;color:#a33232' : tone === 'warn' ? 'background:#fdf3e7;color:#9a6314' : 'background:#e6f5ef;color:#0b7d5e'}`;
+    const utilC = tone => `font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13.5px;margin-top:2px;color:${tone === 'bad' ? '#c23e3e' : tone === 'warn' ? '#c2731a' : tone === 'good' ? '#0b7d5e' : '#0f2540'}`;
+    const A = [
+      { name: 'Chase Freedom', type: 'Credit card · opened 2019 · Open', bal: '$2,860', limit: '$3,500', util: '82%', tone: 'bad', hist: 'On time', pill: 'HIGH IMPACT', ptone: 'bad', imp: 'High', ai: "This account has the largest utilization on your report — 82% of a $3,500 limit. Utilization above 30% on any single card drags your score even when overall utilization is lower, and this card alone accounts for most of your revolving-balance penalty. There are no late payments here, so the fix is purely mathematical: reduce the balance.", action: 'Pay $1,810', actionD: 'Brings this card to 30% ($1,050). At your planned $210/mo extra plus minimums, that is roughly 8 weeks.', benefit: 'High', conf: '★★★★★', confWhy: 'Highest single-card utilization on your file — the math is unambiguous.' },
+      { name: 'Capital One Quicksilver', type: 'Credit card · opened 2017 · Open', bal: '$4,320', limit: '$6,000', util: '72%', tone: 'bad', hist: '1 late · Mar 2024', pill: 'HIGH IMPACT', ptone: 'bad', imp: 'High', ai: "Your oldest active card — which makes it valuable for account age — but it carries two problems: 72% utilization and your only recent late payment (March 2024). You have 13 consecutive on-time payments since, which makes a goodwill adjustment request realistic.", action: 'Pay $2,520 + goodwill letter', actionD: 'Target $1,800 (30%). Send the goodwill letter now — your 13-month clean streak is the argument.', benefit: 'High', conf: '★★★★☆', confWhy: 'Payoff math is certain; goodwill approval depends on the issuer.' },
+      { name: 'Midland Credit Mgmt', type: 'Collection · opened Aug 2024', bal: '$684', limit: '—', util: '—', tone: '', hist: 'Unpaid', pill: 'NEEDS ATTENTION', ptone: 'bad', imp: 'High', ai: "A collection sold by Synchrony Bank (Amazon Store Card). We found a $72 discrepancy between Midland's reported balance and the original charge-off — grounds to demand validation before any payment. Do not pay or acknowledge this debt by phone.", action: 'Send validation letter', actionD: 'Certified mail, 30-day response window. The letter is ready in Letters & Scripts.', benefit: 'High', conf: '★★★★★', confWhy: 'FDCPA validation is your legal right; the balance mismatch strengthens it.' },
+      { name: 'Navient', type: 'Student loan · opened 2018 · Open', bal: '$8,900', limit: '—', util: '—', tone: '', hist: '1 late · 2023', pill: 'WATCH', ptone: 'warn', imp: 'Medium', ai: "An installment loan in good standing since one late payment in 2023. Installment balances matter far less than revolving ones — your payoff pace here is fine. The one risk is a repeat late, which autopay eliminates.", action: 'Enroll in autopay', actionD: 'Most servicers also give a 0.25% rate discount for autopay.', benefit: 'Medium', conf: '★★★★☆', confWhy: 'Preventive — protects your payment history rather than lifting the score now.' },
+      { name: 'Discover it', type: 'Credit card · opened 2021 · Open', bal: '$410', limit: '$2,000', util: '21%', tone: 'good', hist: 'On time', pill: 'HEALTHY', ptone: 'good', imp: 'Low', ai: "Your best-managed card: 21% utilization, spotless history. You paid this down from $980 in January — that improvement contributed to your +14 this cycle. Nothing to fix.", action: 'Keep under 30%', actionD: 'No change needed. This card is your template for the other two.', benefit: 'Maintains', conf: '★★★★★', confWhy: 'Already healthy — recommendation is to preserve behavior.' },
+      { name: 'Toyota Financial', type: 'Auto loan · opened 2023 · Open', bal: '$11,240', limit: '$18,500 orig.', util: '—', tone: '', hist: 'On time', pill: 'HEALTHY', ptone: 'good', imp: 'Low', ai: "Perfect payment history on an installment loan — this is quietly one of the strongest lines on your report and adds to your credit mix. No action improves it beyond continuing on-time payments.", action: 'No action', actionD: 'Stay the course. Paying it off early would not meaningfully help your score.', benefit: 'Maintains', conf: '★★★★★', confWhy: 'On-time installment history — nothing to optimize.' },
+      { name: "Macy's Store Card", type: 'Retail card · opened 2020 · Open', bal: '$0', limit: '$800', util: '0%', tone: 'good', hist: 'On time', pill: 'HEALTHY', ptone: 'good', imp: 'Low', ai: "A zero-balance retail card. Its only job is adding available credit and account age — closing it would raise your overall utilization by shrinking your total limits. Use it once or twice a year so the issuer doesn't close it for inactivity.", action: 'Keep open', actionD: 'Small purchase every 6 months, paid in full.', benefit: 'Maintains', conf: '★★★★☆', confWhy: 'Issuers sometimes close inactive cards regardless.' },
+      { name: 'Wells Fargo Platinum', type: 'Credit card · closed 2022', bal: '$0', limit: '—', util: '—', tone: '', hist: 'On time', pill: 'CLOSED', ptone: 'good', imp: 'None', ai: "Closed in good standing in 2022. Positive closed accounts stay on your report for up to 10 years and keep helping your history — this one ages off naturally around 2032.", action: 'No action', actionD: 'Nothing to do — it quietly helps until it ages off.', benefit: '—', conf: '★★★★★', confWhy: 'Closed account; no available action.' },
+    ];
+    const acctRows = A.map((a, i) => ({ ...a, utilSt: utilC(a.tone), pillSt: pill(a.ptone), on: () => { window.scrollTo(0, 0); this.setState({ acct: i }); } }));
+    const sel = s.acct != null ? A[s.acct] : A[0];
+
+    const recRows = [
+      { cat: 'PAYMENT STRATEGY', t: 'Pay Chase first, then Capital One', d: 'Highest single-card utilization first gives the fastest lift. Minimums everywhere else.', conf: '★★★★★', why: 'Highest utilization — unambiguous.' },
+      { cat: 'COLLECTIONS', t: 'Validate before paying Midland', d: 'The $72 balance mismatch is real leverage. Validation first, negotiation second, everything in writing.', conf: '★★★★★', why: 'Legal right + documented discrepancy.' },
+      { cat: 'CREDIT BUILDING', t: 'Ask, don\'t apply', d: 'Request a Capital One limit increase (soft pull) instead of a new card. $6,000→$9,000 drops utilization 12 points.', conf: '★★★★☆', why: 'Issuer discretion on approval.' },
+      { cat: 'BUDGET', t: 'Route $210/mo extra to cards', d: 'Clears the 30% goal in about 8 weeks without touching savings.', conf: '★★★☆☆', why: 'Depends on your monthly cash flow.' },
+    ];
+
+    const scripts = [
+      { label: 'Debt validation', title: 'Debt Validation Letter — Midland', sub: 'Certified mail · 30-day window', body: '[Your name / address / date]\n\nMidland Credit Management\nP.O. Box 939069, San Diego, CA 92193\n\nRe: Account #[number] — Request for Validation\n\nI request validation of this debt under 15 U.S.C. § 1692g (FDCPA). Please provide: (1) itemized amount and age of the debt, (2) the original creditor, (3) proof of your license to collect in my state, (4) proof you own or are authorized to collect this debt.\n\nUntil validated, cease reporting this account to the bureaus and cease collection activity as required by law. This is a request for verification, not a refusal to pay.\n\nSincerely, [Your name]' },
+      { label: 'Goodwill letter', title: 'Goodwill Adjustment — Capital One', sub: 'For the Mar 2024 late · cite your 13-month streak', body: '[Your name / address / date]\n\nCapital One — Executive Response Team\nP.O. Box 30285, Salt Lake City, UT 84130\n\nRe: Account ending [1234] — Goodwill adjustment request\n\nI\'ve been a customer since 2017. In March 2024 I missed one payment due to [brief honest reason]. Since then I\'ve made 13 consecutive on-time payments and enrolled in autopay.\n\nI respectfully request a goodwill adjustment removing the March 2024 late payment from my credit reports — the only blemish in an otherwise positive history with you.\n\nSincerely, [Your name]' },
+      { label: 'Phone script', title: 'Phone Script — Collection Agency', sub: 'Only after validation. Get everything in writing.', body: 'BEFORE CALLING\n• Max number: $410 (60% of $684)\n• Pay by mailed check — never bank access\n\nOPEN: "I\'m calling about account [number]. I received your validation response and want to discuss resolving it."\n\nOFFER: "I can resolve this today for $340 if you agree to delete the tradeline from all three bureaus."\n\nLADDER: start $340 → cap $410. If they refuse deletion: "Then I need that offer in writing before I pay anything."\n\nNEVER SAY: "this is my debt" · "I can pay next week" · employer, bank, or income.\n\nCLOSE: "Send the agreement in writing. I\'ll pay within 10 days of receiving it."' },
+      { label: 'Pay-for-delete', title: 'Pay-for-Delete Offer — Email', sub: 'Written settlement conditioned on removal', body: 'Subject: Settlement offer — Account #[number]\n\nThis is an offer to settle account #[number] ($684 claimed).\n\nI offer $340 as payment in full, contingent on: (1) deletion of this tradeline from Experian, Equifax, and TransUnion upon payment; (2) the account considered settled in full, with no balance sold or transferred; (3) written confirmation of these terms before payment.\n\nThis offer does not acknowledge the debt\'s validity. Please respond in writing within 15 days.\n\nSincerely, [Your name]' },
+    ];
+    const scriptTabs = scripts.map((sc, i) => ({ label: sc.label, on: () => this.setState({ stab: i }), st: `border:1.5px solid ${s.stab === i ? '#0b1f3a' : '#dbe3ec'};background:${s.stab === i ? '#0b1f3a' : '#fff'};color:${s.stab === i ? '#fff' : '#3d5068'};border-radius:99px;padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer` }));
+
+    const tdot = tone => `width:14px;height:14px;border-radius:50%;flex:none;margin-top:4px;${tone === 'good' ? 'background:#0e9f77' : tone === 'bad' ? 'background:#d05252' : 'background:#c7d2df'}`;
+    const timeline = [
+      { d: 'APR 2026', t: 'Report analyzed — score 642 (+14)', desc: 'Utilization down 9 points; Discover paid down.', dotSt: tdot('good'), line: true },
+      { d: 'APR 2026', t: 'Validation letter sent to Midland', desc: 'Certified mail · response due May 26.', dotSt: tdot('good'), line: true },
+      { d: 'JAN 2026', t: 'Report uploaded — score 628 (+17)', desc: 'First full quarter following the plan.', dotSt: tdot(), line: true },
+      { d: 'OCT 2025', t: 'First report — score 611', desc: 'Baseline analysis; 90-day plan created.', dotSt: tdot(), line: true },
+      { d: 'AUG 2024', t: 'Collection opened — Midland ($684)', desc: 'Sold by Synchrony Bank after Feb 2024 delinquency.', dotSt: tdot('bad'), line: true },
+      { d: 'MAR 2024', t: 'Late payment — Capital One', desc: 'The last late on your file. 13 clean months since.', dotSt: tdot('bad'), line: false },
+    ];
+
+    // reports page
+    const chg = up => `font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;margin-top:2px;color:${up ? '#0b7d5e' : '#8fa3ba'}`;
+    const blogo = (bg, txt) => `width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:#fff;letter-spacing:.02em;background:${bg};font-family:'Instrument Sans',sans-serif;${txt || ''}`;
+    const reportRows = [
+      { logo: 'EXP', logoSt: blogo('linear-gradient(135deg,#3d2a8f,#6a3bd8)'), d: 'April 12, 2026', b: 'Experian · current', s: '642', chg: '+14', chgSt: chg(true), st: 'Analyzed', goViewer: true },
+      { logo: 'EXP', logoSt: blogo('linear-gradient(135deg,#3d2a8f,#6a3bd8)'), d: 'January 8, 2026', b: 'Experian', s: '628', chg: '+17', chgSt: chg(true), st: 'Analyzed' },
+      { logo: 'EXP', logoSt: blogo('linear-gradient(135deg,#3d2a8f,#6a3bd8)'), d: 'October 2, 2025', b: 'Experian · first report', s: '611', chg: '—', chgSt: chg(false), st: 'Analyzed' },
+    ];
+
+    const cpill = tone => `font-size:11px;font-weight:700;border-radius:99px;padding:5px 12px;${tone === 'good' ? 'background:#e6f5ef;color:#0b7d5e' : tone === 'bad' ? 'background:#fbecec;color:#a33232' : 'background:#eef2f7;color:#5a6b80'}`;
+    const compareRows = [
+      { t: 'Credit score', a: '628', b: '642', pill: '▲ IMPROVED', pillSt: cpill('good') },
+      { t: 'Card utilization', a: '81%', b: '72%', pill: '▲ IMPROVED', pillSt: cpill('good') },
+      { t: 'Collections', a: '1', b: '1', pill: 'VALIDATION SENT', pillSt: cpill() },
+      { t: 'Late payments (12 mo)', a: '1', b: '0', pill: '▲ IMPROVED', pillSt: cpill('good') },
+      { t: 'Hard inquiries', a: '2', b: '2', pill: 'UNCHANGED', pillSt: cpill() },
+    ];
+
+    const progBars = [['Oct', 611], ['Jan', 628], ['Apr', 642], ['Jul', '?']].map(([m, sc], i) => ({ m, s: sc === '?' ? '—' : sc, st: `width:56px;border-radius:8px 8px 3px 3px;${sc === '?' ? 'height:82%;border:2px dashed #c7d2df;background:none' : `height:${Math.round((sc - 560) / (700 - 560) * 100)}%;background:${i === 2 ? 'linear-gradient(180deg,#2ee6a8,#0e9f77)' : '#12395c'}`}` }));
+
+    // chat
+    const bub = ai => ai ? { wrapSt: 'display:flex', bubSt: 'background:#fff;border:1px solid #e4e9f0;border-radius:16px 16px 16px 5px;padding:14px 16px;font-size:14px;line-height:1.65;color:#22354d;max-width:85%' } : { wrapSt: 'display:flex;justify-content:flex-end', bubSt: 'background:#0b1f3a;color:#fff;border-radius:16px 16px 5px 16px;padding:14px 16px;font-size:14px;line-height:1.65;max-width:85%' };
+    const chat = [
+      { ...bub(false), text: 'Why is utilization important?' },
+      { ...bub(true), text: "Utilization is the share of your credit limits you're using — and it's about 30% of your score. Lenders read high utilization as financial stress, even if you pay on time. Yours is 72% overall, and Chase Freedom alone is at 82%." },
+      { ...bub(false), text: 'What should I pay first?' },
+      { ...bub(true), text: 'Chase Freedom. Getting it under 30% ($1,050 balance) is the single fastest lift available to you. Then Capital One. Discover is already healthy at 21%.' },
+    ];
+
+    // learn
+    const ltag = hot => `font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;${hot ? 'background:#e6f5ef;color:#0b7d5e' : 'background:#eef2f7;color:#5a6b80'}`;
+    const lessons = [
+      { t: 'Understanding Utilization', d: 'Why 30% matters, per-card vs. overall, and statement timing tricks.', tag: 'BASICS', tagSt: ltag(true), min: 4, rel: true },
+      { t: 'Collections, Explained', d: 'What happens when debt is sold, your FDCPA rights, and validation.', tag: 'DEBT', tagSt: ltag(true), min: 6, rel: true },
+      { t: 'Late Payments & Goodwill', d: 'How lates age off, and when a goodwill letter actually works.', tag: 'REPAIR', tagSt: ltag(true), min: 5, rel: true },
+      { t: 'Charge-Offs', d: 'What "charged off" really means and why the debt still exists.', tag: 'DEBT', tagSt: ltag(), min: 5 },
+      { t: 'Credit Mix', d: 'Revolving vs. installment, and why variety helps (a little).', tag: 'BASICS', tagSt: ltag(), min: 3 },
+      { t: 'Snowball vs. Avalanche', d: 'Two payoff methods, and how to pick for your psychology.', tag: 'STRATEGY', tagSt: ltag(), min: 6 },
+      { t: 'Hard Inquiries', d: 'What they cost, how long they last, and rate-shopping windows.', tag: 'BASICS', tagSt: ltag(), min: 3 },
+      { t: 'Identity Theft', d: 'Spotting accounts that aren\'t yours, freezes, and fraud alerts.', tag: 'SAFETY', tagSt: ltag(), min: 7 },
+      { t: 'Disputes That Work', d: 'What\'s disputable, evidence that wins, and bureau timelines.', tag: 'REPAIR', tagSt: ltag(), min: 8 },
+      { t: 'Building From Thin Credit', d: 'Secured cards, credit-builder loans, and authorized users.', tag: 'BUILDING', tagSt: ltag(), min: 6 },
+    ];
+
+    // goals
+    const goals = {
+      house: { label: 'Buy a House', recs: [
+        { n: '1', t: 'Resolve the collection before applying', d: 'Most mortgage underwriters require collections paid or resolved. Start validation now — timeline: 60-90 days.' },
+        { n: '2', t: 'Push utilization under 10%', d: 'Stricter than the usual 30% — mortgage pricing tiers reward very low utilization.' },
+        { n: '3', t: 'Freeze new credit for 12 months', d: 'No new cards or loans before application; inquiries and new accounts hurt DTI review.' },
+        { n: '4', t: 'Document everything', d: 'Keep letters and payment records — underwriters ask for paper trails on resolved accounts.' } ] },
+      car: { label: 'Buy a Car', recs: [
+        { n: '1', t: '90-day utilization sprint', d: 'Auto lenders are more forgiving than mortgage — under 30% is enough to change your rate tier.' },
+        { n: '2', t: 'Validate the collection, but don\'t wait on it', d: 'You can shop for a loan while validation runs; auto approval is likely even with it pending.' },
+        { n: '3', t: 'Rate-shop in a 14-day window', d: 'Multiple auto inquiries within 14 days count as one.' },
+        { n: '4', t: 'Get pre-approved by a credit union first', d: 'A CU pre-approval anchors your negotiation at the dealership.' } ] },
+      biz: { label: 'Business Loan', recs: [
+        { n: '1', t: 'Your personal score is the gate', d: 'SBA and most lenders check personal credit under ~$150k. The 670 threshold matters most.' },
+        { n: '2', t: 'Keep old accounts open', d: 'Depth of history weighs heavily in manual underwriting.' },
+        { n: '3', t: 'Separate business credit early', d: 'EIN, business bank account, and a starter business card build a parallel file.' },
+        { n: '4', t: 'Bank where you\'ll borrow', d: '6+ months of deposit history with a lender materially improves approval odds.' } ] },
+    };
+    const gCard = (k, active) => `border-radius:16px;padding:20px;cursor:pointer;border:1.5px solid ${active ? '#0e9f77' : '#e4e9f0'};${active ? 'background:linear-gradient(160deg,#0b1f3a,#134066);color:#fff' : 'background:#fff'}`;
+    const goalCards = [['house', '⌂', 'Buy a House', 'Mortgage-ready credit: strict thresholds, paper trails.'], ['car', '⊙', 'Buy a Car', 'Rate-tier sprint: fast wins in 90 days.'], ['biz', '▤', 'Business Loan', 'Personal + business credit in parallel.']].map(([k, ic, t, d]) => ({ ic, t, d, on: () => this.setState({ goal: k }), st: gCard(k, s.goal === k) }));
+
+    // simulator
+    const pay = s.simPay;
+    const chasePaid = Math.min(pay, 2860), capPaid = Math.min(Math.max(pay - 2860, 0), 4320);
+    const newBal = 7590 - chasePaid - capPaid;
+    const newUtil = Math.max(0, Math.round(newBal / 11500 * 100));
+    const fmt = n => '$' + n.toLocaleString();
+    const verdict = newUtil <= 10 ? 'Strong lift likely' : newUtil <= 30 ? 'Meaningful lift likely' : newUtil <= 50 ? 'Moderate improvement' : 'Small improvement';
+    const simWhy = newUtil <= 30 ? 'Crossing under the 30% threshold is where profiles like yours historically see the largest utilization-driven gains.' : 'Still above the 30% threshold — improvement is real but the biggest gains arrive once you cross 30%.';
+
+    // notifications
+    const nic = tone => `width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;${tone === 'good' ? 'background:#e6f5ef;color:#0b7d5e' : tone === 'warn' ? 'background:#fdf3e7;color:#9a6314' : 'background:#eef2f7;color:#3d5068'}`;
+    const notifs = [
+      { ic: '✉', icSt: nic('good'), t: 'Validation letter — day 12 of 30', d: 'Midland must respond by May 26. We\'ll draft next steps either way.', when: '2h ago' },
+      { ic: '!', icSt: nic('warn'), t: 'Task overdue: Pay Chase Freedom $300', d: 'Planned for Apr 20 — reschedule or mark done.', when: '1d ago' },
+      { ic: '↻', icSt: nic(), t: 'Re-upload window opens Jul 11', d: '90 days after your April report. $5 per analysis.', when: '3d ago' },
+      { ic: '✓', icSt: nic('good'), t: 'Autopay confirmed on 5 cards', d: 'Month 1 milestone complete.', when: '1w ago' },
+      { ic: '$', icSt: nic(), t: 'Payment reminder: Capital One due Apr 28', d: 'Minimum $128 · autopay scheduled.', when: '1w ago' },
+    ];
+
+    // settings toggles
+    const tgl = (key) => { const on = s[key]; return { on: () => this.setState({ [key]: !on }), st: `width:44px;height:26px;border-radius:99px;padding:3px;cursor:pointer;transition:background .15s;flex:none;${on ? 'background:#0e9f77' : 'background:#dbe3ec'}`, knob: `width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s;transform:translateX(${on ? '18px' : '0'})` }; };
+    const settingRows = [
+      { t: 'Two-factor authentication', d: 'Code by SMS at each login', ...tgl('twoFa') },
+      { t: 'Email nudges', d: 'Letter deadlines, plan reminders, re-upload windows', ...tgl('emailNudge') },
+      { t: 'SMS reminders', d: 'Only for time-critical deadlines', ...tgl('smsNudge') },
+    ];
+
+    const info = k => () => this.setState({ term: k });
+    const g = this.glossary[s.term] || this.glossary.utilization;
+    const invoices = [
+      { d: 'Apr 12, 2026', item: 'Full Credit Analysis', amt: '$5.00' },
+      { d: 'Jan 8, 2026', item: 'Full Credit Analysis', amt: '$5.00' },
+      { d: 'Oct 2, 2025', item: 'Full Credit Analysis', amt: '$5.00' },
+    ];
+
+    return {
+      navMain, navAcct,
+      pDashboard: p === 'dashboard', pReports: p === 'reports', pViewer: p === 'viewer', pCompare: p === 'compare', pPlan: p === 'plan', pProgress: p === 'progress', pChat: p === 'chat', pLearn: p === 'learn', pGoals: p === 'goals', pSim: p === 'sim', pNotif: p === 'notif', pProfile: p === 'profile', pSettings: p === 'settings', pBilling: p === 'billing',
+      goReports: this.go('reports'), goViewer: this.go('viewer', { vsec: 'overview', acct: null }), goCompare: this.go('compare'), goPlan: this.go('plan'), goProgress: this.go('progress'), goChat: this.go('chat'), goGoals: this.go('goals'), goSim: this.go('sim'), goNotif: this.go('notif'),
+      goLetters: this.go('viewer', { vsec: 'letters' }), goLearnUtil: this.go('learn'),
+      openChase: this.go('viewer', { vsec: 'accounts', acct: 0 }), openCapOne: this.go('viewer', { vsec: 'accounts', acct: 1 }),
+      planDone, planCols, todayTasks, goalLabel: goals[s.goal].label, goalUpper: goals[s.goal].label.toUpperCase(), goalRecs: goals[s.goal].recs, goalCards,
+      vrail, vsOverview: s.vsec === 'overview', vsAccounts: s.vsec === 'accounts', vsCollections: s.vsec === 'collections', vsInquiries: s.vsec === 'inquiries', vsRecs: s.vsec === 'recs', vsLetters: s.vsec === 'letters', vsTimeline: s.vsec === 'timeline', vsPdf: s.vsec === 'pdf',
+      scoreWhy, acctRows, noAcctSel: s.acct == null, acctSel: s.acct != null, backToAccts: () => this.setState({ acct: null }),
+      selName: sel.name, selType: sel.type, selBal: sel.bal, selLimit: sel.limit, selUtil: sel.util === '—' ? '—' : sel.util, selUtilSt: utilC(sel.tone) + ';font-size:17px;margin-top:5px', selHist: sel.hist, selImp: sel.imp, selImpSt: `font-weight:700;font-size:13px;margin-top:7px;color:${sel.imp === 'High' ? '#c23e3e' : sel.imp === 'Medium' ? '#c2731a' : '#0b7d5e'}`, selPill: sel.pill, selPillSt: pill(sel.ptone), selAi: sel.ai, selAction: sel.action, selActionD: sel.actionD, selBenefit: sel.benefit, selConf: sel.conf, selConfWhy: sel.confWhy,
+      toggleExplain: () => this.setState(st => ({ explain: !st.explain })), explainOpen: s.explain, explainChev: s.explain ? '−' : '+',
+      recRows, scriptTabs, scriptTitle: scripts[s.stab].title, scriptSub: scripts[s.stab].sub, scriptBody: scripts[s.stab].body, timeline,
+      reportRows, emptyReports: s.emptyReports, notEmptyReports: !s.emptyReports, toggleEmptyReports: () => this.setState(st => ({ emptyReports: !st.emptyReports })), emptyReportsLabel: s.emptyReports ? 'view with reports' : 'view empty state',
+      compareRows, progBars,
+      chat, chatEmpty: !s.convo, chatFull: s.convo, toggleConvo: () => this.setState(st => ({ convo: !st.convo })), convoToggleLabel: s.convo ? '+ New conversation' : 'View sample conversation',
+      lessons,
+      simPay: pay, simAmt: fmt(pay), simChase: fmt(chasePaid), simCap: fmt(capPaid), simUtil: newUtil + '%', simBarSt: `width:${newUtil}%;height:100%;background:linear-gradient(90deg,#0e9f77,#2ee6a8);border-radius:99px;transition:width .2s`, simVerdict: verdict, simWhy, simChange: e => this.setState({ simPay: +e.target.value }),
+      notifs, notifsCleared: s.notifsCleared, notifsVisible: !s.notifsCleared, clearNotifs: () => this.setState({ notifsCleared: true }),
+      settingRows, invoices,
+      infoOpen: !!s.term, closeInfo: () => this.setState({ term: null }),
+      infoTitle: g.t, infoWhat: g.what, infoWhy: g.why, infoAct: g.act, infoMisc: g.misc, infoLesson: g.lesson,
+      infoUtilization: info('utilization'), infoCollection: info('collection'), infoInquiry: info('inquiry'),
+      termChips: Object.keys(this.glossary).map(k => ({ label: this.glossary[k].t, on: info(k) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

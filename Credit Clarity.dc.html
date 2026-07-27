@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f6f9;font-family:'Instrument Sans',system-ui,sans-serif;color:#0f2540;-webkit-font-smoothing:antialiased}
+a{color:#0e9f77;text-decoration:none}a:hover{color:#0b7d5e;text-decoration:underline}
+@keyframes ccpulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes ccspin{to{transform:rotate(360deg)}}
+@keyframes ccup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+*{box-sizing:border-box}
+button{font-family:'Instrument Sans',system-ui,sans-serif}
+::selection{background:#d5efe5}
+</style>
+</helmet>
+
+<!-- ============ MARKETING NAV ============ -->
+<sc-if value="{{ showMktNav }}" hint-placeholder-val="{{ true }}">
+<div style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid #e4e9f0">
+  <div style="max-width:1120px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;gap:28px">
+    <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:9px;cursor:pointer">
+      <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#0b1f3a,#155a8a);display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:#2ee6a8"></div></div>
+      <span style="font-weight:700;font-size:16px;letter-spacing:-.02em">Credit Clarity</span>
+    </div>
+    <div style="display:flex;gap:22px;font-size:14px;font-weight:500;color:#3d5068;margin-left:12px">
+      <span onClick="{{ goHow }}" style="cursor:pointer" style-hover="color:#0b1f3a">How it works</span>
+      <span onClick="{{ goPricing }}" style="cursor:pointer" style-hover="color:#0b1f3a">Pricing</span>
+      <span onClick="{{ goSecurity }}" style="cursor:pointer" style-hover="color:#0b1f3a">Security</span>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
+      <span onClick="{{ goLogin }}" style="font-size:14px;font-weight:600;color:#3d5068;cursor:pointer" style-hover="color:#0b1f3a">Log in</span>
+      <button onClick="{{ goUpload }}" style="background:#0b1f3a;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer" style-hover="background:#123152">Analyze My Credit Report</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ HOME ============ -->
+<sc-if value="{{ vHome }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Homepage">
+  <!-- hero -->
+  <div style="background:linear-gradient(160deg,#081527 0%,#0b1f3a 55%,#134066 100%);color:#fff;padding:88px 32px 96px">
+    <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(46,230,168,.12);border:1px solid rgba(46,230,168,.3);border-radius:99px;padding:6px 14px;font-size:13px;font-weight:600;color:#7defc4;margin-bottom:24px"><span style="width:6px;height:6px;border-radius:50%;background:#2ee6a8"></span>Powered by Clarity AI</div>
+        <h1 style="font-size:52px;line-height:1.08;letter-spacing:-.03em;margin:0 0 20px;font-weight:700">Understand your credit.<br><span style="color:#5bd6a9">Build your future.</span></h1>
+        <p style="font-size:18px;line-height:1.6;color:#b9c8da;margin:0 0 32px;max-width:480px;text-wrap:pretty">Upload your credit report and let Clarity AI explain what matters, identify opportunities, and create your personalized roadmap.</p>
+        <div style="display:flex;gap:14px;align-items:center">
+          <button onClick="{{ goUpload }}" style="background:#0e9f77;color:#fff;border:0;border-radius:12px;padding:15px 26px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(14,159,119,.35)" style-hover="background:#0b8663">Analyze My Credit Report</button>
+          <button onClick="{{ goHow }}" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:15px 24px;font-size:16px;font-weight:600;cursor:pointer" style-hover="border-color:rgba(255,255,255,.6)">See How It Works</button>
+        </div>
+        <div style="display:flex;gap:22px;margin-top:36px;font-size:12.5px;color:#8fa3ba;font-weight:500">
+          <span>🔐 256-bit encryption</span><span>Reports deleted on request</span><span>Not a credit repair service</span>
+        </div>
+      </div>
+      <!-- product preview card -->
+      <div style="background:#fff;border-radius:20px;padding:26px;color:#0f2540;box-shadow:0 24px 64px rgba(3,10,20,.45);animation:ccup .6s ease">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="font-weight:700;font-size:15px">Your Credit Snapshot</div>
+          <div style="font-size:11px;font-weight:600;color:#0e9f77;background:#e6f5ef;border-radius:99px;padding:4px 10px">Analyzed by Clarity AI</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:#f4f6f9;border-radius:14px;padding:16px"><div style="font-size:12px;color:#5a6b80;font-weight:500">Credit Score</div><div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin-top:4px">642</div><div style="font-size:12px;color:#0e9f77;font-weight:600">▲ +14 since Jan</div></div>
+          <div style="background:#f4f6f9;border-radius:14px;padding:16px"><div style="font-size:12px;color:#5a6b80;font-weight:500">Clarity Score</div><div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin-top:4px">74<span style="font-size:16px;color:#8fa3ba">/100</span></div><div style="font-size:12px;color:#5a6b80">Improving</div></div>
+        </div>
+        <div style="margin-top:12px;background:#fdf3e7;border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:center">
+          <div style="width:34px;height:34px;border-radius:10px;background:#f6ddba;display:flex;align-items:center;justify-content:center;font-weight:700;color:#9a6314">!</div>
+          <div><div style="font-weight:600;font-size:13.5px">Utilization is your biggest opportunity</div><div style="font-size:12.5px;color:#5a6b80">Cards at 72% — bring under 30% for the biggest lift.</div></div>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#5a6b80">Payment history</span><span style="font-weight:600;color:#c2731a">Needs attention</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#5a6b80">Open accounts</span><span style="font-weight:600">8</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#5a6b80">Collections</span><span style="font-weight:600;color:#c23e3e">1 account</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- how it works strip -->
+  <div style="max-width:1120px;margin:0 auto;padding:72px 32px 8px">
+    <div style="text-align:center;margin-bottom:44px">
+      <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 10px">From confusion to a clear plan</h2>
+      <p style="color:#5a6b80;font-size:16px;margin:0">Four steps. About five minutes.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+      <sc-for list="{{ homeSteps }}" as="s" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#0e9f77;margin-bottom:10px">{{ s.num }}</div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:6px">{{ s.t }}</div>
+          <div style="font-size:13.5px;color:#5a6b80;line-height:1.5">{{ s.d }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- benefits -->
+  <div style="max-width:1120px;margin:0 auto;padding:64px 32px 8px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <sc-for list="{{ benefits }}" as="b" hint-placeholder-count="3">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+          <div style="width:36px;height:36px;border-radius:11px;background:#e6f5ef;color:#0e9f77;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;margin-bottom:14px">{{ b.ic }}</div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:6px">{{ b.t }}</div>
+          <div style="font-size:14px;color:#5a6b80;line-height:1.55">{{ b.d }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- testimonials -->
+  <div style="max-width:1120px;margin:0 auto;padding:64px 32px 8px">
+    <h2 style="font-size:26px;letter-spacing:-.02em;margin:0 0 24px;text-align:center">People finally get it</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="3">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+          <div style="font-size:14.5px;line-height:1.6;color:#22354d">“{{ q.q }}”</div>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0b1f3a,#155a8a);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">{{ q.in }}</div>
+            <div><div style="font-weight:600;font-size:13px">{{ q.n }}</div><div style="font-size:12px;color:#8fa3ba">{{ q.r }}</div></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- pricing preview -->
+  <div style="max-width:1120px;margin:0 auto;padding:64px 32px 8px">
+    <div style="background:linear-gradient(135deg,#0b1f3a,#134066);border-radius:22px;padding:44px 48px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:32px">
+      <div>
+        <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 8px">One report. One clear plan. <span style="color:#5bd6a9">$5.</span></h2>
+        <p style="color:#b9c8da;font-size:15px;margin:0;max-width:520px">Free credit snapshot with every upload. Unlock the full AI analysis, roadmap, and communication scripts for a one-time $5.</p>
+      </div>
+      <div style="display:flex;gap:12px;flex:none">
+        <button onClick="{{ goUpload }}" style="background:#0e9f77;color:#fff;border:0;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#0b8663">Start Free</button>
+        <button onClick="{{ goPricing }}" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:14px 22px;font-size:15px;font-weight:600;cursor:pointer" style-hover="border-color:rgba(255,255,255,.6)">See Pricing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div style="max-width:760px;margin:0 auto;padding:64px 32px 80px">
+    <h2 style="font-size:26px;letter-spacing:-.02em;margin:0 0 22px;text-align:center">Questions, answered</h2>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="5">
+        <details style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:16px 20px">
+          <summary style="font-weight:600;font-size:15px;cursor:pointer;list-style:none">{{ f.q }}</summary>
+          <div style="font-size:14px;color:#5a6b80;line-height:1.6;margin-top:10px">{{ f.a }}</div>
+        </details>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div style="background:#081527;color:#8fa3ba;padding:40px 32px">
+    <div style="max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:13px">
+      <div style="max-width:460px;line-height:1.6">Credit Clarity is an educational service. We do not repair credit, remove accurate information, or guarantee score changes. The Credit Clarity Score is not a FICO® or VantageScore® credit score.</div>
+      <div style="display:flex;gap:20px;font-weight:500">
+        <span onClick="{{ goSecurity }}" style="cursor:pointer" style-hover="color:#fff">Security</span>
+        <span onClick="{{ goPricing }}" style="cursor:pointer" style-hover="color:#fff">Pricing</span>
+        <span onClick="{{ goAdmin }}" style="cursor:pointer" style-hover="color:#fff">Admin demo</span>
+        <span onClick="{{ goOrg }}" style="cursor:pointer" style-hover="color:#fff">Org demo</span>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ HOW IT WORKS ============ -->
+<sc-if value="{{ vHow }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="How It Works" style="max-width:880px;margin:0 auto;padding:72px 32px 96px">
+  <h1 style="font-size:40px;letter-spacing:-.03em;margin:0 0 12px;text-align:center">Upload → Analyze → Understand → Improve</h1>
+  <p style="text-align:center;color:#5a6b80;font-size:16px;margin:0 0 52px">What actually happens to your report, step by step.</p>
+  <div style="display:flex;flex-direction:column;gap:0">
+    <sc-for list="{{ howSteps }}" as="s" hint-placeholder-count="4">
+      <div style="display:grid;grid-template-columns:64px 1fr;gap:24px">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#0b1f3a,#155a8a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex:none">{{ s.num }}</div>
+          <sc-if value="{{ s.line }}" hint-placeholder-val="{{ true }}"><div style="width:2px;flex:1;background:#dbe3ec;margin:8px 0"></div></sc-if>
+        </div>
+        <div style="padding-bottom:40px">
+          <div style="font-weight:700;font-size:20px;letter-spacing:-.01em;margin-bottom:6px">{{ s.t }}</div>
+          <div style="font-size:15px;color:#5a6b80;line-height:1.65;max-width:560px">{{ s.d }}</div>
+          <div style="margin-top:12px;display:inline-block;background:#e6f5ef;color:#0b7d5e;font-size:12.5px;font-weight:600;border-radius:99px;padding:5px 12px">{{ s.tag }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="text-align:center;margin-top:12px"><button onClick="{{ goUpload }}" style="background:#0b1f3a;color:#fff;border:0;border-radius:12px;padding:15px 28px;font-size:16px;font-weight:600;cursor:pointer" style-hover="background:#123152">Analyze My Credit Report</button></div>
+</div>
+</sc-if>
+
+<!-- ============ PRICING ============ -->
+<sc-if value="{{ vPricing }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Pricing" style="max-width:980px;margin:0 auto;padding:72px 32px 96px">
+  <h1 style="font-size:40px;letter-spacing:-.03em;margin:0 0 12px;text-align:center">Simple, honest pricing</h1>
+  <p style="text-align:center;color:#5a6b80;font-size:16px;margin:0 0 48px">No subscriptions required. No upsells mid-report.</p>
+  <div style="display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;align-items:start">
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:28px">
+      <div style="font-weight:700;font-size:17px">Free Preview</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin:12px 0 4px">$0</div>
+      <div style="font-size:13px;color:#8fa3ba;margin-bottom:18px">with every upload</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#3d5068">
+        <div>✓ Credit snapshot &amp; score</div><div>✓ Account count &amp; summary</div><div>✓ Top factors affecting your score</div><div>✓ Basic insights</div>
+      </div>
+      <button onClick="{{ goUpload }}" style="margin-top:22px;width:100%;background:#fff;color:#0b1f3a;border:1.5px solid #0b1f3a;border-radius:11px;padding:12px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="background:#f4f6f9">Upload a Report</button>
+    </div>
+    <div style="background:linear-gradient(160deg,#0b1f3a,#134066);color:#fff;border-radius:18px;padding:30px;box-shadow:0 20px 48px rgba(8,21,39,.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700;font-size:17px">Full Credit Analysis</div><div style="background:#0e9f77;font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px">MOST POPULAR</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;margin:12px 0 4px">$5</div>
+      <div style="font-size:13px;color:#8fa3ba;margin-bottom:18px">one-time, per report</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#d6e1ee">
+        <div>✓ Everything in Free</div><div>✓ Full AI account-by-account analysis</div><div>✓ Personalized 90-day action plan</div><div>✓ Collections &amp; dispute guidance</div><div>✓ Communication scripts &amp; letters</div><div>✓ Downloadable PDF report</div><div>✓ Clarity AI chat</div>
+      </div>
+      <button onClick="{{ goUpload }}" style="margin-top:22px;width:100%;background:#0e9f77;color:#fff;border:0;border-radius:11px;padding:13px;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#0b8663">Analyze My Credit Report</button>
+    </div>
+    <div style="background:#fff;border:1px dashed #c7d2df;border-radius:18px;padding:28px">
+      <div style="font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px">Clarity Plus <span style="background:#eef2f7;color:#5a6b80;font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 8px">COMING SOON</span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:600;margin:12px 0 4px">$9<span style="font-size:16px;color:#8fa3ba">/mo</span></div>
+      <div style="font-size:13px;color:#8fa3ba;margin-bottom:18px">continuous monitoring</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#3d5068">
+        <div>Quarterly re-analysis</div><div>Score change alerts</div><div>Unlimited Clarity AI chat</div><div>Progress tracking over time</div>
+      </div>
+      <button disabled style="margin-top:22px;width:100%;background:#eef2f7;color:#8fa3ba;border:0;border-radius:11px;padding:12px;font-size:14.5px;font-weight:600">Join Waitlist</button>
+    </div>
+  </div>
+  <div style="text-align:center;color:#8fa3ba;font-size:13px;margin-top:28px">Payments processed securely by Stripe. Educational service — not credit repair.</div>
+</div>
+</sc-if>
+
+<!-- ============ SECURITY ============ -->
+<sc-if value="{{ vSecurity }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Security" style="max-width:880px;margin:0 auto;padding:72px 32px 96px">
+  <h1 style="font-size:40px;letter-spacing:-.03em;margin:0 0 12px;text-align:center">Your report. Your control.</h1>
+  <p style="text-align:center;color:#5a6b80;font-size:16px;margin:0 0 48px;max-width:560px;margin-left:auto;margin-right:auto">Credit reports are among the most sensitive documents you own. Here is exactly how we treat them.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <sc-for list="{{ securityItems }}" as="s" hint-placeholder-count="6">
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+        <div style="width:36px;height:36px;border-radius:11px;background:#0b1f3a;color:#5bd6a9;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:14px">{{ s.ic }}</div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:6px">{{ s.t }}</div>
+        <div style="font-size:14px;color:#5a6b80;line-height:1.6">{{ s.d }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ LOGIN ============ -->
+<sc-if value="{{ vLogin }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Login" style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:64px 32px">
+  <div style="width:400px;background:#fff;border:1px solid #e4e9f0;border-radius:20px;padding:36px;box-shadow:0 12px 40px rgba(10,25,50,.08)">
+    <div style="text-align:center;margin-bottom:26px">
+      <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#0b1f3a,#155a8a);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px"><div style="width:14px;height:14px;border-radius:50%;background:#2ee6a8"></div></div>
+      <div style="font-weight:700;font-size:20px;letter-spacing:-.02em">Welcome back</div>
+      <div style="font-size:14px;color:#5a6b80;margin-top:4px">Log in to your Credit Clarity account</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Email</div><input placeholder="you@email.com" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77"></div>
+      <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Password</div><input type="password" placeholder="••••••••" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77"></div>
+      <div style="text-align:right;font-size:12.5px;font-weight:600;color:#0e9f77;cursor:pointer">Forgot password?</div>
+      <button onClick="{{ goDashboard }}" style="background:#0b1f3a;color:#fff;border:0;border-radius:11px;padding:13px;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#123152">Log In</button>
+      <div style="text-align:center;font-size:13px;color:#5a6b80">New here? <span onClick="{{ goUpload }}" style="color:#0e9f77;font-weight:600;cursor:pointer">Start with your report</span> — no account needed.</div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ UPLOAD ============ -->
+<sc-if value="{{ vUpload }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Upload Report" style="max-width:680px;margin:0 auto;padding:64px 32px 96px">
+  <div style="text-align:center;margin-bottom:36px">
+    <h1 style="font-size:32px;letter-spacing:-.025em;margin:0 0 10px">Upload your credit report securely.</h1>
+    <p style="color:#5a6b80;font-size:15.5px;margin:0">No account needed to get your free preview. Your file is encrypted the moment it arrives.</p>
+  </div>
+
+  <sc-if value="{{ upEmpty }}" hint-placeholder-val="{{ true }}">
+    <div onClick="{{ startUpload }}" style="background:#fff;border:2px dashed #b9c8da;border-radius:20px;padding:56px 32px;text-align:center;cursor:pointer;transition:border-color .15s" style-hover="border-color:#0e9f77">
+      <div style="width:56px;height:56px;border-radius:16px;background:#e6f5ef;color:#0e9f77;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin-bottom:16px">↑</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:6px">Drag &amp; drop your credit report</div>
+      <div style="font-size:14px;color:#5a6b80;margin-bottom:18px">or click to browse your files</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#8fa3ba;margin-bottom:10px">SUPPORTED REPORTS · PDF</div>
+      <div style="display:inline-flex;gap:10px">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:10px;padding:8px 14px;display:flex;align-items:center;height:44px;overflow:hidden"><img src="uploads/experian-og-image.png" alt="Experian" style="height:56px;width:100px;object-fit:cover;object-position:center"></div>
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:10px;padding:8px 14px;display:flex;align-items:center;height:44px"><img src="uploads/download.png" alt="Equifax" style="height:22px;object-fit:contain"></div>
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:10px;padding:8px 14px;display:flex;align-items:center;height:44px"><img src="uploads/download.jpg" alt="TransUnion" style="height:30px;object-fit:contain"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:14px"><span onClick="{{ failUpload }}" style="font-size:12px;color:#b9c8da;cursor:pointer">(demo: simulate an invalid file)</span></div>
+  </sc-if>
+
+  <sc-if value="{{ upUploading }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:20px;padding:36px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#5a6b80">PDF</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:15px">experian_report_apr2026.pdf</div><div style="font-size:12.5px;color:#8fa3ba">2.4 MB · Uploading…</div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:15px;color:#0e9f77">{{ upPct }}%</div>
+      </div>
+      <div style="height:8px;background:#eef2f7;border-radius:99px;overflow:hidden"><div style="{{ upBarStyle }}"></div></div>
+      <div style="font-size:12.5px;color:#8fa3ba;margin-top:14px">🔐 Encrypted in transit with TLS 1.3 · Encrypted at rest with AES-256</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ upProcessing }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:20px;padding:44px;text-align:center">
+      <div style="width:44px;height:44px;border:3px solid #e4e9f0;border-top-color:#0e9f77;border-radius:50%;animation:ccspin .9s linear infinite;margin:0 auto 18px"></div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:6px">Validating your report…</div>
+      <div style="font-size:14px;color:#5a6b80">Checking format, bureau, and report date. This takes a few seconds.</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ upError }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#fff;border:1px solid #f0d4d4;border-radius:20px;padding:36px;text-align:center">
+      <div style="width:48px;height:48px;border-radius:14px;background:#fbecec;color:#c23e3e;display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin-bottom:14px">✕</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:6px">We couldn't read that file</div>
+      <div style="font-size:14px;color:#5a6b80;margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto">This doesn't look like a credit report PDF from Experian, Equifax, or TransUnion. Screenshots and scanned images aren't supported yet.</div>
+      <button onClick="{{ resetUpload }}" style="background:#0b1f3a;color:#fff;border:0;border-radius:11px;padding:12px 22px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="background:#123152">Try Another File</button>
+    </div>
+  </sc-if>
+
+  <div style="margin-top:28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+    <div style="font-size:12.5px;color:#5a6b80"><div style="font-weight:700;color:#0f2540;margin-bottom:2px">Where to get your report</div>annualcreditreport.com — free weekly</div>
+    <div style="font-size:12.5px;color:#5a6b80"><div style="font-weight:700;color:#0f2540;margin-bottom:2px">We never pull your credit</div>No inquiry, no SSN required</div>
+    <div style="font-size:12.5px;color:#5a6b80"><div style="font-weight:700;color:#0f2540;margin-bottom:2px">Delete anytime</div>One click removes your data</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ FREE PREVIEW ============ -->
+<sc-if value="{{ vPreview }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Free Preview" style="max-width:980px;margin:0 auto;padding:56px 32px 96px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="background:#e6f5ef;color:#0b7d5e;font-size:12px;font-weight:700;border-radius:99px;padding:5px 12px">FREE PREVIEW</div><div style="font-size:13px;color:#8fa3ba">Experian report · Apr 12, 2026</div></div>
+  <h1 style="font-size:32px;letter-spacing:-.025em;margin:0 0 28px">Here's your credit snapshot</h1>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Credit Score</div><div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;margin-top:6px">642</div><div style="font-size:12.5px;color:#c2731a;font-weight:600;margin-top:2px">Fair range</div></div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Accounts</div><div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;margin-top:6px">8</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">7 open · 1 collection</div></div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Payment History</div><div style="font-size:19px;font-weight:700;margin-top:12px;color:#c2731a">Needs Attention</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">2 late payments found</div></div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Utilization</div><div style="font-size:19px;font-weight:700;margin-top:12px;color:#c23e3e">High — 72%</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">Goal: below 30%</div></div>
+  </div>
+  <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:22px 24px;margin-bottom:36px">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">Major factors affecting your score</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <span style="background:#fbecec;color:#a33232;font-size:13px;font-weight:600;border-radius:99px;padding:7px 14px">High card utilization (72%)</span>
+      <span style="background:#fbecec;color:#a33232;font-size:13px;font-weight:600;border-radius:99px;padding:7px 14px">1 collection account ($684)</span>
+      <span style="background:#fdf3e7;color:#9a6314;font-size:13px;font-weight:600;border-radius:99px;padding:7px 14px">2 late payments</span>
+      <span style="background:#e6f5ef;color:#0b7d5e;font-size:13px;font-weight:600;border-radius:99px;padding:7px 14px">Good account age (6.2 yrs)</span>
+      <span style="background:#e6f5ef;color:#0b7d5e;font-size:13px;font-weight:600;border-radius:99px;padding:7px 14px">Few recent inquiries</span>
+    </div>
+  </div>
+  <h2 style="font-size:20px;letter-spacing:-.015em;margin:0 0 16px">Your full analysis is ready</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px">
+    <sc-for list="{{ lockedCards }}" as="l" hint-placeholder-count="5">
+      <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px;position:relative;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:14px">🔒</span><span style="font-weight:700;font-size:15px">{{ l.t }}</span></div>
+        <div style="font-size:13.5px;color:#5a6b80;line-height:1.5;filter:blur(0px)">{{ l.d }}</div>
+        <div style="margin-top:12px;height:8px;border-radius:99px;background:linear-gradient(90deg,#eef2f7,#e4e9f0);width:80%"></div>
+        <div style="margin-top:6px;height:8px;border-radius:99px;background:linear-gradient(90deg,#eef2f7,#e4e9f0);width:55%"></div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background:linear-gradient(135deg,#0b1f3a,#134066);border-radius:18px;padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:24px">
+    <div><div style="font-weight:700;font-size:19px;letter-spacing:-.01em">Unlock your full analysis, roadmap &amp; scripts</div><div style="font-size:14px;color:#b9c8da;margin-top:4px">One-time payment · Secure Stripe checkout · Instant access</div></div>
+    <button onClick="{{ goCheckout }}" style="flex:none;background:#0e9f77;color:#fff;border:0;border-radius:12px;padding:15px 26px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(14,159,119,.4)" style-hover="background:#0b8663">Unlock Full Analysis — $5</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ CHECKOUT ============ -->
+<sc-if value="{{ vCheckout }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Checkout" style="min-height:75vh;display:flex;align-items:center;justify-content:center;padding:56px 32px">
+  <div style="display:grid;grid-template-columns:340px 400px;gap:0;background:#fff;border:1px solid #e4e9f0;border-radius:20px;overflow:hidden;box-shadow:0 16px 48px rgba(10,25,50,.1)">
+    <div style="background:#0b1f3a;color:#fff;padding:32px">
+      <div style="font-size:13px;color:#8fa3ba;font-weight:600;margin-bottom:18px">ORDER SUMMARY</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:4px">Full Credit Analysis</div>
+      <div style="font-size:13px;color:#b9c8da;line-height:1.6;margin-bottom:22px">AI analysis · 90-day plan · scripts · PDF report · Clarity AI chat</div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:12px 0;border-top:1px solid rgba(255,255,255,.12)"><span style="color:#b9c8da">Subtotal</span><span style="font-family:'JetBrains Mono',monospace">$5.00</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding:12px 0;border-top:1px solid rgba(255,255,255,.12)"><span>Total due today</span><span style="font-family:'JetBrains Mono',monospace">$5.00</span></div>
+      <div style="margin-top:22px;font-size:12px;color:#8fa3ba;line-height:1.6">One-time payment. Not a subscription. 7-day money-back guarantee if the analysis isn't useful to you.</div>
+    </div>
+    <div style="padding:32px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><div style="font-weight:700;font-size:16px">Pay with card</div><div style="font-size:11.5px;font-weight:600;color:#5a6b80;background:#f4f6f9;border-radius:8px;padding:4px 10px">Powered by Stripe</div></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Email</div><input placeholder="you@email.com" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77"></div>
+        <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Card number</div><input placeholder="4242 4242 4242 4242" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:'JetBrains Mono',monospace" style-focus="border-color:#0e9f77"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Expiry</div><input placeholder="MM / YY" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:'JetBrains Mono',monospace" style-focus="border-color:#0e9f77"></div>
+          <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">CVC</div><input placeholder="123" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:'JetBrains Mono',monospace" style-focus="border-color:#0e9f77"></div>
+        </div>
+        <button onClick="{{ pay }}" style="{{ payBtnStyle }}">{{ payLabel }}</button>
+        <div style="text-align:center;font-size:12px;color:#8fa3ba">🔐 Encrypted &amp; PCI-compliant. We never store card numbers.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ SIGNUP (after pay) ============ -->
+<sc-if value="{{ vSignup }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Create Account" style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:56px 32px">
+  <div style="width:420px;background:#fff;border:1px solid #e4e9f0;border-radius:20px;padding:36px;box-shadow:0 12px 40px rgba(10,25,50,.08)">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:#e6f5ef;color:#0b7d5e;font-size:12.5px;font-weight:700;border-radius:99px;padding:5px 12px;margin-bottom:18px">✓ Payment received</div>
+    <div style="font-weight:700;font-size:21px;letter-spacing:-.02em;margin-bottom:6px">Create your account</div>
+    <div style="font-size:14px;color:#5a6b80;margin-bottom:22px;line-height:1.55">Your analysis will be saved here so you can track progress and re-upload reports every 90 days.</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Full name</div><input placeholder="Jordan Ellis" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77"></div>
+      <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Email</div><input placeholder="jordan@email.com" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77"></div>
+      <div><div style="font-size:12.5px;font-weight:600;color:#3d5068;margin-bottom:5px">Password</div><input type="password" placeholder="8+ characters" style="width:100%;border:1.5px solid #dbe3ec;border-radius:10px;padding:11px 13px;font-size:14px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77"></div>
+      <button onClick="{{ goQuiz }}" style="background:#0b1f3a;color:#fff;border:0;border-radius:11px;padding:13px;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#123152">Create Account &amp; Continue</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ QUESTIONNAIRE ============ -->
+<sc-if value="{{ vQuiz }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Goals Questionnaire" style="max-width:640px;margin:0 auto;padding:64px 32px 96px">
+  <div style="font-size:13px;font-weight:600;color:#0e9f77;margin-bottom:10px">PERSONALIZE YOUR PLAN</div>
+  <h1 style="font-size:30px;letter-spacing:-.025em;margin:0 0 6px">Three quick questions</h1>
+  <p style="color:#5a6b80;font-size:15px;margin:0 0 36px">Clarity AI uses these to shape your roadmap — not to sell you anything.</p>
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div>
+      <div style="font-weight:700;font-size:16.5px;margin-bottom:14px">What is your main financial goal?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ q1opts }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button></sc-for>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:700;font-size:16.5px;margin-bottom:14px">What timeline are you working with?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ q2opts }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button></sc-for>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:700;font-size:16.5px;margin-bottom:14px">What is your biggest challenge?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ q3opts }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button></sc-for>
+      </div>
+    </div>
+    <button onClick="{{ submitQuiz }}" disabled="{{ quizIncomplete }}" style="{{ quizBtnStyle }}">Build My Roadmap →</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ AI PROCESSING ============ -->
+<sc-if value="{{ vProcessing }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Clarity AI Processing" style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:56px 32px;background:linear-gradient(160deg,#081527,#0b1f3a 60%,#123a5c)">
+  <div style="width:480px;text-align:center;color:#fff">
+    <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);margin:0 auto 22px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(14,159,119,.4);animation:ccpulse 1.8s ease infinite"><div style="width:26px;height:26px;border-radius:50%;background:#fff;opacity:.95"></div></div>
+    <div style="font-size:13px;font-weight:700;letter-spacing:.12em;color:#5bd6a9;margin-bottom:8px">MEET CLARITY AI</div>
+    <h1 style="font-size:28px;letter-spacing:-.02em;margin:0 0 30px">Building your personalized analysis</h1>
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:26px 30px;text-align:left;display:flex;flex-direction:column;gap:16px">
+      <sc-for list="{{ aiSteps }}" as="s" hint-placeholder-count="5">
+        <div style="{{ s.rowSt }}">
+          <div style="{{ s.dotSt }}">{{ s.mark }}</div>
+          <span style="font-size:15px;font-weight:500">{{ s.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size:13px;color:#8fa3ba;margin-top:20px">Usually takes under a minute. Your report never leaves encrypted storage.</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ APP SHELL (dashboard / report) ============ -->
+<sc-if value="{{ inApp }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;min-height:100vh">
+  <!-- sidebar -->
+  <div style="width:232px;flex:none;background:#081527;color:#b9c8da;display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh">
+    <div style="display:flex;align-items:center;gap:9px;padding:6px 10px;margin-bottom:24px">
+      <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:#fff"></div></div>
+      <span style="font-weight:700;font-size:15px;color:#fff;letter-spacing:-.01em">Credit Clarity</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <sc-for list="{{ sideNav }}" as="n" hint-placeholder-count="4">
+        <div onClick="{{ n.on }}" style="{{ n.st }}">{{ n.label }}</div>
+      </sc-for>
+    </div>
+    <button onClick="{{ toggleChat }}" style="margin-top:18px;background:linear-gradient(135deg,#0e9f77,#12b586);color:#fff;border:0;border-radius:11px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="filter:brightness(1.08)"><span style="width:7px;height:7px;border-radius:50%;background:#fff"></span>Ask Clarity AI</button>
+    <div style="margin-top:auto;padding:12px 10px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px">
+      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#155a8a,#0e9f77);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff">JE</div>
+      <div><div style="font-size:13px;font-weight:600;color:#fff">Jordan Ellis</div><div style="font-size:11px;color:#8fa3ba">Full analysis · Apr 2026</div></div>
+    </div>
+  </div>
+
+  <!-- main -->
+  <div style="flex:1;min-width:0">
+
+    <!-- ===== DASHBOARD ===== -->
+    <sc-if value="{{ vDashboard }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Dashboard" style="padding:32px 40px 80px;max-width:1120px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px">
+        <div><h1 style="font-size:26px;letter-spacing:-.02em;margin:0 0 4px">Good morning, Jordan</h1><div style="font-size:13.5px;color:#5a6b80">Latest report: Experian · Apr 12, 2026 · <span style="color:#0e9f77;font-weight:600">Next upload available Jul 11</span></div></div>
+        <button onClick="{{ goUpload }}" style="background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;color:#0f2540;cursor:pointer" style-hover="border-color:#0b1f3a">Upload New Report</button>
+      </div>
+
+      <!-- score row -->
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:16px;margin-bottom:16px">
+        <div style="background:linear-gradient(160deg,#0b1f3a,#134066);border-radius:18px;padding:26px;color:#fff;display:flex;gap:24px;align-items:center">
+          <svg width="128" height="128" viewBox="0 0 128 128">
+            <circle cx="64" cy="64" r="54" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"></circle>
+            <circle cx="64" cy="64" r="54" fill="none" stroke="#2ee6a8" stroke-width="10" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="88.2" transform="rotate(-90 64 64)"></circle>
+            <text x="64" y="60" text-anchor="middle" fill="#fff" font-size="30" font-weight="700" font-family="JetBrains Mono,monospace">74</text>
+            <text x="64" y="80" text-anchor="middle" fill="#8fa3ba" font-size="12" font-family="Instrument Sans,sans-serif">/ 100</text>
+          </svg>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5bd6a9;margin-bottom:6px">CREDIT CLARITY SCORE</div>
+            <div style="font-size:14px;line-height:1.55;color:#d6e1ee">Your credit profile is improving. Focus on reducing utilization and addressing negative accounts.</div>
+            <div style="font-size:11.5px;color:#8fa3ba;margin-top:10px">Educational score — not FICO® or VantageScore®</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Credit Score (Experian)</div><div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;margin-top:8px">642</div><div style="font-size:12.5px;color:#0e9f77;font-weight:600;margin-top:2px">▲ +14 since January</div></div>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Card Utilization</div><div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;margin-top:8px;color:#c23e3e">72%</div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">Goal: below 30%</div></div>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:22px"><div style="font-size:12.5px;color:#5a6b80;font-weight:500">Actions Completed</div><div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;margin-top:8px">3<span style="font-size:18px;color:#8fa3ba">/9</span></div><div style="font-size:12.5px;color:#5a6b80;margin-top:2px">90-day plan progress</div></div>
+        </div>
+      </div>
+
+      <!-- opportunities -->
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin:28px 0 14px"><h2 style="font-size:18px;letter-spacing:-.01em;margin:0">Biggest opportunities</h2><span onClick="{{ goReport }}" style="font-size:13px;font-weight:600;color:#0e9f77;cursor:pointer">View full report →</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <sc-for list="{{ opps }}" as="o" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:15px">{{ o.t }}</span><span style="{{ o.badgeSt }}">{{ o.impact }}</span></div>
+            <div style="display:flex;gap:18px;font-size:13px"><div><div style="color:#8fa3ba;font-size:11.5px;font-weight:600">{{ o.k1 }}</div><div style="font-weight:700;margin-top:2px">{{ o.v1 }}</div></div><div><div style="color:#8fa3ba;font-size:11.5px;font-weight:600">{{ o.k2 }}</div><div style="font-weight:700;margin-top:2px;color:#0b7d5e">{{ o.v2 }}</div></div></div>
+            <div style="font-size:13px;color:#5a6b80;line-height:1.5">{{ o.d }}</div>
+            <div onClick="{{ o.on }}" style="margin-top:auto;font-size:13px;font-weight:600;color:#0e9f77;cursor:pointer">{{ o.cta }} →</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- plan + health -->
+      <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:28px">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:24px">
+          <h2 style="font-size:18px;letter-spacing:-.01em;margin:0 0 18px">Your 90-day action plan</h2>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <sc-for list="{{ plan }}" as="m" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:44px 1fr;gap:16px">
+                <div style="display:flex;flex-direction:column;align-items:center">
+                  <div style="{{ m.dotSt }}">{{ m.num }}</div>
+                  <sc-if value="{{ m.line }}" hint-placeholder-val="{{ true }}"><div style="width:2px;flex:1;background:#e4e9f0;margin:6px 0"></div></sc-if>
+                </div>
+                <div style="padding-bottom:22px">
+                  <div style="display:flex;gap:10px;align-items:baseline"><span style="font-weight:700;font-size:15px">{{ m.t }}</span><span style="font-size:12px;color:#8fa3ba;font-weight:600">{{ m.tag }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:7px;margin-top:10px">
+                    <sc-for list="{{ m.items }}" as="a" hint-placeholder-count="3">
+                      <div style="display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:#3d5068"><span style="{{ a.ck }}">{{ a.mk }}</span><span style="{{ a.txt }}">{{ a.label }}</span></div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:24px">
+            <h2 style="font-size:18px;letter-spacing:-.01em;margin:0 0 16px">Credit health breakdown</h2>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ health }}" as="h" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="font-weight:600">{{ h.t }}</span><span style="{{ h.lblSt }}">{{ h.lbl }}</span></div>
+                  <div style="height:7px;background:#eef2f7;border-radius:99px;overflow:hidden"><div style="{{ h.barSt }}"></div></div>
+                  <div style="font-size:11.5px;color:#8fa3ba;margin-top:4px">{{ h.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:24px">
+            <h2 style="font-size:18px;letter-spacing:-.01em;margin:0 0 14px">Report history</h2>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ history }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f8fafc;border-radius:12px">
+                  <div><div style="font-size:13.5px;font-weight:600">{{ r.d }}</div><div style="font-size:11.5px;color:#8fa3ba">{{ r.b }}</div></div>
+                  <div style="text-align:right"><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px">{{ r.s }}</div><div style="{{ r.chgSt }}">{{ r.chg }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== REPORT ===== -->
+    <sc-if value="{{ vReport }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Report Analysis" style="padding:32px 40px 80px;max-width:1120px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px">
+        <div><h1 style="font-size:26px;letter-spacing:-.02em;margin:0 0 4px">Your credit report, explained</h1><div style="font-size:13.5px;color:#5a6b80">Experian · Apr 12, 2026 · Analyzed by Clarity AI</div></div>
+        <button style="background:#0b1f3a;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:#123152">↓ Download PDF Report</button>
+      </div>
+      <div style="display:flex;gap:6px;border-bottom:1px solid #e4e9f0;margin-bottom:24px;overflow-x:auto">
+        <sc-for list="{{ rtabs }}" as="t" hint-placeholder-count="6"><div onClick="{{ t.on }}" style="{{ t.st }}">{{ t.label }}</div></sc-for>
+      </div>
+
+      <!-- Summary tab -->
+      <sc-if value="{{ rtSummary }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:28px;margin-bottom:16px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:10px">EXECUTIVE SUMMARY</div>
+          <p style="font-size:15.5px;line-height:1.7;margin:0 0 14px;max-width:760px;text-wrap:pretty">Jordan, your credit profile is in the <strong>fair range (642)</strong> and trending upward — you've gained 31 points since October. Two things are holding you back more than everything else combined: <strong>your credit card utilization (72%)</strong> and <strong>one collection account ($684, Midland Credit Management)</strong>. Your account age and credit mix are genuinely strong, which means your score responds quickly once balances come down.</p>
+          <p style="font-size:15.5px;line-height:1.7;margin:0;max-width:760px;color:#3d5068;text-wrap:pretty">If you follow the 90-day plan — validate the collection, bring your two largest card balances under 30%, and set up autopay — profiles like yours typically move into the good range (670+) within one to two reporting cycles.</p>
+        </div>
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:28px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#0e9f77;margin-bottom:14px">WHY YOUR SCORE IS 642</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <sc-for list="{{ scoreWhy }}" as="w" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;padding:14px;background:#f8fafc;border-radius:12px">
+                <div style="{{ w.dotSt }}">{{ w.sign }}</div>
+                <div><div style="font-weight:600;font-size:14px">{{ w.t }}</div><div style="font-size:13px;color:#5a6b80;line-height:1.5;margin-top:2px">{{ w.d }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Accounts tab -->
+      <sc-if value="{{ rtAccounts }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ accounts }}" as="a" hint-placeholder-count="8">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px 24px;display:grid;grid-template-columns:1.4fr .7fr .7fr .6fr .9fr 1.6fr;gap:16px;align-items:center">
+              <div><div style="font-weight:700;font-size:14.5px">{{ a.name }}</div><div style="font-size:12px;color:#8fa3ba;margin-top:2px">{{ a.type }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">BALANCE</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;margin-top:2px">{{ a.bal }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">LIMIT</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;margin-top:2px">{{ a.limit }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">UTIL.</div><div style="{{ a.utilSt }}">{{ a.util }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">HISTORY</div><div style="font-size:12.5px;font-weight:600;margin-top:2px">{{ a.hist }}</div></div>
+              <div style="{{ a.recSt }}">{{ a.rec }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Collections tab -->
+      <sc-if value="{{ rtCollections }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #f0d4d4;border-radius:18px;padding:28px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+            <div><div style="font-weight:700;font-size:18px">Midland Credit Management</div><div style="font-size:13px;color:#5a6b80;margin-top:2px">Collection · Original creditor: Synchrony Bank (Amazon Store Card)</div></div>
+            <span style="background:#fbecec;color:#a33232;font-size:12px;font-weight:700;border-radius:99px;padding:6px 13px">NEEDS ATTENTION</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+            <div style="background:#f8fafc;border-radius:12px;padding:14px"><div style="font-size:11px;color:#8fa3ba;font-weight:600">AMOUNT</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:17px;margin-top:4px">$684</div></div>
+            <div style="background:#f8fafc;border-radius:12px;padding:14px"><div style="font-size:11px;color:#8fa3ba;font-weight:600">OPENED</div><div style="font-weight:600;font-size:14px;margin-top:6px">Aug 2024</div></div>
+            <div style="background:#f8fafc;border-radius:12px;padding:14px"><div style="font-size:11px;color:#8fa3ba;font-weight:600">FIRST DELINQUENCY</div><div style="font-weight:600;font-size:14px;margin-top:6px">Feb 2024</div></div>
+            <div style="background:#f8fafc;border-radius:12px;padding:14px"><div style="font-size:11px;color:#8fa3ba;font-weight:600">FALLS OFF REPORT</div><div style="font-weight:600;font-size:14px;margin-top:6px">Feb 2031</div></div>
+          </div>
+          <div style="background:#e6f5ef;border-radius:14px;padding:18px 20px">
+            <div style="font-weight:700;font-size:14px;color:#0b7d5e;margin-bottom:8px">Recommended: request debt validation first</div>
+            <div style="font-size:14px;line-height:1.65;color:#22354d;max-width:720px;text-wrap:pretty">Before paying anything, send a debt validation letter within your rights under the FDCPA. Roughly 1 in 3 collection accounts contain errors in amount or ownership. If validated, you can then negotiate — often for less than the full balance, ideally with a pay-for-delete agreement in writing. A ready-to-send letter is in your <span onClick="{{ goScriptsTab }}" style="color:#0b7d5e;font-weight:700;cursor:pointer;text-decoration:underline">Scripts</span> tab.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:18px"><div style="font-weight:700;font-size:13.5px;margin-bottom:6px">Step 1 — Validate</div><div style="font-size:13px;color:#5a6b80;line-height:1.55">Send the validation letter by certified mail. They have 30 days to respond.</div></div>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:18px"><div style="font-weight:700;font-size:13.5px;margin-bottom:6px">Step 2 — Negotiate</div><div style="font-size:13px;color:#5a6b80;line-height:1.55">If valid, negotiate a settlement. Get any agreement in writing before paying.</div></div>
+          <div style="background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:18px"><div style="font-weight:700;font-size:13.5px;margin-bottom:6px">Step 3 — Verify removal</div><div style="font-size:13px;color:#5a6b80;line-height:1.55">Re-upload your report in 90 days — Clarity AI will confirm the change.</div></div>
+        </div>
+      </sc-if>
+
+      <!-- Inquiries tab -->
+      <sc-if value="{{ rtInquiries }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ inquiries }}" as="i" hint-placeholder-count="2">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px 24px;display:grid;grid-template-columns:1.3fr .8fr .8fr 2fr;gap:16px;align-items:center">
+              <div><div style="font-weight:700;font-size:14.5px">{{ i.name }}</div><div style="font-size:12px;color:#8fa3ba;margin-top:2px">{{ i.type }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">DATE</div><div style="font-weight:600;font-size:13.5px;margin-top:2px">{{ i.date }}</div></div>
+              <div><div style="font-size:11px;color:#8fa3ba;font-weight:600">IMPACT</div><div style="{{ i.impSt }}">{{ i.imp }}</div></div>
+              <div style="font-size:13px;color:#5a6b80;line-height:1.5">{{ i.note }}</div>
+            </div>
+          </sc-for>
+          <div style="background:#e6f5ef;border-radius:14px;padding:16px 20px;font-size:13.5px;color:#22354d;line-height:1.6">✓ <strong>No action needed.</strong> Two inquiries in 12 months is normal. Hard inquiries stop affecting your score after 12 months and fall off entirely after 24.</div>
+        </div>
+      </sc-if>
+
+      <!-- Errors tab -->
+      <sc-if value="{{ rtErrors }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ errors }}" as="e" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px 24px;display:flex;gap:16px;align-items:flex-start">
+              <div style="{{ e.dotSt }}">{{ e.ic }}</div>
+              <div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:14.5px">{{ e.t }}</span><span style="{{ e.sevSt }}">{{ e.sev }}</span></div><div style="font-size:13.5px;color:#5a6b80;line-height:1.6;margin-top:4px;max-width:700px">{{ e.d }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Recommendations tab -->
+      <sc-if value="{{ rtRecs }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ recs }}" as="r" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+              <div style="font-size:12px;font-weight:700;letter-spacing:.06em;color:#0e9f77;margin-bottom:8px">{{ r.cat }}</div>
+              <div style="font-weight:700;font-size:16px;margin-bottom:8px">{{ r.t }}</div>
+              <div style="font-size:13.5px;color:#5a6b80;line-height:1.65">{{ r.d }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Scripts tab -->
+      <sc-if value="{{ rtScripts }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+          <sc-for list="{{ scriptTabs }}" as="s" hint-placeholder-count="4"><button onClick="{{ s.on }}" style="{{ s.st }}">{{ s.label }}</button></sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #e4e9f0;border-radius:18px;padding:28px;max-width:820px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div><div style="font-weight:700;font-size:17px">{{ scriptTitle }}</div><div style="font-size:13px;color:#5a6b80;margin-top:2px">{{ scriptSub }}</div></div>
+            <button style="background:#fff;border:1.5px solid #dbe3ec;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:#0b1f3a">Copy</button>
+          </div>
+          <div style="background:#f8fafc;border-radius:14px;padding:24px;font-size:13.5px;line-height:1.8;color:#22354d;white-space:pre-line;font-family:'JetBrains Mono',monospace">{{ scriptBody }}</div>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+  </div>
+
+  <!-- Clarity AI chat panel -->
+  <sc-if value="{{ chatOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="width:360px;flex:none;background:#fff;border-left:1px solid #e4e9f0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:18px 20px;border-bottom:1px solid #e4e9f0;display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0e9f77,#2ee6a8);display:flex;align-items:center;justify-content:center"><div style="width:11px;height:11px;border-radius:50%;background:#fff"></div></div><div><div style="font-weight:700;font-size:14.5px">Clarity AI</div><div style="font-size:11.5px;color:#0e9f77;font-weight:600">● Knows your report</div></div></div>
+      <div onClick="{{ toggleChat }}" style="cursor:pointer;color:#8fa3ba;font-size:18px;font-weight:600;padding:4px 8px">✕</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ chat }}" as="m" hint-placeholder-count="4">
+        <div style="{{ m.wrapSt }}"><div style="{{ m.bubSt }}">{{ m.text }}</div></div>
+      </sc-for>
+    </div>
+    <div style="padding:14px 16px;border-top:1px solid #e4e9f0">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="background:#f4f6f9;border:1px solid #e4e9f0;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:600;color:#3d5068;cursor:pointer" style-hover="border-color:#0e9f77">What should I pay first?</span>
+        <span style="background:#f4f6f9;border:1px solid #e4e9f0;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:600;color:#3d5068;cursor:pointer" style-hover="border-color:#0e9f77">Explain my collection</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input placeholder="Ask about your credit…" style="flex:1;border:1.5px solid #dbe3ec;border-radius:11px;padding:11px 13px;font-size:13.5px;outline:none;font-family:inherit" style-focus="border-color:#0e9f77">
+        <button style="background:#0e9f77;color:#fff;border:0;border-radius:11px;width:42px;font-size:16px;font-weight:700;cursor:pointer" style-hover="background:#0b8663">↑</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ============ ADMIN ============ -->
+<sc-if value="{{ vAdmin }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Admin Dashboard" style="display:flex;min-height:100vh;background:#0d1117">
+  <div style="width:220px;flex:none;background:#090d13;color:#7d8ba0;padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh">
+    <div style="display:flex;align-items:center;gap:9px;padding:6px 10px;margin-bottom:20px"><div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#0e9f77,#2ee6a8)"></div><span style="font-weight:700;font-size:14px;color:#fff">Clarity Admin</span></div>
+    <div style="background:rgba(46,230,168,.1);color:#5bd6a9;border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:600;cursor:pointer">Overview</div>
+    <div style="border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="color:#fff">Users</div>
+    <div style="border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="color:#fff">Payments</div>
+    <div style="border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="color:#fff">AI Usage</div>
+    <div style="border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="color:#fff">Support</div>
+    <div onClick="{{ goHome }}" style="margin-top:auto;border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;color:#5b6a80" style-hover="color:#fff">← Back to site</div>
+  </div>
+  <div style="flex:1;padding:32px 40px 80px;color:#e6ecf4">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:26px"><div><h1 style="font-size:24px;letter-spacing:-.02em;margin:0 0 4px;color:#fff">Overview</h1><div style="font-size:13px;color:#7d8ba0">July 2026 · updated 4 min ago</div></div><div style="font-size:12.5px;color:#7d8ba0;background:#161d29;border:1px solid #232d3d;border-radius:9px;padding:8px 14px">Internal · admin@creditclarity.com</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
+      <sc-for list="{{ adminKpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:#161d29;border:1px solid #232d3d;border-radius:16px;padding:20px"><div style="font-size:12px;color:#7d8ba0;font-weight:500">{{ k.t }}</div><div style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;margin-top:8px;color:#fff">{{ k.v }}</div><div style="{{ k.chgSt }}">{{ k.chg }}</div></div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:1.3fr .7fr;gap:14px;margin-bottom:16px">
+      <div style="background:#161d29;border:1px solid #232d3d;border-radius:16px;padding:22px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:18px"><span style="font-weight:700;font-size:15px;color:#fff">Revenue — last 8 weeks</span><span style="font-size:12px;color:#7d8ba0">Stripe · net of fees</span></div>
+        <div style="display:flex;align-items:flex-end;gap:10px;height:120px">
+          <sc-for list="{{ revBars }}" as="b" hint-placeholder-count="8">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end"><div style="{{ b.st }}"></div><div style="font-size:10px;color:#5b6a80;font-family:'JetBrains Mono',monospace">{{ b.w }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#161d29;border:1px solid #232d3d;border-radius:16px;padding:22px">
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:16px">AI cost tracking</div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span style="color:#7d8ba0">Claude API — MTD</span><span style="font-family:'JetBrains Mono',monospace;color:#fff">$1,872</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#7d8ba0">Avg cost / report</span><span style="font-family:'JetBrains Mono',monospace;color:#fff">$0.31</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#7d8ba0">Gross margin / report</span><span style="font-family:'JetBrains Mono',monospace;color:#5bd6a9">$4.24</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#7d8ba0">Chat messages — MTD</span><span style="font-family:'JetBrains Mono',monospace;color:#fff">41,208</span></div>
+          <div style="height:7px;background:#232d3d;border-radius:99px;overflow:hidden;margin-top:4px"><div style="width:62%;height:100%;background:linear-gradient(90deg,#0e9f77,#2ee6a8)"></div></div>
+          <div style="font-size:11.5px;color:#5b6a80">62% of $3,000 monthly AI budget</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#161d29;border:1px solid #232d3d;border-radius:16px;padding:22px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px"><span style="font-weight:700;font-size:15px;color:#fff">Recent payments</span><span style="font-size:12.5px;color:#5bd6a9;font-weight:600;cursor:pointer">Open in Stripe →</span></div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr .8fr;gap:12px;font-size:11px;color:#5b6a80;font-weight:700;padding:0 4px 10px;border-bottom:1px solid #232d3d">
+        <span>CUSTOMER</span><span>PRODUCT</span><span>AMOUNT</span><span>STATUS</span><span>TIME</span>
+      </div>
+      <sc-for list="{{ payments }}" as="p" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr .8fr;gap:12px;font-size:13px;padding:12px 4px;border-bottom:1px solid #1c2534;align-items:center">
+          <span style="color:#e6ecf4;font-weight:500">{{ p.c }}</span><span style="color:#7d8ba0">{{ p.pr }}</span><span style="font-family:'JetBrains Mono',monospace;color:#fff">{{ p.a }}</span><span style="{{ p.st }}">{{ p.s }}</span><span style="color:#5b6a80">{{ p.t }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ ORG ============ -->
+<sc-if value="{{ vOrg }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Organization Dashboard" style="max-width:1060px;margin:0 auto;padding:40px 32px 96px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+    <div>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:#eef2f7;color:#3d5068;font-size:12px;font-weight:700;border-radius:99px;padding:5px 12px;margin-bottom:12px">CLARITY FOR ORGANIZATIONS · PREVIEW</div>
+      <h1 style="font-size:26px;letter-spacing:-.02em;margin:0 0 4px">Riverside Community Church</h1>
+      <div style="font-size:13.5px;color:#5a6b80">Financial Wellness Program · Spring 2026 cohort</div>
+    </div>
+    <button style="background:#0b1f3a;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:#123152">Invite Members</button>
+  </div>
+  <div style="background:#e6f5ef;border-radius:12px;padding:12px 16px;font-size:13px;color:#0b7d5e;font-weight:500;margin-bottom:24px">🔒 Privacy-first: organization admins see aggregate progress only — never individual credit reports or scores.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px"><div style="font-size:12.5px;color:#5a6b80">Members enrolled</div><div style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:600;margin-top:6px">214</div><div style="font-size:12px;color:#0e9f77;font-weight:600">▲ 26 this month</div></div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px"><div style="font-size:12.5px;color:#5a6b80">Reports completed</div><div style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:600;margin-top:6px">168</div><div style="font-size:12px;color:#5a6b80">79% of enrolled</div></div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px"><div style="font-size:12.5px;color:#5a6b80">Avg Clarity Score gain</div><div style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:600;margin-top:6px;color:#0b7d5e">+9</div><div style="font-size:12px;color:#5a6b80">over 90 days</div></div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:20px"><div style="font-size:12.5px;color:#5a6b80">30-day engagement</div><div style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:600;margin-top:6px">71%</div><div style="font-size:12px;color:#5a6b80">opened plan or chat</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:14px">
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:16px">Financial literacy progress</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ orgModules }}" as="m" hint-placeholder-count="4">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="font-weight:600">{{ m.t }}</span><span style="color:#5a6b80;font-family:'JetBrains Mono',monospace;font-size:12px">{{ m.pct }}%</span></div>
+            <div style="height:7px;background:#eef2f7;border-radius:99px;overflow:hidden"><div style="{{ m.st }}"></div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:16px">Cohort health (aggregate)</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+        <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Avg utilization</span><span style="font-weight:700;color:#c2731a">54% → 41%</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Members with autopay set</span><span style="font-weight:700">61%</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Collections addressed</span><span style="font-weight:700;color:#0b7d5e">38 of 52</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#5a6b80">Plans completed (90-day)</span><span style="font-weight:700">44</span></div>
+      </div>
+      <div style="margin-top:18px;background:#f8fafc;border-radius:12px;padding:14px;font-size:12.5px;color:#5a6b80;line-height:1.6">Members who completed Month 1 actions were <strong style="color:#0f2540">3.2× more likely</strong> to raise their Clarity Score by 10+ points.</div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ DEMO NAVIGATOR ============ -->
+<sc-if value="{{ showDemoNav }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;bottom:20px;right:20px;z-index:100">
+  <sc-if value="{{ demoOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;bottom:48px;right:0;background:#0b1f3a;border-radius:14px;padding:10px;box-shadow:0 16px 48px rgba(3,10,20,.4);display:flex;flex-direction:column;gap:2px;width:220px">
+      <sc-for list="{{ demoLinks }}" as="d" hint-placeholder-count="10">
+        <div onClick="{{ d.on }}" style="{{ d.st }}">{{ d.label }}</div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <div onClick="{{ toggleDemo }}" style="background:#0b1f3a;color:#fff;border-radius:99px;padding:10px 16px;font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(3,10,20,.3);display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:50%;background:#2ee6a8"></span>Screen map</div>
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showDemoNav&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;home&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;upload&quot;,&quot;preview&quot;,&quot;dashboard&quot;,&quot;report&quot;,&quot;admin&quot;,&quot;org&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
+class Component extends DCLogic {
+  state = { view: (this.props && this.props.startView) || 'home', upPhase: 'empty', upPct: 0, paying: false, q1: null, q2: null, q3: null, aiStep: 0, rtab: 'summary', stab: 0, chatOpen: false, demoOpen: false };
+
+  nav(v) { return () => { this.clearTimers(); const patch = { view: v, demoOpen: false }; if (v === 'upload') { patch.upPhase = 'empty'; patch.upPct = 0; } if (v === 'processing') patch.aiStep = 0; window.scrollTo(0, 0); this.setState(patch, () => { if (v === 'processing') this.runAI(); }); }; }
+  clearTimers() { clearInterval(this._t1); clearTimeout(this._t2); clearInterval(this._t3); }
+  componentWillUnmount() { this.clearTimers(); }
+
+  startUpload = () => {
+    this.setState({ upPhase: 'uploading', upPct: 0 });
+    this._t1 = setInterval(() => {
+      this.setState(s => {
+        const p = Math.min(100, s.upPct + 7 + Math.random() * 9);
+        if (p >= 100) { clearInterval(this._t1); this._t2 = setTimeout(() => this.setState({ view: 'preview' }, () => window.scrollTo(0, 0)), 1900); return { upPct: 100, upPhase: 'processing' }; }
+        return { upPct: p };
+      });
+    }, 160);
+  };
+
+  pay = () => { if (this.state.paying) return; this.setState({ paying: true }); this._t2 = setTimeout(() => this.setState({ paying: false, view: 'signup' }, () => window.scrollTo(0, 0)), 1400); };
+
+  runAI() { this._t3 = setInterval(() => { this.setState(s => { if (s.aiStep >= 5) { clearInterval(this._t3); this._t2 = setTimeout(() => this.setState({ view: 'dashboard' }, () => window.scrollTo(0, 0)), 900); return null; } return { aiStep: s.aiStep + 1 }; }); }, 950); }
+
+  chip(sel) { return `border:1.5px solid ${sel ? '#0e9f77' : '#dbe3ec'};background:${sel ? '#e6f5ef' : '#fff'};color:${sel ? '#0b7d5e' : '#3d5068'};border-radius:99px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer`; }
+
+  renderVals() {
+    const s = this.state;
+    const v = s.view;
+    const mkt = ['home', 'how', 'pricing', 'security', 'login', 'upload', 'preview', 'org'].includes(v);
+    const opt = (key, val) => ({ label: val, on: () => this.setState({ [key]: val }), st: this.chip(s[key] === val) });
+    const quizDone = s.q1 && s.q2 && s.q3;
+
+    const aiLabels = ['Reading your report', 'Identifying important accounts', 'Finding improvement opportunities', 'Building your personalized roadmap', 'Preparing your financial action plan'];
+    const aiSteps = aiLabels.map((label, i) => {
+      const done = s.aiStep > i, active = s.aiStep === i;
+      return { label, mark: done ? '✓' : '', rowSt: `display:flex;align-items:center;gap:14px;color:${done ? '#fff' : active ? '#d6e1ee' : '#5b6f89'};transition:color .3s`, dotSt: `width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;${done ? 'background:#0e9f77;color:#fff' : active ? 'border:2px solid #2ee6a8;animation:ccpulse 1s ease infinite' : 'border:2px solid #2c405a'}` };
+    });
+
+    const sideItems = [['dashboard', 'Dashboard'], ['report', 'Full Report'], ['upload', 'Upload Report'], ['org', 'My Organization']];
+    const sideNav = sideItems.map(([k, label]) => ({ label, on: this.nav(k), st: `border-radius:11px;padding:11px 12px;font-size:13.5px;font-weight:600;cursor:pointer;${v === k ? 'background:rgba(46,230,168,.12);color:#5bd6a9' : 'color:#b9c8da'}` }));
+
+    const badge = t => t === 'High' ? 'background:#fbecec;color:#a33232;font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px' : 'background:#fdf3e7;color:#9a6314;font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px';
+    const opps = [
+      { t: 'Reduce Utilization', impact: 'High impact', badgeSt: badge('High'), k1: 'CURRENT', v1: '72%', k2: 'GOAL', v2: 'Below 30%', d: 'Your two largest card balances drive most of your score drag. Paying $2,500 across them gets you under 30%.', cta: 'See payoff order', on: this.nav('report') },
+      { t: 'Review Collection', impact: 'High impact', badgeSt: badge('High'), k1: 'STATUS', v1: 'Needs attention', k2: 'ACTION', v2: 'Request validation', d: 'Midland Credit Management, $684. Validate before paying — the letter is ready in Scripts.', cta: 'Open dispute guide', on: () => { this.setState({ view: 'report', rtab: 'collections' }); window.scrollTo(0, 0); } },
+      { t: 'Set Up Autopay', impact: 'Medium', badgeSt: badge('Med'), k1: 'LATES FOUND', v1: '2', k2: 'PREVENTS', v2: 'Future lates', d: 'Payment history is 35% of your score. Autopay minimums on all 5 active cards removes the risk entirely.', cta: 'Mark as done', on: () => {} },
+    ];
+
+    const ck = done => done ? 'width:17px;height:17px;border-radius:6px;background:#0e9f77;color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-top:1px' : 'width:17px;height:17px;border-radius:6px;border:1.5px solid #c7d2df;flex:none;margin-top:1px';
+    const item = (label, done) => ({ label, mk: done ? '✓' : '', ck: ck(done), txt: done ? 'text-decoration:line-through;color:#8fa3ba' : '' });
+    const mdot = (active) => `width:34px;height:34px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;${active ? 'background:#0b1f3a;color:#fff' : 'background:#eef2f7;color:#8fa3ba'}`;
+    const plan = [
+      { num: '1', t: 'Month 1 — Stabilize', tag: 'In progress', dotSt: mdot(true), line: true, items: [item('Send debt validation letter to Midland (certified mail)', true), item('Set up autopay minimums on all 5 cards', true), item('Pay Chase Freedom down to under 50% ($1,750)', true)] },
+      { num: '2', t: 'Month 2 — Reduce', tag: 'Starts May 12', dotSt: mdot(false), line: true, items: [item('Bring Chase & Capital One under 30% utilization', false), item('Send goodwill letter for Mar 2024 late payment', false), item('Avoid new credit applications', false)] },
+      { num: '3', t: 'Month 3 — Optimize', tag: 'Starts Jun 12', dotSt: mdot(false), line: false, items: [item('Request credit limit increase on Capital One', false), item('Re-upload report — verify collection & utilization changes', false), item('Review updated Clarity Score & next plan', false)] },
+    ];
+
+    const hbar = (pct, color) => `width:${pct}%;height:100%;background:${color};border-radius:99px`;
+    const hlbl = c => `font-weight:700;color:${c}`;
+    const health = [
+      { t: 'Payment history', lbl: 'Needs attention', lblSt: hlbl('#c2731a'), barSt: hbar(58, '#e0a23a'), note: '2 late payments + 1 collection · 35% of score' },
+      { t: 'Utilization', lbl: 'High', lblSt: hlbl('#c23e3e'), barSt: hbar(34, '#d05252'), note: '72% average across cards · 30% of score' },
+      { t: 'Account age', lbl: 'Good', lblSt: hlbl('#0b7d5e'), barSt: hbar(74, '#0e9f77'), note: '6.2 years average · 15% of score' },
+      { t: 'Credit mix', lbl: 'Good', lblSt: hlbl('#0b7d5e'), barSt: hbar(81, '#0e9f77'), note: '4 account types · 10% of score' },
+      { t: 'New inquiries', lbl: 'Good', lblSt: hlbl('#0b7d5e'), barSt: hbar(88, '#0e9f77'), note: '2 in last 12 months · 10% of score' },
+    ];
+
+    const chg = up => `font-size:11.5px;font-weight:700;color:${up ? '#0b7d5e' : '#8fa3ba'}`;
+    const history = [
+      { d: 'Apr 12, 2026', b: 'Experian · current', s: '642', chg: '+14', chgSt: chg(true) },
+      { d: 'Jan 8, 2026', b: 'Experian', s: '628', chg: '+17', chgSt: chg(true) },
+      { d: 'Oct 2, 2025', b: 'Experian · first report', s: '611', chg: '—', chgSt: chg(false) },
+    ];
+
+    const rtabItems = [['summary', 'Summary'], ['accounts', 'Accounts (8)'], ['collections', 'Collections (1)'], ['inquiries', 'Inquiries (2)'], ['errors', 'Errors (3)'], ['recs', 'Recommendations'], ['scripts', 'Scripts']];
+    const rtabs = rtabItems.map(([k, label]) => ({ label, on: () => this.setState({ rtab: k }), st: `padding:11px 16px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2.5px solid ${s.rtab === k ? '#0e9f77' : 'transparent'};color:${s.rtab === k ? '#0f2540' : '#8fa3ba'};margin-bottom:-1px` }));
+
+    const wdot = pos => `width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;${pos ? 'background:#e6f5ef;color:#0b7d5e' : 'background:#fbecec;color:#a33232'}`;
+    const scoreWhy = [
+      { sign: '–', dotSt: wdot(false), t: 'High revolving utilization (72%)', d: 'The single biggest drag. Scores respond within 1-2 statement cycles of balances dropping.' },
+      { sign: '–', dotSt: wdot(false), t: 'Collection account ($684)', d: 'Unresolved collections cap how high your score can climb until addressed.' },
+      { sign: '+', dotSt: wdot(true), t: 'Account age (6.2 yrs avg)', d: 'Your oldest card is from 2017. Keep old accounts open — this factor is working for you.' },
+      { sign: '+', dotSt: wdot(true), t: 'Credit mix & low inquiries', d: 'Cards, auto, student loan, retail — healthy variety with only 2 recent inquiries.' },
+    ];
+
+    const util = (pct, tone) => `font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;margin-top:2px;color:${tone === 'bad' ? '#c23e3e' : tone === 'warn' ? '#c2731a' : tone === 'good' ? '#0b7d5e' : '#0f2540'}`;
+    const rec = tone => `font-size:12.5px;line-height:1.5;font-weight:500;border-radius:10px;padding:10px 12px;${tone === 'bad' ? 'background:#fbecec;color:#a33232' : tone === 'warn' ? 'background:#fdf3e7;color:#9a6314' : 'background:#e6f5ef;color:#0b7d5e'}`;
+    const accounts = [
+      { name: 'Chase Freedom', type: 'Credit card · opened 2019', bal: '$2,860', limit: '$3,500', util: '82%', utilSt: util(82, 'bad'), hist: 'On time', rec: 'Highest utilization — pay this card first', recSt: rec('bad') },
+      { name: 'Capital One Quicksilver', type: 'Credit card · opened 2017', bal: '$4,320', limit: '$6,000', util: '72%', utilSt: util(72, 'bad'), hist: '1 late · Mar 2024', rec: 'Pay to $1,800 (30%) · goodwill letter for the late', recSt: rec('bad') },
+      { name: 'Midland Credit Mgmt', type: 'Collection · Aug 2024', bal: '$684', limit: '—', util: '—', utilSt: util(0, ''), hist: 'Unpaid', rec: 'Request debt validation before paying anything', recSt: rec('bad') },
+      { name: 'Navient', type: 'Student loan · opened 2018', bal: '$8,900', limit: '—', util: '—', utilSt: util(0, ''), hist: '1 late · 2023', rec: 'Enroll in autopay — prevents repeat lates', recSt: rec('warn') },
+      { name: 'Discover it', type: 'Credit card · opened 2021', bal: '$410', limit: '$2,000', util: '21%', utilSt: util(21, 'good'), hist: 'On time', rec: 'Healthy — keep under 30%', recSt: rec('good') },
+      { name: 'Toyota Financial', type: 'Auto loan · opened 2023', bal: '$11,240', limit: '$18,500 orig.', util: '—', utilSt: util(0, ''), hist: 'On time', rec: 'On track — no action needed', recSt: rec('good') },
+      { name: "Macy's Store Card", type: 'Retail card · opened 2020', bal: '$0', limit: '$800', util: '0%', utilSt: util(0, 'good'), hist: 'On time', rec: 'Keep open — helps age and mix', recSt: rec('good') },
+      { name: 'Wells Fargo Platinum', type: 'Credit card · closed 2022', bal: '$0', limit: '—', util: '—', utilSt: util(0, ''), hist: 'On time', rec: 'Closed in good standing — no action', recSt: rec('good') },
+    ];
+
+    const imp = low => `font-size:12.5px;font-weight:700;margin-top:2px;color:${low ? '#0b7d5e' : '#c2731a'}`;
+    const inquiries = [
+      { name: 'Toyota Financial Services', type: 'Auto loan application', date: 'Mar 2023', imp: 'Minimal', impSt: imp(true), note: 'Over 12 months old — no longer affects your score. Falls off Mar 2025→2027 window.' },
+      { name: 'Chase Bank', type: 'Credit card application', date: 'Nov 2025', imp: 'Small (~3-5 pts)', impSt: imp(false), note: 'Recent but normal. Effect fades over the next 8 months. No action needed.' },
+    ];
+
+    const edot = sev => `width:34px;height:34px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;${sev === 'hi' ? 'background:#fbecec;color:#a33232' : 'background:#fdf3e7;color:#9a6314'}`;
+    const esev = sev => `font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px;${sev === 'hi' ? 'background:#fbecec;color:#a33232' : 'background:#fdf3e7;color:#9a6314'}`;
+    const errors = [
+      { ic: '!', dotSt: edot('hi'), sev: 'VERIFY NOW', sevSt: esev('hi'), t: 'Collection balance mismatch', d: 'Midland reports $684, but the original Synchrony charge-off shows $612. A $72 discrepancy is grounds to demand validation — collectors must prove the exact amount owed.' },
+      { ic: '!', dotSt: edot('med'), sev: 'CHECK', sevSt: esev('med'), t: 'Address history includes an unfamiliar entry', d: 'An address in Toledo, OH (2021) appears on your file. If you never lived there, dispute it — stray addresses sometimes indicate mixed files or identity issues.' },
+      { ic: '?', dotSt: edot('med'), sev: 'CHECK', sevSt: esev('med'), t: 'Navient late payment date inconsistency', d: 'The late payment is dated Jun 2023 in one section and Aug 2023 in another. If your records show on-time payments for both months, this is disputable.' },
+    ];
+
+    const recs = [
+      { cat: 'PAYMENT STRATEGY', t: 'Avalanche with a utilization twist', d: 'Normally you\'d attack the highest APR first. In your case, paying Chase (82%) to under 30% first gives the fastest score lift, then Capital One. Keep making minimums everywhere else.' },
+      { cat: 'BUDGET', t: 'Free $210/month by re-routing', d: 'Your minimum payments total roughly $480/mo. Routing an extra $210/mo at Chase clears the utilization goal in about 8 weeks without touching savings.' },
+      { cat: 'CREDIT BUILDING', t: 'Ask, don\'t apply', d: 'Request a limit increase on Capital One (soft pull) instead of opening a new card. A $6,000→$9,000 limit drops your utilization 12 points with zero new-account penalty.' },
+      { cat: 'DEBT PAYOFF', t: 'Handle the collection on paper only', d: 'Never pay a collector by phone on the first call. Validate in writing, negotiate in writing, and only pay once a pay-for-delete or settlement letter is in hand.' },
+    ];
+
+    const scripts = [
+      { label: 'Debt validation letter', title: 'Debt Validation Letter — Midland Credit Management', sub: 'Send by certified mail within 30 days of first contact. Keep a copy.', body: `[Your name]\n[Your address]\n[Date]\n\nMidland Credit Management\nP.O. Box 939069\nSan Diego, CA 92193\n\nRe: Account #[account number] — Request for Validation\n\nTo whom it may concern:\n\nI am requesting validation of the above-referenced debt under my rights per 15 U.S.C. § 1692g (Fair Debt Collection Practices Act).\n\nPlease provide:\n1. The amount and age of the debt, itemized\n2. The name of the original creditor\n3. Documentation showing you are licensed to collect in my state\n4. Proof you own or are authorized to collect this debt\n\nUntil validated, please cease reporting this account to the credit bureaus and cease all collection activity as required by law.\n\nThis is not a refusal to pay, but a request for verification.\n\nSincerely,\n[Your name]` },
+      { label: 'Goodwill letter', title: 'Goodwill Adjustment Letter — Capital One', sub: 'For the March 2024 late payment. Works best with an on-time streak since.', body: `[Your name]\n[Your address]\n[Date]\n\nCapital One — Executive Response Team\nP.O. Box 30285\nSalt Lake City, UT 84130\n\nRe: Account ending [1234] — Goodwill adjustment request\n\nDear Capital One,\n\nI have been a customer since 2017 and value the relationship. In March 2024, I missed one payment due to [brief honest reason — job transition, medical event, banking error].\n\nSince then I have made 13 consecutive on-time payments and enrolled in autopay so it cannot happen again.\n\nI am writing to respectfully ask for a goodwill adjustment removing the March 2024 late payment from my credit reports. It is the only blemish on an otherwise positive history with you.\n\nThank you for considering this request.\n\nSincerely,\n[Your name]` },
+      { label: 'Collection phone script', title: 'Phone Script — Speaking with a Collection Agency', sub: 'Use only after validation. Stay calm, admit nothing, get everything in writing.', body: `BEFORE CALLING\n• Have your validation response in front of you\n• Know your maximum number: $410 (60% of $684)\n• Never give bank account access — pay by mailed check or card\n\nOPENING\n"Hi, I'm calling about account [number]. I received your validation response and I'd like to discuss resolving this account."\n\nIF THEY DEMAND FULL PAYMENT\n"I'm not in a position to pay $684. I can resolve this today for $340 if you agree to delete the tradeline from all three bureaus."\n\nNEGOTIATION LADDER\nStart: $340 (50%) → Cap: $410 (60%)\nIf they refuse deletion: "Then I'll need that offer in writing before I pay anything."\n\nNEVER SAY\n• "I know this is my debt" (admits ownership)\n• "I can pay next week" (creates commitment)\n• Your employer, bank name, or income\n\nCLOSING\n"Please send the agreement in writing to my address on file. I will pay within 10 days of receiving it."` },
+      { label: 'Pay-for-delete email', title: 'Pay-for-Delete Offer — Email Template', sub: 'A written settlement offer conditioned on removal from your reports.', body: `Subject: Settlement offer — Account #[account number]\n\nTo whom it may concern:\n\nThis letter is an offer to settle account #[account number], listed with a balance of $684.\n\nI offer $340 as payment in full, contingent on the following terms:\n\n1. Upon receipt of payment, [Agency] will request deletion of this tradeline from Experian, Equifax, and TransUnion.\n2. [Agency] will consider the account settled in full and will not sell or transfer any remaining balance.\n3. [Agency] will send written confirmation of these terms before payment is made.\n\nThis offer is not an acknowledgment of the debt's validity. If these terms are acceptable, please respond in writing within 15 days.\n\nSincerely,\n[Your name]` },
+    ];
+    const scriptTabs = scripts.map((sc, i) => ({ label: sc.label, on: () => this.setState({ stab: i }), st: `border:1.5px solid ${s.stab === i ? '#0b1f3a' : '#dbe3ec'};background:${s.stab === i ? '#0b1f3a' : '#fff'};color:${s.stab === i ? '#fff' : '#3d5068'};border-radius:99px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer` }));
+
+    const bub = ai => ai ? { wrapSt: 'display:flex', bubSt: 'background:#f4f6f9;border-radius:14px 14px 14px 4px;padding:12px 14px;font-size:13.5px;line-height:1.6;color:#22354d;max-width:85%' } : { wrapSt: 'display:flex;justify-content:flex-end', bubSt: 'background:#0b1f3a;color:#fff;border-radius:14px 14px 4px 14px;padding:12px 14px;font-size:13.5px;line-height:1.6;max-width:85%' };
+    const chat = [
+      { ...bub(true), text: "Hi Jordan — I've read your April report. Your biggest lever right now is card utilization. Want me to walk through it?" },
+      { ...bub(false), text: 'What should I pay first?' },
+      { ...bub(true), text: 'Chase Freedom first. It\'s at 82% utilization ($2,860 of $3,500) — the highest on your file. Paying it to under $1,050 (30%) should help more than any other single move. Capital One is next.' },
+      { ...bub(false), text: 'How do I talk to the collection agency?' },
+      { ...bub(true), text: 'Don\'t call them yet. Send the debt validation letter first — it\'s in your Scripts tab, addressed and ready. If they validate, I\'ll prep you with the negotiation script. Never agree to anything on a first call.' },
+    ];
+
+    const kchg = up => `font-size:12px;font-weight:600;margin-top:4px;color:${up ? '#5bd6a9' : '#e0a23a'}`;
+    const adminKpis = [
+      { t: 'Total users', v: '12,480', chg: '▲ 8.2% vs June', chgSt: kchg(true) },
+      { t: 'Reports processed', v: '18,924', chg: '▲ 11.4% vs June', chgSt: kchg(true) },
+      { t: 'Revenue — MTD', v: '$23,410', chg: '▲ 9.1% vs June', chgSt: kchg(true) },
+      { t: 'Upload → paid conversion', v: '38%', chg: '▼ 2 pts — checkout test', chgSt: kchg(false) },
+    ];
+    const revVals = [2.1, 2.4, 2.2, 2.8, 3.1, 2.9, 3.4, 3.8];
+    const revBars = revVals.map((val, i) => ({ w: 'W' + (i + 1), st: `width:100%;height:${Math.round(val / 3.8 * 100)}%;border-radius:6px 6px 2px 2px;background:${i === 7 ? 'linear-gradient(180deg,#2ee6a8,#0e9f77)' : '#1f3c54'}` }));
+    const pst = ok => `font-size:11.5px;font-weight:700;border-radius:99px;padding:4px 10px;width:fit-content;${ok ? 'background:rgba(46,230,168,.12);color:#5bd6a9' : 'background:rgba(224,162,58,.12);color:#e0a23a'}`;
+    const payments = [
+      { c: 'm.torres@gmail.com', pr: 'Full Analysis', a: '$5.00', s: 'Succeeded', st: pst(true), t: '2 min ago' },
+      { c: 'dwhite84@yahoo.com', pr: 'Full Analysis', a: '$5.00', s: 'Succeeded', st: pst(true), t: '11 min ago' },
+      { c: 'k.nguyen@outlook.com', pr: 'Full Analysis', a: '$5.00', s: 'Requires action', st: pst(false), t: '18 min ago' },
+      { c: 'sarah.j.mills@gmail.com', pr: 'Full Analysis', a: '$5.00', s: 'Succeeded', st: pst(true), t: '24 min ago' },
+      { c: 'rob.delgado@icloud.com', pr: 'Full Analysis', a: '$5.00', s: 'Succeeded', st: pst(true), t: '31 min ago' },
+    ];
+
+    const orgModules = [
+      { t: 'Understanding your credit report', pct: 84, st: hbar(84, '#0e9f77') },
+      { t: 'Utilization & payment strategy', pct: 67, st: hbar(67, '#0e9f77') },
+      { t: 'Dealing with collections', pct: 52, st: hbar(52, '#12a5c9') },
+      { t: 'Building long-term credit health', pct: 31, st: hbar(31, '#155a8a') },
+    ];
+
+    const demoItems = [['home', 'Homepage'], ['how', 'How it works'], ['pricing', 'Pricing'], ['security', 'Security'], ['login', 'Login'], ['upload', 'Upload'], ['preview', 'Free preview'], ['checkout', 'Checkout ($5)'], ['signup', 'Create account'], ['questionnaire', 'Questionnaire'], ['processing', 'Clarity AI processing'], ['dashboard', 'Dashboard'], ['report', 'Report analysis'], ['admin', 'Admin dashboard'], ['org', 'Org dashboard']];
+    const demoLinks = demoItems.map(([k, label]) => ({ label, on: this.nav(k), st: `border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;${v === k ? 'background:rgba(46,230,168,.15);color:#5bd6a9' : 'color:#b9c8da'}` }));
+
+    return {
+      vHome: v === 'home', vHow: v === 'how', vPricing: v === 'pricing', vSecurity: v === 'security', vLogin: v === 'login', vUpload: v === 'upload', vPreview: v === 'preview', vCheckout: v === 'checkout', vSignup: v === 'signup', vQuiz: v === 'questionnaire', vProcessing: v === 'processing', vDashboard: v === 'dashboard', vReport: v === 'report', vAdmin: v === 'admin', vOrg: v === 'org',
+      inApp: v === 'dashboard' || v === 'report',
+      showMktNav: mkt && v !== 'org' || v === 'org',
+      goHome: this.nav('home'), goHow: this.nav('how'), goPricing: this.nav('pricing'), goSecurity: this.nav('security'), goLogin: this.nav('login'), goUpload: this.nav('upload'), goCheckout: this.nav('checkout'), goQuiz: this.nav('questionnaire'), goDashboard: this.nav('dashboard'), goReport: this.nav('report'), goAdmin: this.nav('admin'), goOrg: this.nav('org'),
+      startUpload: this.startUpload, failUpload: () => this.setState({ upPhase: 'error' }), resetUpload: () => this.setState({ upPhase: 'empty', upPct: 0 }),
+      upEmpty: v === 'upload' && s.upPhase === 'empty', upUploading: v === 'upload' && s.upPhase === 'uploading', upProcessing: v === 'upload' && s.upPhase === 'processing', upError: v === 'upload' && s.upPhase === 'error',
+      upPct: Math.round(s.upPct), upBarStyle: `width:${s.upPct}%;height:100%;background:linear-gradient(90deg,#0e9f77,#2ee6a8);border-radius:99px;transition:width .15s`,
+      pay: this.pay, payLabel: s.paying ? 'Processing…' : 'Pay $5.00', payBtnStyle: `background:${s.paying ? '#5a6b80' : '#0b1f3a'};color:#fff;border:0;border-radius:11px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px`,
+      q1opts: ['Build my credit', 'Recover from credit mistakes', 'Pay down debt', 'Prepare for a major purchase', 'Understand my finances'].map(o => opt('q1', o)),
+      q2opts: ['30 days', '90 days', '6 months', 'Long term'].map(o => opt('q2', o)),
+      q3opts: ['Debt', 'Missed payments', 'Collections', 'Low score', 'Lack of understanding'].map(o => opt('q3', o)),
+      quizIncomplete: !quizDone, submitQuiz: () => { if (quizDone) this.nav('processing')(); },
+      quizBtnStyle: `border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:600;margin-top:4px;${quizDone ? 'background:#0e9f77;color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(14,159,119,.3)' : 'background:#e4e9f0;color:#8fa3ba;cursor:not-allowed'}`,
+      aiSteps, sideNav, opps, plan, health, history, rtabs,
+      rtSummary: s.rtab === 'summary', rtAccounts: s.rtab === 'accounts', rtCollections: s.rtab === 'collections', rtInquiries: s.rtab === 'inquiries', rtErrors: s.rtab === 'errors', rtRecs: s.rtab === 'recs', rtScripts: s.rtab === 'scripts',
+      goScriptsTab: () => { this.setState({ rtab: 'scripts' }); window.scrollTo(0, 0); },
+      scoreWhy, accounts, inquiries, errors, recs, scriptTabs,
+      scriptTitle: scripts[s.stab].title, scriptSub: scripts[s.stab].sub, scriptBody: scripts[s.stab].body,
+      chatOpen: s.chatOpen && (v === 'dashboard' || v === 'report'), toggleChat: () => this.setState(st => ({ chatOpen: !st.chatOpen })), chat,
+      adminKpis, revBars, payments, orgModules,
+      showDemoNav: this.props.showDemoNav ?? true, demoOpen: s.demoOpen, toggleDemo: () => this.setState(st => ({ demoOpen: !st.demoOpen })), demoLinks,
+      homeSteps: [
+        { num: '01', t: 'Upload your report', d: 'Drag in a PDF from Experian, Equifax, or TransUnion. No account needed.' },
+        { num: '02', t: 'Get your free snapshot', d: 'Score, accounts, and the major factors affecting you — free, instantly.' },
+        { num: '03', t: 'Unlock the full analysis', d: '$5 one-time. Clarity AI explains every account and builds your plan.' },
+        { num: '04', t: 'Follow your roadmap', d: 'A 90-day plan with scripts, letters, and a coach that knows your report.' },
+      ],
+      benefits: [
+        { ic: 'Aa', t: 'Plain-English explanations', d: 'Every account, inquiry, and status decoded — no jargon, no guessing what "charge-off" means.' },
+        { ic: '↗', t: 'Prioritized by impact', d: 'Not 40 generic tips. The 3-5 moves that matter most for your specific report, ranked.' },
+        { ic: '✉', t: 'Words that work', d: 'Validation letters, goodwill requests, and negotiation scripts — written for your accounts, ready to send.' },
+      ],
+      quotes: [
+        { q: 'I\'d stared at my report for years without understanding it. This explained my collection account in one paragraph and gave me the exact letter to send.', n: 'Maria T.', r: 'Houston, TX', in: 'MT' },
+        { q: 'The 90-day plan told me which card to pay first and why. My score went from 615 to 671 in four months.', n: 'Devon W.', r: 'Atlanta, GA', in: 'DW' },
+        { q: 'We use it in our church financial wellness group. It\'s the first tool members actually finish.', n: 'Pastor J. Okafor', r: 'Riverside Community Church', in: 'JO' },
+      ],
+      faqs: [
+        { q: 'Is this credit repair?', a: 'No. We don\'t dispute accurate information, promise score increases, or contact bureaus for you. Credit Clarity explains your report and gives you the knowledge and tools to act yourself.' },
+        { q: 'Do you pull my credit?', a: 'Never. You upload a report you already have — there\'s no inquiry, and we don\'t need your SSN. Free reports are available weekly at annualcreditreport.com.' },
+        { q: 'What happens to my report after analysis?', a: 'It\'s encrypted at rest, visible only to you, and you can permanently delete it (and your account) with one click at any time.' },
+        { q: 'What exactly does $5 get me?', a: 'A full AI analysis of every account, a personalized 90-day action plan, dispute and negotiation scripts, a downloadable PDF report, and access to Clarity AI chat.' },
+        { q: 'Will my score definitely go up?', a: 'No one can promise that — and you should be suspicious of anyone who does. We show you the factors, the actions most likely to help, and track your progress across reports.' },
+      ],
+      howSteps: [
+        { num: '1', t: 'Upload', d: 'Drop in your PDF credit report from any of the three bureaus. Your file is encrypted in transit and at rest, and you can delete it at any time.', tag: 'Takes 30 seconds', line: true },
+        { num: '2', t: 'Analyze', d: 'Clarity AI reads every account, balance, status, inquiry, and remark — then cross-checks for inconsistencies and possible reporting errors.', tag: 'Under a minute', line: true },
+        { num: '3', t: 'Understand', d: 'You get a plain-English explanation of your score, what\'s helping, what\'s hurting, and how much each factor matters — with your free snapshot up front.', tag: 'Free preview included', line: true },
+        { num: '4', t: 'Improve', d: 'A personalized 90-day roadmap, ready-to-send letters and scripts, and Clarity AI chat that knows your report. Re-upload in 90 days to track progress.', tag: '$5 one-time', line: false },
+      ],
+      securityItems: [
+        { ic: 'AES', t: 'Encrypted everywhere', d: 'TLS 1.3 in transit, AES-256 at rest. Your report is never stored unencrypted, and never used to train AI models.' },
+        { ic: '⌫', t: 'Delete anytime', d: 'One click permanently removes your reports, analysis, and account. No retention period, no "soft delete."' },
+        { ic: '∅', t: 'No credit pull, no SSN', d: 'We never touch your credit file. You upload a report you already have — we don\'t ask for your Social Security number.' },
+        { ic: 'RLS', t: 'Isolated by design', d: 'Row-level security means your data is technically inaccessible to other users — enforced at the database layer, not just the app.' },
+        { ic: '$', t: 'Payments by Stripe', d: 'Card details go directly to Stripe and never touch our servers. We see only that a payment succeeded.' },
+        { ic: '✓', t: 'You stay in control', d: 'No data sold, no marketing lists, no third-party sharing. Your report exists for one purpose: your analysis.' },
+      ],
+      lockedCards: [
+        { t: 'Full Account Analysis', d: 'Every account explained with a specific recommendation.' },
+        { t: 'Personalized Improvement Plan', d: 'Your 90-day roadmap, sequenced by impact.' },
+        { t: 'Debt Strategy', d: 'What to pay first, and exactly why.' },
+        { t: 'Dispute Guidance', d: '3 possible errors found on your report.' },
+        { t: 'Communication Scripts', d: 'Letters and scripts written for your accounts.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
