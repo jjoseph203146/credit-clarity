@@ -20,8 +20,7 @@ import type {
 
 const MONO = "font-[family-name:var(--font-jetbrains-mono)]";
 
-function scoreTier(score: number | null): { label: string; className: string } {
-  if (score == null) return { label: "Not yet found", className: "text-muted" };
+function scoreTier(score: number): { label: string; className: string } {
   if (score >= 800) return { label: "Excellent range", className: "text-teal-deep" };
   if (score >= 740) return { label: "Very good range", className: "text-teal-deep" };
   if (score >= 670) return { label: "Good range", className: "text-[#2c7a4b]" };
@@ -132,7 +131,6 @@ function PreviewPageInner() {
   const { report, accounts, collections } = data;
 
   const score = report.credit_score;
-  const tier = scoreTier(score);
   const bureauName = bureauLabel(report.bureau);
 
   const openAccounts = accounts.filter((a) => a.status === "open").length;
@@ -141,6 +139,17 @@ function PreviewPageInner() {
     (a) => a.type === "credit_card" || a.type === "retail_card",
   ).length;
   const recommendationsCount = accounts.length + collections.length;
+
+  const oldestAccount = [...accounts]
+    .filter((a) => a.opened_date)
+    .sort((a, b) => new Date(a.opened_date!).getTime() - new Date(b.opened_date!).getTime())[0];
+  const creditHistoryYears = oldestAccount
+    ? Math.max(
+        0,
+        (Date.now() - new Date(oldestAccount.opened_date!).getTime()) /
+          (365.25 * 24 * 3600 * 1000),
+      )
+    : null;
 
   const lateAccounts = accounts.filter(
     (a) => a.payment_history && /late/i.test(a.payment_history),
@@ -156,27 +165,25 @@ function PreviewPageInner() {
   };
 
   const factors = deriveScoreFactors(accounts, collections);
+  const toneDot: Record<string, string> = { good: "🟢", warn: "🟡", bad: "🔴", neutral: "⚪" };
 
   const lockedCards = [
     {
-      t: "Full Account Analysis",
-      d: "Every account explained with a specific recommendation.",
+      t: "See which accounts deserve your attention first",
+      d: "Every account ranked by impact with personalized recommendations.",
     },
     {
-      t: "Personalized Improvement Plan",
-      d: "Your 90-day roadmap, sequenced by impact.",
+      t: "Your 90-Day Credit Roadmap",
+      d: "Exactly what to do first, second, and third.",
     },
-    { t: "Debt Strategy", d: "What to pay first, and exactly why." },
+    { t: "Debt Payoff Strategy", d: "Which balances to prioritize and why." },
     {
-      t: "Dispute Guidance",
-      d:
-        collectionCount > 0
-          ? `${collectionCount} item${collectionCount > 1 ? "s" : ""} worth reviewing for accuracy.`
-          : "We'll flag anything worth reviewing for accuracy.",
+      t: "Items Worth Reviewing",
+      d: "We'll identify accounts and details that may deserve closer review for accuracy.",
     },
     {
-      t: "Communication Scripts",
-      d: "Letters and scripts written for your accounts.",
+      t: "Communication Toolkit",
+      d: "Letters and scripts tailored to your report.",
     },
   ];
 
@@ -228,8 +235,10 @@ function PreviewPageInner() {
             {score != null ? (
               <>
                 <div className={`mt-1.5 text-[40px] font-semibold ${MONO}`}>{score}</div>
-                <div className={`mt-0.5 text-[12.5px] font-semibold ${tier.className}`}>
-                  {tier.label}
+                <div
+                  className={`mt-0.5 text-[12.5px] font-semibold ${scoreTier(score).className}`}
+                >
+                  {scoreTier(score).label}
                 </div>
               </>
             ) : (
@@ -293,48 +302,43 @@ function PreviewPageInner() {
         </div>
 
         <div className="mb-4 rounded-2xl border border-border bg-white p-[22px] px-6">
-          <div className="mb-3 text-[15px] font-bold">
-            Top factors affecting your credit profile
-          </div>
+          <div className="mb-3 text-[15px] font-bold">Biggest opportunities we found</div>
           <div className="flex flex-col gap-2">
             {factors.length > 0 ? (
               factors.map((f) => (
                 <div key={f.title} className="flex items-start gap-2.5 text-[13.5px]">
-                  <span className="mt-[1px]">{f.positive ? "🟢" : "🔴"}</span>
-                  <span>
-                    <span className="font-semibold">{f.title}</span>
-                    {f.detail ? <span className="text-muted"> — {f.detail}</span> : null}
-                  </span>
+                  <span className="mt-[1px]">{toneDot[f.tone]}</span>
+                  <span>{f.narrative}</span>
                 </div>
               ))
             ) : (
               <span className="text-[13.5px] text-muted">
-                We didn&apos;t find enough detail in your report to list factors yet.
+                We didn&apos;t find enough detail in your report to list opportunities yet.
               </span>
             )}
           </div>
         </div>
 
         <div className="mb-9 rounded-2xl border border-border bg-white p-[22px] px-6">
-          <div className="mb-3 text-[15px] font-bold">What Clarity AI discovered</div>
+          <div className="mb-3 text-[15px] font-bold">Clarity AI initial findings</div>
           <div className="flex flex-col gap-2 text-[13.5px]">
-            <div>✓ {accounts.length} account{accounts.length === 1 ? "" : "s"} reviewed</div>
+            <div>✓ We reviewed {accounts.length} account{accounts.length === 1 ? "" : "s"}</div>
             {collectionCount > 0 && (
               <div>
-                ✓ {collectionCount} collection account{collectionCount > 1 ? "s" : ""} identified
+                ✓ We identified {collectionCount} collection account
+                {collectionCount > 1 ? "s" : ""}
               </div>
+            )}
+            {creditHistoryYears != null && (
+              <div>✓ Your credit history spans {creditHistoryYears.toFixed(1)} years</div>
             )}
             {revolvingCount > 0 && (
               <div>
-                ✓ {revolvingCount} revolving credit account{revolvingCount > 1 ? "s" : ""}
+                ✓ We found {revolvingCount} revolving credit account
+                {revolvingCount > 1 ? "s" : ""} on file
               </div>
             )}
-            {collectionCount > 0 && (
-              <div>
-                ✓ {collectionCount} item{collectionCount > 1 ? "s" : ""} worth reviewing for
-                accuracy
-              </div>
-            )}
+            <div>✓ We found multiple opportunities to strengthen your credit profile</div>
             <div className="mt-1 font-semibold text-navy">
               🔒 {recommendationsCount} personalized recommendation
               {recommendationsCount === 1 ? "" : "s"} ready
@@ -344,19 +348,23 @@ function PreviewPageInner() {
 
         {collectionCount > 0 || accounts.length > 0 ? (
           <div className="mb-9 rounded-2xl border border-border bg-white p-[22px] px-6">
-            <div className="mb-2 text-[13px] font-bold text-muted">Your Highest Priority</div>
+            <div className="mb-2 text-[13px] font-bold text-muted">
+              Clarity AI recommendation preview
+            </div>
             <div className="flex items-start gap-2">
               <span className="text-sm">🔒</span>
               <div>
-                <div className="text-[15px] font-bold">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-teal-deep">
+                  Priority #1
+                </div>
+                <div className="mt-0.5 text-[15px] font-bold">
                   {collectionCount > 0
                     ? "Address your highest-impact collection account"
                     : "Reduce revolving credit utilization"}
                 </div>
                 <div className="mt-1 text-[13.5px] leading-relaxed text-muted">
-                  We&apos;ve identified one action that may have a meaningful impact on your
-                  credit profile. Unlock to see the recommended accounts, suggested order, and
-                  reasoning.
+                  We&apos;ve already identified the account that could have the biggest impact on
+                  your credit profile. Unlock to see which account and why.
                 </div>
               </div>
             </div>
@@ -390,12 +398,18 @@ function PreviewPageInner() {
               One-time payment · Secure Stripe checkout · Instant access
             </div>
           </div>
-          <Link
-            href={`/checkout?reportId=${report.id}`}
-            className="flex-none rounded-xl bg-teal px-[26px] py-[15px] text-base font-semibold text-white shadow-[0_8px_24px_rgba(14,159,119,.4)] transition-colors hover:bg-[#0b8663]"
-          >
-            Unlock My Complete Credit Roadmap — $5
-          </Link>
+          <div className="flex flex-none flex-col items-center gap-2">
+            <Link
+              href={`/checkout?reportId=${report.id}`}
+              className="rounded-xl bg-teal px-[26px] py-[15px] text-base font-semibold text-white shadow-[0_8px_24px_rgba(14,159,119,.4)] transition-colors hover:bg-[#0b8663]"
+            >
+              Unlock My Complete Credit Roadmap — $5
+            </Link>
+            <div className="max-w-[280px] text-center text-[11.5px] leading-snug text-[#8fa3ba]">
+              Secure one-time payment through Stripe. No subscription required. Your report
+              remains private and can be deleted at any time.
+            </div>
+          </div>
         </div>
       </div>
     </div>

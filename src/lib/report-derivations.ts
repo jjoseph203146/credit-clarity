@@ -179,8 +179,22 @@ export function inquiryPill(impact: ReportInquiry["impact"]): { label: string; t
 export function deriveScoreFactors(
   accounts: ReportAccount[],
   collections: ReportCollection[],
-): { sign: "+" | "–"; positive: boolean; title: string; detail: string }[] {
-  const factors: { sign: "+" | "–"; positive: boolean; title: string; detail: string }[] = [];
+): {
+  sign: "+" | "–";
+  positive: boolean;
+  tone: Tone;
+  title: string;
+  detail: string;
+  narrative: string;
+}[] {
+  const factors: {
+    sign: "+" | "–";
+    positive: boolean;
+    tone: Tone;
+    title: string;
+    detail: string;
+    narrative: string;
+  }[] = [];
 
   const util = overallUtilization(accounts);
   if (util != null && util > 30) {
@@ -190,20 +204,25 @@ export function deriveScoreFactors(
     factors.push({
       sign: "–",
       positive: false,
+      tone: "bad",
       title: `High utilization (${util}%)`,
       detail: worst
         ? `${worst.name} carries the largest share. Responds within 1-2 statement cycles of paying down.`
         : "Responds within 1-2 statement cycles of paying down.",
+      narrative: "Your credit utilization is elevated and may be limiting your score.",
     });
   }
 
   if (collections.length > 0) {
     const total = collections.reduce((s, c) => s + (c.amount ?? 0), 0);
+    const count = collections.length;
     factors.push({
       sign: "–",
       positive: false,
-      title: `${collections.length} collection${collections.length > 1 ? "s" : ""} (${formatMoney(total)})`,
+      tone: "bad",
+      title: `${count} collection${count > 1 ? "s" : ""} (${formatMoney(total)})`,
       detail: "Caps your ceiling until validated or resolved.",
+      narrative: `${count === 1 ? "One collection account requires" : `${count} collection accounts require`} attention.`,
     });
   }
 
@@ -218,8 +237,10 @@ export function deriveScoreFactors(
     factors.push({
       sign: "+",
       positive: true,
+      tone: "good",
       title: `Account age (${years.toFixed(1)} yrs)`,
       detail: `Oldest account: ${oldest.name} — keep it open.`,
+      narrative: "Your long credit history is a strength.",
     });
   }
 
@@ -228,8 +249,10 @@ export function deriveScoreFactors(
     factors.push({
       sign: "+",
       positive: true,
+      tone: "warn",
       title: "Mix & inquiries",
       detail: `${types.size} account type${types.size > 1 ? "s" : ""} on file.`,
+      narrative: "Credit mix and recent inquiries may be limiting future borrowing.",
     });
   }
 
