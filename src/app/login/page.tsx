@@ -6,7 +6,7 @@ import { login } from "./actions";
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; message?: string };
 }) {
   return (
     <div>
@@ -27,6 +27,11 @@ export default function LoginPage({
               {searchParams.error}
             </div>
           )}
+          {searchParams.message && (
+            <div className="mb-4 rounded-lg bg-[#e6f5ef] px-3 py-2 text-[13px] font-medium text-teal-deep">
+              {searchParams.message}
+            </div>
+          )}
           <form action={login} className="flex flex-col gap-3">
             <div>
               <div className="mb-[5px] text-[12.5px] font-semibold text-[#3d5068]">
@@ -40,9 +45,12 @@ export default function LoginPage({
               </div>
               <Input name="password" type="password" placeholder="••••••••" required />
             </div>
-            <div className="text-right text-[12.5px] font-semibold text-teal">
+            <Link
+              href="/forgot-password"
+              className="text-right text-[12.5px] font-semibold text-teal"
+            >
               Forgot password?
-            </div>
+            </Link>
             <button
               type="submit"
               className="rounded-[11px] bg-navy py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#123152]"
