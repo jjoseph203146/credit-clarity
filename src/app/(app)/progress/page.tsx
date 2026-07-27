@@ -56,10 +56,36 @@ export default async function ProgressPage() {
       </p>
 
       {history.length === 0 ? (
-        <div className="rounded-[18px] border border-dashed border-[#c7d2df] bg-white px-8 py-14 text-center">
-          <div className="mb-1 text-base font-semibold">No analyzed reports yet</div>
-          <div className="text-[13.5px] text-[var(--muted)]">
-            Upload and analyze a report to start tracking your score over time.
+        <div className="relative overflow-hidden rounded-[18px] border border-dashed border-[#c7d2df] bg-white px-8 py-14 text-center">
+          <svg
+            viewBox="0 0 400 140"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[140px] w-full opacity-[0.06]"
+            preserveAspectRatio="none"
+          >
+            <polyline
+              points="10,120 60,95 110,105 160,70 210,80 260,45 310,55 390,20"
+              fill="none"
+              stroke="var(--teal)"
+              strokeWidth="4"
+            />
+          </svg>
+          <div className="relative">
+            <div className="mb-1 text-base font-semibold">Your progress timeline will appear here</div>
+            <div className="mx-auto mb-5 max-w-[440px] text-[13.5px] text-[var(--muted)]">
+              Complete your first analysis to unlock progress tracking.
+            </div>
+            <div className="mx-auto max-w-[380px] rounded-2xl border border-[var(--border)] bg-[#f8fafc] p-5 text-left text-[13px]">
+              <div className="mb-2 font-semibold text-[var(--ink)]">
+                After each new report, Credit Clarity automatically tracks:
+              </div>
+              <div className="flex flex-col gap-1.5 text-[var(--muted)]">
+                <span>✓ Credit score changes</span>
+                <span>✓ Clarity Score improvements</span>
+                <span>✓ Accounts you&apos;ve improved</span>
+                <span>✓ Completed action plan tasks</span>
+                <span>✓ Progress toward your financial goal</span>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
@@ -101,7 +127,7 @@ export default async function ProgressPage() {
 
           {!hasEnoughHistory && (
             <div className="mb-3.5 rounded-2xl border border-dashed border-[#c7d2df] bg-white p-5 text-[13px] text-[var(--muted)]">
-              Upload a second report to start seeing trends and comparisons here.
+              Upload another report in approximately 90 days to compare your progress.
             </div>
           )}
 

@@ -1,15 +1,17 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/supabase/types";
+import type { Database, ReportAccount } from "@/lib/supabase/types";
 import { LearnCenter, type Lesson, type GlossaryTerm } from "@/components/app/learn-center";
+import { overallUtilization } from "@/lib/report-derivations";
 
 // Lesson content mirrors the design prototype — no DB table backs lesson
-// content itself, only per-user completion (`learning_progress`).
-const lessons: Lesson[] = [
-  { slug: "understanding-utilization", title: "Understanding Utilization", description: "Why 30% matters, per-card vs. overall, and statement timing tricks.", tag: "BASICS", minutes: 4, relevant: true },
-  { slug: "collections-explained", title: "Collections, Explained", description: "What happens when debt is sold, your FDCPA rights, and validation.", tag: "DEBT", minutes: 6, relevant: true },
-  { slug: "late-payments-and-goodwill", title: "Late Payments & Goodwill", description: "How lates age off, and when a goodwill letter actually works.", tag: "REPAIR", minutes: 5, relevant: true },
+// content itself, only per-user completion (`learning_progress`). `relevant`
+// is computed per-user below from their actual report, not hardcoded here.
+const LESSONS: Omit<Lesson, "relevant" | "relevantReason">[] = [
+  { slug: "understanding-utilization", title: "Understanding Utilization", description: "Why 30% matters, per-card vs. overall, and statement timing tricks.", tag: "BASICS", minutes: 4 },
+  { slug: "collections-explained", title: "Collections, Explained", description: "What happens when debt is sold, your FDCPA rights, and validation.", tag: "DEBT", minutes: 6 },
+  { slug: "late-payments-and-goodwill", title: "Late Payments & Goodwill", description: "How lates age off, and when a goodwill letter actually works.", tag: "REPAIR", minutes: 5 },
   { slug: "charge-offs", title: "Charge-Offs", description: 'What "charged off" really means and why the debt still exists.', tag: "DEBT", minutes: 5 },
   { slug: "credit-mix", title: "Credit Mix", description: "Revolving vs. installment, and why variety helps (a little).", tag: "BASICS", minutes: 3 },
   { slug: "snowball-vs-avalanche", title: "Snowball vs. Avalanche", description: "Two payoff methods, and how to pick for your psychology.", tag: "STRATEGY", minutes: 6 },
@@ -39,12 +41,68 @@ export default async function LearnPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: progress } = await supabase
-    .from("learning_progress")
-    .select("lesson_slug")
-    .eq("user_id", user.id);
+  const [{ data: progress }, { data: latestReport }] = await Promise.all([
+    supabase.from("learning_progress").select("lesson_slug").eq("user_id", user.id),
+    supabase
+      .from("reports")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   const completedSlugs = (progress ?? []).map((p) => p.lesson_slug);
+
+  let accounts: ReportAccount[] = [];
+  let collectionCount = 0;
+  if (latestReport) {
+    const [{ data: acc }, { data: col }] = await Promise.all([
+      supabase
+        .from("report_accounts")
+        .select("*")
+        .eq("report_id", latestReport.id)
+        .returns<ReportAccount[]>(),
+      supabase.from("report_collections").select("id").eq("report_id", latestReport.id),
+    ]);
+    accounts = acc ?? [];
+    collectionCount = col?.length ?? 0;
+  }
+
+  // Relevance is derived from the user's actual report, not a hardcoded
+  // flag — a lesson only claims to be "relevant to your report" when
+  // something in the real data justifies it.
+  const util = overallUtilization(accounts);
+  const worstUtilAccount = [...accounts]
+    .filter((a) => a.utilization != null)
+    .sort((a, b) => (b.utilization ?? 0) - (a.utilization ?? 0))[0];
+  const hasLatePayment = accounts.some((a) => a.payment_history && /late/i.test(a.payment_history));
+  const hasThinFile = accounts.length > 0 && accounts.length <= 3;
+
+  const relevance: Record<string, string> = {};
+  if (util != null && util > 30) {
+    relevance["understanding-utilization"] = worstUtilAccount
+      ? `${worstUtilAccount.name} is using ${worstUtilAccount.utilization}% of its limit.`
+      : `Your overall utilization is ${util}%.`;
+  }
+  if (collectionCount > 0) {
+    relevance["collections-explained"] =
+      collectionCount === 1
+        ? "1 collection account found on your report."
+        : `${collectionCount} collection accounts found on your report.`;
+  }
+  if (hasLatePayment) {
+    relevance["late-payments-and-goodwill"] = "We found a late payment on one of your accounts.";
+  }
+  if (hasThinFile) {
+    relevance["building-from-thin-credit"] = `Only ${accounts.length} account${accounts.length === 1 ? "" : "s"} found on your report.`;
+  }
+
+  const lessons: Lesson[] = LESSONS.map((l) => ({
+    ...l,
+    relevant: l.slug in relevance,
+    relevantReason: relevance[l.slug],
+  }));
 
   return (
     <LearnCenter lessons={lessons} glossary={glossary} initialCompletedSlugs={completedSlugs} />

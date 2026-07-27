@@ -78,14 +78,24 @@ export function NotificationList({ notifications: initial }: NotificationListPro
         )}
       </div>
 
-      {notifications.length === 0 || allRead ? (
+      {notifications.length === 0 ? (
         <div className="rounded-[18px] border border-dashed border-[#c7d2df] bg-white px-8 py-14 text-center">
           <div className="mx-auto mb-3.5 flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-[#e6f5ef] text-xl font-bold text-[#0b7d5e]">
             ✓
           </div>
-          <div className="mb-1 text-base font-semibold">All caught up</div>
-          <div className="text-[13.5px] text-[var(--muted)]">
-            We&apos;ll nudge you when a letter deadline, task, or re-upload window comes due.
+          <div className="mb-1 text-base font-semibold">You&apos;re all caught up</div>
+          <div className="mx-auto mb-4 max-w-[380px] text-[13.5px] text-[var(--muted)]">
+            We&apos;ll notify you about things that matter to your financial journey — not generic
+            tips.
+          </div>
+          <div className="mx-auto max-w-[300px] rounded-2xl border border-[var(--border)] bg-[#f8fafc] p-4 text-left text-[13px] text-[var(--muted)]">
+            <div className="mb-2 font-semibold text-[var(--ink)]">We&apos;ll notify you about:</div>
+            <div className="flex flex-col gap-1.5">
+              <span>✓ Action plan tasks</span>
+              <span>✓ Communication deadlines</span>
+              <span>✓ Re-upload windows</span>
+              <span>✓ Report analysis updates</span>
+            </div>
           </div>
         </div>
       ) : (

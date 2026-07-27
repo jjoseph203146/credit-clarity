@@ -63,6 +63,21 @@ export async function signup(formData: FormData) {
       );
     } else {
       claimedReportId = claimedReport.id;
+
+      // `payments.user_id` is null at insert time (checkout happens before
+      // an account exists) and nothing else ever backfills it — without
+      // this, the settings page's payment history would show "no payments"
+      // forever even for a user who just paid. Best-effort: a failure here
+      // shouldn't block signup, just log it.
+      const { error: paymentClaimError } = await admin
+        .from("payments")
+        .update({ user_id: data.user.id })
+        .eq("report_id", claimedReportId);
+      if (paymentClaimError) {
+        console.warn(
+          `[signup] failed to backfill payments.user_id for report ${claimedReportId}: ${paymentClaimError.message}`,
+        );
+      }
     }
   }
 

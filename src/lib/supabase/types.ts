@@ -151,10 +151,20 @@ export type ActionPlan = {
   updated_at: string;
 };
 
+export type AiConversationSource = {
+  type: "account" | "collection";
+  id: string;
+  label: string;
+};
+
 export type AiConversationMessage = {
   role: "user" | "assistant";
   content: string;
   created_at: string;
+  /** Assistant messages only — accounts/collections the reply actually referenced. */
+  sources?: AiConversationSource[];
+  /** Assistant messages only — user's thumbs up/down on this specific reply. */
+  feedback?: "up" | "down" | null;
 };
 
 export type AiConversation = {

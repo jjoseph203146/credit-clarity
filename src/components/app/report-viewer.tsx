@@ -256,8 +256,9 @@ export function ReportViewer({
                 return (
                   <button
                     key={a.id}
+                    id={`account-${a.id}`}
                     onClick={() => setSelectedAccount(i)}
-                    className="grid grid-cols-[1.5fr_.7fr_.6fr_.8fr_auto] items-center gap-3.5 rounded-[14px] border border-[var(--border)] bg-white px-5 py-4 text-left hover:border-[var(--teal)]"
+                    className="grid grid-cols-[1.5fr_.7fr_.6fr_.8fr_auto] items-center gap-3.5 rounded-[14px] border border-[var(--border)] bg-white px-5 py-4 text-left hover:border-[var(--teal)] scroll-mt-24"
                   >
                     <div>
                       <div className="text-sm font-bold">{a.name}</div>
@@ -389,7 +390,11 @@ export function ReportViewer({
             )}
             <div className="flex flex-col gap-3.5">
               {collections.map((c) => (
-                <div key={c.id} className="rounded-2xl border border-[#f0d4d4] bg-white p-6">
+                <div
+                  key={c.id}
+                  id={`collection-${c.id}`}
+                  className="rounded-2xl border border-[#f0d4d4] bg-white p-6 scroll-mt-24"
+                >
                   <div className="mb-3.5 flex items-start justify-between">
                     <div>
                       <div className="text-[17px] font-bold">{c.agency_name ?? "Unknown agency"}</div>

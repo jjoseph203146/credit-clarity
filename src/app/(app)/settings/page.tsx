@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SecurityToggles } from "@/components/app/security-toggles";
+import { SecuritySection, NotificationPreferences } from "@/components/app/security-toggles";
 import { DeleteAccountForm } from "@/components/app/delete-account-form";
 import type { Challenge, Goal, Timeline } from "@/lib/supabase/types";
 
@@ -110,9 +110,12 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      {/* Your context */}
+      {/* Your Financial Profile */}
       <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
-        <div className="mb-3.5 text-[15px] font-semibold">Your context</div>
+        <div className="mb-1 text-[15px] font-semibold">Your Financial Profile</div>
+        <div className="mb-3.5 text-[12.5px] text-[var(--muted)]">
+          This helps Clarity AI personalize your recommendations.
+        </div>
         <div className="flex flex-col gap-3 text-[13.5px]">
           {CONTEXT_ROWS.map((row) => (
             <div key={row.label} className="flex justify-between">
@@ -133,7 +136,13 @@ export default async function SettingsPage() {
       {/* Security */}
       <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
         <div className="mb-4 text-[15px] font-semibold">Security</div>
-        <SecurityToggles />
+        <SecuritySection />
+      </div>
+
+      {/* Notifications */}
+      <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
+        <div className="mb-4 text-[15px] font-semibold">Notifications</div>
+        <NotificationPreferences />
       </div>
 
       {/* Billing */}
@@ -190,12 +199,28 @@ export default async function SettingsPage() {
         )}
       </div>
 
+      {/* Connected services */}
+      <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
+        <div className="mb-3.5 text-[15px] font-semibold">Connected Services</div>
+        <div className="flex items-center justify-between text-[13.5px]">
+          <span>Stripe</span>
+          <span className="font-semibold text-[#0b7d5e]">✓ Payment account</span>
+        </div>
+        <div className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">
+          No bank accounts connected. Credit Clarity never connects directly to your bank —
+          reports are uploaded by you as a PDF.
+        </div>
+      </div>
+
       {/* Danger zone */}
       <div className="rounded-[18px] border border-[#f0d4d4] bg-white p-6">
         <div className="mb-1.5 text-[15px] font-semibold">Your data</div>
-        <div className="mb-4 text-[13.5px] leading-relaxed text-[var(--muted)]">
+        <div className="mb-1.5 text-[13.5px] leading-relaxed text-[var(--muted)]">
           Deleting removes your reports, analysis, chat history, and account permanently. No
-          retention period.
+          retention period. This action cannot be undone.
+        </div>
+        <div className="mb-4 text-[13.5px] leading-relaxed text-[var(--muted)]">
+          Your uploaded credit reports are not used to train AI models.
         </div>
         <div className="flex flex-wrap gap-2.5">
           <Button variant="outline">Export My Data</Button>

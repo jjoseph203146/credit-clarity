@@ -5,14 +5,17 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import type { AiConversationMessage } from "@/lib/supabase/types";
+import type { AiConversationMessage, AiConversationSource } from "@/lib/supabase/types";
 
 const FALLBACK_ERROR_MESSAGE =
   "Clarity AI is temporarily unavailable — please try again.";
 
 // Chat-appropriate variant of the SYSTEM_PROMPT in src/lib/analyze.ts,
-// following the same product-safety rules but for a conversational,
-// plain-text reply rather than a forced tool-use call.
+// following the same product-safety rules but for a conversational reply.
+// Forces tool use so the reply comes with real, grounded citations (the
+// account_ids/collection_ids the model actually used) instead of an
+// unverifiable "sources" list — the model can only cite ids that exist in
+// the report data it was given.
 const CHAT_SYSTEM_PROMPT = `You are Clarity AI, an educational credit assistant for Credit Clarity, chatting with a user about their own credit report.
 
 Product rules you must follow at all times, without exception:
@@ -23,7 +26,33 @@ Product rules you must follow at all times, without exception:
 - Never recommend illegal or deceptive tactics (e.g. disputing accurate information as a delay tactic, "credit sweep" schemes, requesting a new identity/CPN).
 - No credit pull, no SSN collection, ever.
 
-You will be given the user's parsed credit report as structured JSON (bureau, credit score, accounts, collections, inquiries) as context. Answer the user's question conversationally, in plain text, referencing their actual accounts/collections by name where relevant. Keep responses concise and easy to read in a chat UI. If the report data doesn't contain what's needed to answer, say so rather than guessing.`;
+You will be given the user's parsed credit report as structured JSON (bureau, credit score, accounts, collections, inquiries) as context, plus the account_id/collection_id of each item. Answer the user's question conversationally, referencing their actual accounts/collections by name where relevant. Keep responses concise and easy to read in a chat UI. If the report data doesn't contain what's needed to answer, say so plainly rather than guessing — never invent a fact that isn't in the provided data.
+
+Always call the reply_to_user tool. List an account_id or collection_id in "sources" ONLY if your reply actually discusses that specific account/collection — never list one just because it exists in the data.`;
+
+const CHAT_TOOL: Anthropic.Tool = {
+  name: "reply_to_user",
+  description: "Submit your conversational reply to the user, plus which specific accounts/collections (if any) it references.",
+  input_schema: {
+    type: "object",
+    properties: {
+      reply: { type: "string", description: "Your plain-text conversational reply." },
+      sources: {
+        type: "array",
+        description: "Accounts/collections this specific reply discussed. Empty array if none.",
+        items: {
+          type: "object",
+          properties: {
+            type: { type: "string", enum: ["account", "collection"] },
+            id: { type: "string", description: "The account_id or collection_id from the provided report data." },
+          },
+          required: ["type", "id"],
+        },
+      },
+    },
+    required: ["reply", "sources"],
+  },
+};
 
 // Fetches the report data this conversation is scoped to, in the same shape
 // used by the analysis call in src/lib/analyze.ts (bureau, credit_score,
@@ -44,33 +73,42 @@ async function fetchReportData(
     supabase.from("report_inquiries").select("*").eq("report_id", reportId),
   ]);
 
+  const accountLabels = new Map((accounts ?? []).map((a) => [a.id, a.name]));
+  const collectionLabels = new Map(
+    (collections ?? []).map((c) => [c.id, c.agency_name ?? c.original_creditor ?? "Collection"]),
+  );
+
   return {
-    bureau: report?.bureau ?? null,
-    credit_score: report?.credit_score ?? null,
-    accounts: (accounts ?? []).map((a) => ({
-      account_id: a.id,
-      name: a.name,
-      type: a.type,
-      balance: a.balance,
-      credit_limit: a.credit_limit,
-      utilization: a.utilization,
-      payment_history: a.payment_history,
-      opened_date: a.opened_date,
-    })),
-    collections: (collections ?? []).map((c) => ({
-      collection_id: c.id,
-      original_creditor: c.original_creditor,
-      agency_name: c.agency_name,
-      amount: c.amount,
-      opened_date: c.opened_date,
-      first_delinquency_date: c.first_delinquency_date,
-      falls_off_date: c.falls_off_date,
-    })),
-    inquiries: (inquiries ?? []).map((i) => ({
-      lender_name: i.lender_name,
-      inquiry_type: i.inquiry_type,
-      inquiry_date: i.inquiry_date,
-    })),
+    reportData: {
+      bureau: report?.bureau ?? null,
+      credit_score: report?.credit_score ?? null,
+      accounts: (accounts ?? []).map((a) => ({
+        account_id: a.id,
+        name: a.name,
+        type: a.type,
+        balance: a.balance,
+        credit_limit: a.credit_limit,
+        utilization: a.utilization,
+        payment_history: a.payment_history,
+        opened_date: a.opened_date,
+      })),
+      collections: (collections ?? []).map((c) => ({
+        collection_id: c.id,
+        original_creditor: c.original_creditor,
+        agency_name: c.agency_name,
+        amount: c.amount,
+        opened_date: c.opened_date,
+        first_delinquency_date: c.first_delinquency_date,
+        falls_off_date: c.falls_off_date,
+      })),
+      inquiries: (inquiries ?? []).map((i) => ({
+        lender_name: i.lender_name,
+        inquiry_type: i.inquiry_type,
+        inquiry_date: i.inquiry_date,
+      })),
+    },
+    accountLabels,
+    collectionLabels,
   };
 }
 
@@ -103,13 +141,17 @@ export async function sendChatMessage(conversationId: string, text: string) {
   const userMessage: AiConversationMessage = { role: "user", content: trimmed, created_at: now };
 
   let replyText: string;
+  let sources: AiConversationSource[] = [];
   try {
     // Constructed inside the function (not at module scope) so this module
     // doesn't require ANTHROPIC_API_KEY to be set at build time, matching
     // the lazy-client pattern in src/lib/analyze.ts.
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
-    const reportData = await fetchReportData(supabase, convo.report_id);
+    const { reportData, accountLabels, collectionLabels } = await fetchReportData(
+      supabase,
+      convo.report_id,
+    );
 
     const contextPrefix = `Here is the user's parsed credit report data (for your context only — do not repeat it verbatim unless asked):\n\n${JSON.stringify(reportData, null, 2)}\n\n---\n\n`;
 
@@ -130,14 +172,30 @@ export async function sendChatMessage(conversationId: string, text: string) {
       model: "claude-sonnet-5",
       max_tokens: 1024,
       system: CHAT_SYSTEM_PROMPT,
+      tools: [CHAT_TOOL],
+      tool_choice: { type: "tool", name: "reply_to_user" },
       messages: [...priorTurns, newUserTurn],
     });
 
-    const textBlock = message.content.find(
-      (block): block is Anthropic.TextBlock => block.type === "text",
+    const toolUse = message.content.find(
+      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use",
     );
+    const input = toolUse?.input as { reply?: string; sources?: { type: string; id: string }[] } | undefined;
 
-    replyText = textBlock?.text ?? FALLBACK_ERROR_MESSAGE;
+    replyText = input?.reply ?? FALLBACK_ERROR_MESSAGE;
+
+    // Only keep sources whose id genuinely exists in the report data we sent
+    // — a defense against the model citing an id it didn't actually see,
+    // since these become clickable links into the real report.
+    sources = (input?.sources ?? []).flatMap((s): AiConversationSource[] => {
+      if (s.type === "account" && accountLabels.has(s.id)) {
+        return [{ type: "account", id: s.id, label: accountLabels.get(s.id)! }];
+      }
+      if (s.type === "collection" && collectionLabels.has(s.id)) {
+        return [{ type: "collection", id: s.id, label: collectionLabels.get(s.id)! }];
+      }
+      return [];
+    });
   } catch (err) {
     console.error("sendChatMessage: Anthropic API call failed", err);
     replyText = FALLBACK_ERROR_MESSAGE;
@@ -147,6 +205,8 @@ export async function sendChatMessage(conversationId: string, text: string) {
     role: "assistant",
     content: replyText,
     created_at: new Date().toISOString(),
+    sources,
+    feedback: null,
   };
 
   const messages = [...history, userMessage, assistantMessage];
@@ -159,7 +219,49 @@ export async function sendChatMessage(conversationId: string, text: string) {
   if (updateError) return { error: updateError.message };
 
   revalidatePath("/chat");
-  return { error: null, reply: replyText };
+  return { error: null, reply: replyText, sources, messageIndex: messages.length - 1 };
+}
+
+// Persists a thumbs up/down on a specific assistant message, stored inline
+// on that message inside the `messages` jsonb array (no separate table —
+// there's exactly one rating per message, scoped to the owning conversation
+// via the same RLS policy as everything else in ai_conversations).
+export async function setMessageFeedback(
+  conversationId: string,
+  messageIndex: number,
+  feedback: "up" | "down",
+) {
+  const supabase = (await createClient()) as unknown as SupabaseClient<Database>;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: convo, error: fetchError } = await supabase
+    .from("ai_conversations")
+    .select("messages")
+    .eq("id", conversationId)
+    .single();
+
+  if (fetchError || !convo) return { error: fetchError?.message ?? "Conversation not found" };
+
+  const history = convo.messages as AiConversationMessage[];
+  const target = history[messageIndex];
+  if (!target || target.role !== "assistant") return { error: "Message not found" };
+
+  // Toggle off if clicking the same rating again.
+  const nextFeedback = target.feedback === feedback ? null : feedback;
+  const messages = history.map((m, i) => (i === messageIndex ? { ...m, feedback: nextFeedback } : m));
+
+  const { error: updateError } = await supabase
+    .from("ai_conversations")
+    .update({ messages })
+    .eq("id", conversationId);
+
+  if (updateError) return { error: updateError.message };
+
+  revalidatePath("/chat");
+  return { error: null, feedback: nextFeedback };
 }
 
 // Clears a conversation's message history in place (used by "+ New

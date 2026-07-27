@@ -325,6 +325,24 @@ export async function runAnalysis(
       return { ok: false, error: statusError.message };
     }
 
+    // Notify the user their report is ready — only meaningful once the
+    // report is claimed (report.user_id set). In the normal anonymous-
+    // checkout flow this runs before signup, so there's no user_id yet and
+    // this is skipped; that's fine, since that user is actively watching
+    // /processing and gets redirected straight to the report. This mainly
+    // fires for re-analysis of an already-claimed report.
+    if (report.user_id) {
+      const { error: notifyError } = await admin.from("notifications").insert({
+        user_id: report.user_id,
+        kind: "system",
+        title: "Your report is ready",
+        body: "Clarity AI finished analyzing your report — your action plan and recommendations are ready to view.",
+      });
+      if (notifyError) {
+        console.error("runAnalysis: failed to insert ready notification", notifyError);
+      }
+    }
+
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error during analysis";
