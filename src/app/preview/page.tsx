@@ -207,25 +207,25 @@ function PreviewPageInner() {
         <h1 className="mb-7 text-[32px] tracking-[-.025em]">Here&apos;s your credit snapshot</h1>
 
         {/* Step tracker: frames the preview as a finished analysis waiting to be revealed. */}
-        <div className="mb-6 flex items-center gap-2 text-[12.5px] font-semibold text-muted">
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-[12.5px] font-semibold text-muted">
           <span className="flex items-center gap-1.5 text-teal-deep">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-deep text-[9px] text-white">✓</span>
-            Analyzing report
+            Report uploaded
           </span>
           <span className="h-px w-6 bg-border" />
           <span className="flex items-center gap-1.5 text-teal-deep">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-deep text-[9px] text-white">✓</span>
-            Preview complete
+            Report parsed
+          </span>
+          <span className="h-px w-6 bg-border" />
+          <span className="flex items-center gap-1.5 text-teal-deep">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-deep text-[9px] text-white">✓</span>
+            Preview generated
           </span>
           <span className="h-px w-6 bg-border" />
           <span className="flex items-center gap-1.5">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border text-[9px]">3</span>
-            Full analysis ready
-          </span>
-          <span className="h-px w-6 bg-border" />
-          <span className="flex items-center gap-1.5">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border text-[9px]">4</span>
-            Unlock to continue
+            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border text-[9px]">🔒</span>
+            Unlock full report
           </span>
         </div>
 
@@ -303,12 +303,15 @@ function PreviewPageInner() {
 
         <div className="mb-4 rounded-2xl border border-border bg-white p-[22px] px-6">
           <div className="mb-3 text-[15px] font-bold">Biggest opportunities we found</div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {factors.length > 0 ? (
               factors.map((f) => (
                 <div key={f.title} className="flex items-start gap-2.5 text-[13.5px]">
                   <span className="mt-[1px]">{toneDot[f.tone]}</span>
-                  <span>{f.narrative}</span>
+                  <span>
+                    <div className="font-semibold">{f.narrative}</div>
+                    <div className="text-muted">{f.why}</div>
+                  </span>
                 </div>
               ))
             ) : (
@@ -340,8 +343,8 @@ function PreviewPageInner() {
             )}
             <div>✓ We found multiple opportunities to strengthen your credit profile</div>
             <div className="mt-1 font-semibold text-navy">
-              🔒 {recommendationsCount} personalized recommendation
-              {recommendationsCount === 1 ? "" : "s"} ready
+              🔒 {recommendationsCount} personalized insight{recommendationsCount === 1 ? "" : "s"}{" "}
+              and recommendations are ready
             </div>
           </div>
         </div>
@@ -357,19 +360,30 @@ function PreviewPageInner() {
                 <div className="text-[11px] font-bold uppercase tracking-wide text-teal-deep">
                   Priority #1
                 </div>
-                <div className="mt-0.5 text-[15px] font-bold">
-                  {collectionCount > 0
-                    ? "Address your highest-impact collection account"
-                    : "Reduce revolving credit utilization"}
-                </div>
+                <div className="mt-0.5 text-[15px] font-bold">Your Most Important Next Step</div>
                 <div className="mt-1 text-[13.5px] leading-relaxed text-muted">
-                  We&apos;ve already identified the account that could have the biggest impact on
-                  your credit profile. Unlock to see which account and why.
+                  We&apos;ve identified one action that may have the greatest impact on
+                  strengthening your credit profile. Unlock to see which account and why.
                 </div>
               </div>
             </div>
           </div>
         ) : null}
+
+        <div className="mb-9 rounded-2xl border border-border bg-white p-[22px] px-6">
+          <div className="mb-3 text-[15px] font-bold">Your report has been analyzed</div>
+          <div className="flex flex-col gap-2 text-[13.5px]">
+            <div>✓ {accounts.length} account{accounts.length === 1 ? "" : "s"} reviewed</div>
+            <div>
+              ✓ {collectionCount} collection{collectionCount === 1 ? "" : "s"} identified
+            </div>
+            <div>
+              ✓ {recommendationsCount} personalized insight{recommendationsCount === 1 ? "" : "s"}{" "}
+              generated
+            </div>
+            <div>✓ 1 custom roadmap prepared</div>
+          </div>
+        </div>
 
         <h2 className="mb-4 text-xl tracking-[-.015em]">Your full analysis is ready</h2>
         <div className="mb-7 grid grid-cols-3 gap-3.5 max-md:grid-cols-1">
@@ -406,10 +420,17 @@ function PreviewPageInner() {
               Unlock My Complete Credit Roadmap — $5
             </Link>
             <div className="max-w-[280px] text-center text-[11.5px] leading-snug text-[#8fa3ba]">
+              Delivered instantly after secure payment. Download as a professional PDF and access
+              it anytime from your dashboard.
+              <br />
               Secure one-time payment through Stripe. No subscription required. Your report
               remains private and can be deleted at any time.
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 text-center text-[12px] text-[#8fa3ba]">
+          Future uploads will let you compare progress over time.
         </div>
       </div>
     </div>

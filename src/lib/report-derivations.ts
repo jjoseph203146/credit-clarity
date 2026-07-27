@@ -186,6 +186,7 @@ export function deriveScoreFactors(
   title: string;
   detail: string;
   narrative: string;
+  why: string;
 }[] {
   const factors: {
     sign: "+" | "–";
@@ -194,6 +195,7 @@ export function deriveScoreFactors(
     title: string;
     detail: string;
     narrative: string;
+    why: string;
   }[] = [];
 
   const util = overallUtilization(accounts);
@@ -210,6 +212,7 @@ export function deriveScoreFactors(
         ? `${worst.name} carries the largest share. Responds within 1-2 statement cycles of paying down.`
         : "Responds within 1-2 statement cycles of paying down.",
       narrative: "Your credit utilization is elevated and may be limiting your score.",
+      why: "Paying down revolving balances tends to help relatively quickly.",
     });
   }
 
@@ -223,6 +226,7 @@ export function deriveScoreFactors(
       title: `${count} collection${count > 1 ? "s" : ""} (${formatMoney(total)})`,
       detail: "Caps your ceiling until validated or resolved.",
       narrative: `${count === 1 ? "One collection account requires" : `${count} collection accounts require`} attention.`,
+      why: "These may affect how lenders evaluate future applications.",
     });
   }
 
@@ -240,7 +244,8 @@ export function deriveScoreFactors(
       tone: "good",
       title: `Account age (${years.toFixed(1)} yrs)`,
       detail: `Oldest account: ${oldest.name} — keep it open.`,
-      narrative: "Your long credit history is a strength.",
+      narrative: `Your ${years.toFixed(0)}-year credit history is a strength.`,
+      why: "Longer account history generally contributes positively to your credit profile.",
     });
   }
 
@@ -252,7 +257,8 @@ export function deriveScoreFactors(
       tone: "warn",
       title: "Mix & inquiries",
       detail: `${types.size} account type${types.size > 1 ? "s" : ""} on file.`,
-      narrative: "Credit mix and recent inquiries may be limiting future borrowing.",
+      narrative: "Credit mix and inquiries deserve review.",
+      why: "Your report suggests opportunities to strengthen this area over time.",
     });
   }
 
