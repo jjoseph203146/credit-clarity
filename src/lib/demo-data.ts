@@ -18,8 +18,8 @@ export const navMain: NavItem[] = [
   { label: "My Reports", href: "/reports", icon: "⧉" },
   { label: "Action Plan", href: "/plan", icon: "☑" },
   { label: "Clarity AI", href: "/chat", icon: "✦" },
-  { label: "Progress", href: "/progress", icon: "↗" },
   { label: "Learning Center", href: "/learn", icon: "◈" },
+  { label: "Progress", href: "/progress", icon: "↗" },
   { label: "Goals & Simulator", href: "/goals", icon: "◎" },
   { label: "Notifications", href: "/notifications", icon: "◍", dot: 5 },
 ];

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScoreRing } from "@/components/app/score-ring";
 import { DashboardTodayTasks, type DisplayTask } from "@/components/app/dashboard-today-tasks";
+import { ReportAnalysisPoller } from "@/components/app/report-analysis-poller";
 import {
   bureauLabel,
   formatDate,
@@ -128,19 +129,32 @@ export default async function DashboardPage() {
       )
     : "—";
 
-  const clarityNote =
-    util != null && util > 30
+  const isAnalyzing = latest.status !== "analyzed" && latest.status !== "error";
+
+  const clarityNote = isAnalyzing
+    ? "Clarity AI is analyzing your report…"
+    : util != null && util > 30
       ? `Focus on utilization${(accounts ?? []).some((a) => a.type === "collection") ? " and your collection account" : ""}.`
       : "Your profile is trending well — keep it up.";
 
   return (
     <div className="max-w-[1080px] px-9 pb-[72px] pt-7">
+      {isAnalyzing && <ReportAnalysisPoller reportId={latest.id} />}
       <div className="mb-[22px] flex items-end justify-between">
         <div>
           <h1 className="m-0 mb-1 text-2xl tracking-[-0.02em]">Good morning, {greetingName}</h1>
           <div className="text-[13px] text-[var(--muted)]">
-            {bureauLabel(latest.bureau)} · {formatDate(latest.report_date)} ·{" "}
-            <span className="font-semibold text-[var(--teal)]">next upload {nextUpload}</span>
+            {isAnalyzing ? (
+              <>
+                Your {reports.length === 1 ? "first " : ""}report is currently being analyzed.
+                This usually takes less than one minute.
+              </>
+            ) : (
+              <>
+                {bureauLabel(latest.bureau)} · {formatDate(latest.report_date)} ·{" "}
+                <span className="font-semibold text-[var(--teal)]">next upload {nextUpload}</span>
+              </>
+            )}
           </div>
         </div>
         <Link
@@ -151,9 +165,33 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {isAnalyzing && (
+        <div className="mb-3.5 rounded-[18px] border border-[#c9e9dc] bg-[#f2faf6] p-5">
+          <div className="mb-2 text-[15px] font-bold text-[var(--teal-deep)]">
+            🎉 Your report is being prepared
+          </div>
+          <div className="mb-1 flex flex-wrap gap-x-5 gap-y-1 text-[13.5px] text-[var(--ink)]">
+            <span>✅ Accounts</span>
+            <span>✅ Collections</span>
+            <span>🔄 Recommendations</span>
+            <span>🔄 90-day roadmap</span>
+          </div>
+          <div className="text-[12.5px] text-[var(--muted)]">
+            Estimated completion: under a minute — this page will update automatically.
+          </div>
+        </div>
+      )}
+
       <div className="mb-3.5 grid grid-cols-[360px_1fr] gap-3.5">
         <div className="flex items-center gap-5 rounded-[18px] bg-gradient-to-br from-[var(--navy)] to-[#134066] p-6 text-white">
-          <ScoreRing score={latest.clarity_score ?? 0} max={100} />
+          {isAnalyzing ? (
+            <div className="flex h-[116px] w-[116px] flex-none flex-col items-center justify-center gap-2 rounded-full border-4 border-white/10">
+              <span className="text-[12px] font-semibold text-[#d6e1ee]">Calculating…</span>
+              <span className="h-1.5 w-14 animate-pulse rounded-full bg-mint" />
+            </div>
+          ) : (
+            <ScoreRing score={latest.clarity_score ?? 0} max={100} />
+          )}
           <div>
             <div className="mb-[5px] text-[11px] font-bold tracking-[0.08em] text-[var(--mint-light)]">
               CLARITY SCORE
@@ -178,15 +216,21 @@ export default async function DashboardPage() {
             className="rounded-[18px] border border-[var(--border)] bg-white p-5 hover:border-[var(--teal)]"
           >
             <div className="text-xs text-[var(--muted)]">Card Utilization</div>
-            <div
-              className={cn(
-                mono,
-                "mt-2 text-[34px] font-semibold",
-                util != null && util > 30 ? "text-[#c23e3e]" : "text-[var(--teal-deep)]",
-              )}
-            >
-              {util != null ? `${util}%` : "—"}
-            </div>
+            {isAnalyzing ? (
+              <div className="mt-2 text-[14px] font-semibold text-[var(--muted)]">
+                Analyzing revolving accounts…
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  mono,
+                  "mt-2 text-[34px] font-semibold",
+                  util != null && util > 30 ? "text-[#c23e3e]" : "text-[var(--teal-deep)]",
+                )}
+              >
+                {util != null ? `${util}%` : "—"}
+              </div>
+            )}
             <div className="mt-0.5 text-xs font-semibold text-[var(--teal)]">
               Simulate a payment →
             </div>
@@ -196,10 +240,16 @@ export default async function DashboardPage() {
             className="rounded-[18px] border border-[var(--border)] bg-white p-5 hover:border-[var(--teal)]"
           >
             <div className="text-xs text-[var(--muted)]">Plan Progress</div>
-            <div className={cn(mono, "mt-2 text-[34px] font-semibold")}>
-              {planDone}
-              <span className="text-[17px] text-[#8fa3ba]">/{planTotal}</span>
-            </div>
+            {isAnalyzing ? (
+              <div className="mt-2 text-[14px] font-semibold text-[var(--muted)]">
+                Building your plan…
+              </div>
+            ) : (
+              <div className={cn(mono, "mt-2 text-[34px] font-semibold")}>
+                {planDone}
+                <span className="text-[17px] text-[#8fa3ba]">/{planTotal}</span>
+              </div>
+            )}
             <div className="mt-0.5 text-xs font-semibold text-[var(--teal)]">Open planner →</div>
           </Link>
           <Link
@@ -207,9 +257,15 @@ export default async function DashboardPage() {
             className="rounded-[18px] border border-[var(--border)] bg-white p-5 hover:border-[var(--teal)]"
           >
             <div className="text-xs text-[var(--muted)]">Score Trend</div>
-            <div className={cn(mono, "mt-2 text-[34px] font-semibold text-[var(--teal-deep)]")}>
-              {scoreTrend != null ? `${scoreTrend >= 0 ? "+" : ""}${scoreTrend}` : "—"}
-            </div>
+            {isAnalyzing ? (
+              <div className="mt-2 text-[14px] font-semibold text-[var(--muted)]">
+                Available after your first completed analysis
+              </div>
+            ) : (
+              <div className={cn(mono, "mt-2 text-[34px] font-semibold text-[var(--teal-deep)]")}>
+                {scoreTrend != null ? `${scoreTrend >= 0 ? "+" : ""}${scoreTrend}` : "—"}
+              </div>
+            )}
             <div className="mt-0.5 text-xs font-semibold text-[var(--teal)]">
               {oldest ? `since ${formatDate(oldest.report_date, { month: "long" })}` : "—"} →
             </div>
@@ -225,7 +281,15 @@ export default async function DashboardPage() {
               Full plan →
             </Link>
           </div>
-          <DashboardTodayTasks actionPlanId={actionPlan?.id ?? null} initialTasks={shownTasks} />
+          <DashboardTodayTasks
+            actionPlanId={actionPlan?.id ?? null}
+            initialTasks={shownTasks}
+            emptyMessage={
+              isAnalyzing
+                ? "Building your personalized action plan…"
+                : undefined
+            }
+          />
         </div>
 
         <div className="rounded-[18px] border border-[var(--border)] bg-white p-[22px]">

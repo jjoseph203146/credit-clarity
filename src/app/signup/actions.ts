@@ -44,6 +44,8 @@ export async function signup(formData: FormData) {
     redirect(`/signup?error=${encodeURIComponent(insertError.message)}`);
   }
 
+  let claimedReportId: string | null = null;
+
   if (reportId) {
     const { data: claimedReport, error: claimError } = await admin
       .from("reports")
@@ -59,6 +61,8 @@ export async function signup(formData: FormData) {
       console.warn(
         `[signup] report ${reportId} could not be claimed for user ${data.user.id} — already claimed or not found`,
       );
+    } else {
+      claimedReportId = claimedReport.id;
     }
   }
 
@@ -74,6 +78,13 @@ export async function signup(formData: FormData) {
     redirect(
       `/login?message=${encodeURIComponent("Account created — check your email to confirm it before logging in.")}`,
     );
+  }
+
+  // The report they just paid for is what they came here for — send them to
+  // the processing screen (which polls for the AI analysis the Stripe
+  // webhook already kicked off) rather than the empty dashboard.
+  if (claimedReportId) {
+    redirect(`/processing?reportId=${claimedReportId}`);
   }
 
   redirect("/dashboard");

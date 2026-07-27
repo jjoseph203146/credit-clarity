@@ -18,9 +18,11 @@ export interface DisplayTask extends ActionPlanTask {
 export function DashboardTodayTasks({
   actionPlanId,
   initialTasks,
+  emptyMessage,
 }: {
   actionPlanId: string | null;
   initialTasks: DisplayTask[];
+  emptyMessage?: string;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [, startTransition] = useTransition();
@@ -40,7 +42,8 @@ export function DashboardTodayTasks({
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl bg-[#f8fafc] px-3.5 py-3 text-[13px] text-[var(--muted)]">
-        No tasks yet — your action plan will appear here once your report is analyzed.
+        {emptyMessage ??
+          "No tasks yet — your action plan will appear here once your report is analyzed."}
       </div>
     );
   }

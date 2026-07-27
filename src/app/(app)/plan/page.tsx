@@ -26,7 +26,7 @@ export default async function PlanPage() {
   // action plan over a general one.
   const { data: latestReport } = await supabase
     .from("reports")
-    .select("id")
+    .select("id, status")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -70,6 +70,9 @@ export default async function PlanPage() {
   const totalTasks = tasks.length;
   const doneTasks = tasks.filter((t) => t.done).length;
 
+  const isAnalyzing =
+    !plan && !!latestReport && latestReport.status !== "analyzed" && latestReport.status !== "error";
+
   return (
     <div className="max-w-[1040px] px-9 pb-[72px] pt-7">
       <div className="mb-5 flex items-end justify-between gap-4">
@@ -78,7 +81,9 @@ export default async function PlanPage() {
           <div className="text-[13px] text-[var(--muted)]">
             {plan
               ? `${doneTasks} of ${totalTasks} done · built for your goal: `
-              : "No action plan yet · goal: "}
+              : isAnalyzing
+                ? "Building your plan · goal: "
+                : "No action plan yet · goal: "}
             <strong className="text-[var(--ink)]">{goalLabel}</strong>
           </div>
         </div>
@@ -89,6 +94,20 @@ export default async function PlanPage() {
 
       {plan ? (
         <PlanBoard planId={plan.id} tasks={tasks} />
+      ) : isAnalyzing ? (
+        <div className="rounded-[18px] border border-dashed border-[#c7d2df] bg-white px-8 py-14 text-center">
+          <div className="mb-2 inline-flex h-10 w-10 animate-pulse items-center justify-center rounded-full bg-[#e6f5ef] text-lg">
+            ⏳
+          </div>
+          <div className="mb-1 text-base font-semibold">Building your plan</div>
+          <div className="mx-auto mb-4 max-w-[420px] text-[13.5px] text-[var(--muted)]">
+            Clarity AI is analyzing your report. We&apos;re generating personalized
+            recommendations, a debt strategy, a payment order, and your communication toolkit.
+          </div>
+          <div className="mx-auto max-w-[280px] rounded-full bg-[#eef2f7] px-4 py-1.5 text-[12px] font-semibold text-[var(--muted)]">
+            Usually ready in under a minute
+          </div>
+        </div>
       ) : (
         <div className="rounded-[18px] border border-dashed border-[#c7d2df] bg-white px-8 py-14 text-center">
           <div className="mb-1 text-base font-semibold">Your action plan will appear here</div>
