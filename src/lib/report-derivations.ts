@@ -187,6 +187,7 @@ export function deriveScoreFactors(
   detail: string;
   narrative: string;
   why: string;
+  learnMore: string;
 }[] {
   const factors: {
     sign: "+" | "–";
@@ -196,6 +197,7 @@ export function deriveScoreFactors(
     detail: string;
     narrative: string;
     why: string;
+    learnMore: string;
   }[] = [];
 
   const util = overallUtilization(accounts);
@@ -213,6 +215,8 @@ export function deriveScoreFactors(
         : "Responds within 1-2 statement cycles of paying down.",
       narrative: "Your credit utilization is elevated and may be limiting your score.",
       why: "Paying down revolving balances tends to help relatively quickly.",
+      learnMore:
+        "High utilization signals to lenders that you're relying heavily on your available credit. Your full report shows exactly which accounts to pay down first for the fastest impact.",
     });
   }
 
@@ -227,6 +231,8 @@ export function deriveScoreFactors(
       detail: "Caps your ceiling until validated or resolved.",
       narrative: `${count === 1 ? "One collection account requires" : `${count} collection accounts require`} attention.`,
       why: "These may affect how lenders evaluate future applications.",
+      learnMore:
+        "Collections can remain on your report for years and may influence lending decisions. Your full report explains each collection individually and outlines educational next steps.",
     });
   }
 
@@ -246,6 +252,8 @@ export function deriveScoreFactors(
       detail: `Oldest account: ${oldest.name} — keep it open.`,
       narrative: `Your ${years.toFixed(0)}-year credit history is a strength.`,
       why: "Longer account history generally contributes positively to your credit profile.",
+      learnMore:
+        "A longer credit history gives lenders more data to evaluate your reliability. Keeping older accounts open, even with occasional light use, helps preserve this strength.",
     });
   }
 
@@ -259,6 +267,8 @@ export function deriveScoreFactors(
       detail: `${types.size} account type${types.size > 1 ? "s" : ""} on file.`,
       narrative: "Credit mix and inquiries deserve review.",
       why: "Your report suggests opportunities to strengthen this area over time.",
+      learnMore:
+        "A healthy mix of account types and a manageable number of recent inquiries both play a role in your credit profile. Your full report breaks down exactly how yours compares.",
     });
   }
 

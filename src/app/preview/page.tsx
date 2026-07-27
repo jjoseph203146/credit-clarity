@@ -50,6 +50,7 @@ function PreviewPageInner() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedFactor, setExpandedFactor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!reportId) {
@@ -167,6 +168,20 @@ function PreviewPageInner() {
   const factors = deriveScoreFactors(accounts, collections);
   const toneDot: Record<string, string> = { good: "🟢", warn: "🟡", bad: "🔴", neutral: "⚪" };
 
+  // Rough, honest signal for how much structured data we confidently pulled
+  // from the PDF — not a claim about the (not-yet-run) paid AI analysis.
+  const fieldsFound = [score != null, report.bureau != null, accounts.length > 0].filter(
+    Boolean,
+  ).length;
+  const confidence =
+    fieldsFound === 3 ? "High" : fieldsFound === 2 ? "Medium" : "Low";
+  const confidenceClass =
+    confidence === "High"
+      ? "text-teal-deep"
+      : confidence === "Medium"
+        ? "text-[#c2731a]"
+        : "text-muted";
+
   const lockedCards = [
     {
       t: "See which accounts deserve your attention first",
@@ -203,6 +218,10 @@ function PreviewPageInner() {
             FREE PREVIEW
           </div>
           <div className="text-[13px] text-[#8fa3ba]">{reportMeta}</div>
+          <div className="text-[13px] text-[#8fa3ba]">
+            · Report parsed successfully ·{" "}
+            <span className={`font-semibold ${confidenceClass}`}>{confidence} confidence</span>
+          </div>
         </div>
         <h1 className="mb-7 text-[32px] tracking-[-.025em]">Here&apos;s your credit snapshot</h1>
 
@@ -215,7 +234,7 @@ function PreviewPageInner() {
           <span className="h-px w-6 bg-border" />
           <span className="flex items-center gap-1.5 text-teal-deep">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-deep text-[9px] text-white">✓</span>
-            Report parsed
+            Credit data extracted
           </span>
           <span className="h-px w-6 bg-border" />
           <span className="flex items-center gap-1.5 text-teal-deep">
@@ -277,7 +296,7 @@ function PreviewPageInner() {
             <div className="mt-0.5 text-[12.5px] text-muted">
               {lateAccounts > 0
                 ? `${lateAccounts} late payment${lateAccounts > 1 ? "s" : ""} found`
-                : "✓ No late payments detected"}
+                : "No late payments detected in the uploaded report"}
             </div>
           </div>
           <div className="rounded-2xl border border-border bg-white p-[22px]">
@@ -305,12 +324,38 @@ function PreviewPageInner() {
           <div className="mb-3 text-[15px] font-bold">Biggest opportunities we found</div>
           <div className="flex flex-col gap-3">
             {factors.length > 0 ? (
-              factors.map((f) => (
+              factors.map((f, i) => (
                 <div key={f.title} className="flex items-start gap-2.5 text-[13.5px]">
                   <span className="mt-[1px]">{toneDot[f.tone]}</span>
                   <span>
                     <div className="font-semibold">{f.narrative}</div>
                     <div className="text-muted">{f.why}</div>
+                    {i === 0 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedFactor(expandedFactor === f.title ? null : f.title)
+                          }
+                          className="mt-1 text-[12.5px] font-semibold text-teal"
+                        >
+                          {expandedFactor === f.title ? "▼" : "▶"} Preview why this matters
+                        </button>
+                        {expandedFactor === f.title && (
+                          <div className="mt-2 rounded-xl bg-[#f6f8fb] p-3.5 text-[13px] leading-relaxed text-[#3d5068]">
+                            {f.learnMore}
+                            <div className="mt-2">
+                              <Link
+                                href={`/checkout?reportId=${report.id}`}
+                                className="font-semibold text-teal"
+                              >
+                                🔒 View my personalized guidance
+                              </Link>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </span>
                 </div>
               ))
@@ -385,7 +430,9 @@ function PreviewPageInner() {
           </div>
         </div>
 
-        <h2 className="mb-4 text-xl tracking-[-.015em]">Your full analysis is ready</h2>
+        <h2 className="mb-4 text-xl tracking-[-.015em]">
+          Your personalized credit report is ready
+        </h2>
         <div className="mb-7 grid grid-cols-3 gap-3.5 max-md:grid-cols-1">
           {lockedCards.map((l) => (
             <div
@@ -423,8 +470,10 @@ function PreviewPageInner() {
               Delivered instantly after secure payment. Download as a professional PDF and access
               it anytime from your dashboard.
               <br />
-              Secure one-time payment through Stripe. No subscription required. Your report
-              remains private and can be deleted at any time.
+              Secure one-time payment through Stripe. No subscription required.
+              <br />
+              Your original PDF is never modified. Credit Clarity analyzes a secure copy, and you
+              can permanently delete your data at any time.
             </div>
           </div>
         </div>
