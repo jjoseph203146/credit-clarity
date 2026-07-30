@@ -28,22 +28,62 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Webhook signature verification failed: ${message}` }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-
+  if (event.type === "charge.updated" || event.type === "checkout.session.completed") {
     const admin = createAdminClient();
+    let paymentId: string | null = null;
+
+    // Handle both charge.updated and checkout.session.completed events
+    if (event.type === "charge.updated") {
+      const charge = event.data.object as Stripe.Charge;
+
+      // For charge.updated, find payment by charge ID in metadata
+      if (charge.metadata?.payment_id) {
+        paymentId = charge.metadata.payment_id;
+      } else {
+        // Fallback: search by charge ID if stored in payments table
+        const { data: payment } = await admin
+          .from("payments")
+          .select("id")
+          .eq("stripe_charge_id", charge.id)
+          .maybeSingle();
+        paymentId = payment?.id ?? null;
+      }
+
+      if (!paymentId) {
+        return NextResponse.json(
+          { error: "Could not find payment for charge" },
+          { status: 404 },
+        );
+      }
+    } else {
+      // checkout.session.completed: find by session ID
+      const session = event.data.object as Stripe.Checkout.Session;
+      const { data: payment } = await admin
+        .from("payments")
+        .select("id")
+        .eq("stripe_session_id", session.id)
+        .maybeSingle();
+      paymentId = payment?.id ?? null;
+
+      if (!paymentId) {
+        return NextResponse.json(
+          { error: "Matching payment not found" },
+          { status: 404 },
+        );
+      }
+    }
 
     const { data: payment, error: paymentError } = await admin
       .from("payments")
       .update({ status: "succeeded" })
-      .eq("stripe_session_id", session.id)
+      .eq("id", paymentId)
       .select()
       .single();
 
     if (paymentError || !payment) {
       return NextResponse.json(
-        { error: paymentError?.message ?? "Matching payment not found" },
-        { status: 404 },
+        { error: paymentError?.message ?? "Failed to update payment" },
+        { status: 500 },
       );
     }
 
