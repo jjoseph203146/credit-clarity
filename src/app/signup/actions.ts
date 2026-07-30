@@ -10,8 +10,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function signup(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirm_password") as string;
   const fullName = formData.get("full_name") as string;
   const reportId = formData.get("reportId") as string | null;
+
+  if (password !== confirmPassword) {
+    redirect(`/signup?error=${encodeURIComponent("Passwords do not match")}`);
+  }
 
   const supabase = await createClient();
 
