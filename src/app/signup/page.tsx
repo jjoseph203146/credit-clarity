@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { signup } from "./actions";
 
@@ -104,6 +105,15 @@ export default function SignupPage({
             Create Account &amp; Continue
           </button>
         </form>
+        <div className="mt-6 text-center text-[13px] text-muted">
+          Already have an account?{" "}
+          <Link
+            href={`/login${searchParams.reportId ? `?reportId=${searchParams.reportId}` : ""}`}
+            className="font-semibold text-navy hover:text-[#0b1f3a] transition-colors"
+          >
+            Login instead
+          </Link>
+        </div>
       </div>
     </div>
   );
