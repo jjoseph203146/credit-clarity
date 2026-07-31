@@ -36,22 +36,22 @@ export async function POST(req: Request) {
     if (event.type === "charge.updated") {
       const charge = event.data.object as Stripe.Charge;
 
-      // For charge.updated, find payment by charge ID in metadata
+      // For charge.updated, try to find payment via metadata
       if (charge.metadata?.payment_id) {
         paymentId = charge.metadata.payment_id;
-      } else {
-        // Fallback: search by charge ID if stored in payments table
+      } else if (charge.metadata?.session_id) {
+        // Try searching by session ID from metadata
         const { data: payment } = await admin
           .from("payments")
           .select("id")
-          .eq("stripe_charge_id", charge.id)
+          .eq("stripe_session_id", charge.metadata.session_id)
           .maybeSingle();
         paymentId = payment?.id ?? null;
       }
 
       if (!paymentId) {
         return NextResponse.json(
-          { error: "Could not find payment for charge" },
+          { error: "Could not find payment for charge (no metadata)" },
           { status: 404 },
         );
       }
