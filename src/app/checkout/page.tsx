@@ -57,7 +57,7 @@ function CheckoutPageInner() {
           </div>
           <div className="mb-1 text-[17px] font-bold">Full Credit Analysis</div>
           <div className="mb-[22px] text-[13px] leading-relaxed text-[#b9c8da]">
-            AI analysis · 90-day plan · scripts · PDF report · Clarity AI chat
+            AI account analysis · action plan · PDF report · Clarity AI Q&amp;A
           </div>
           <div className="flex justify-between border-t border-white/[.12] py-3 text-sm">
             <span className="text-[#b9c8da]">Subtotal</span>

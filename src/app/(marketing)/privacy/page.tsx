@@ -41,7 +41,7 @@ const sections = [
     h: "Your right to delete",
     body: [
       "You can permanently delete an individual report, or your entire account, at any time from Settings.",
-      "Deletion is immediate and permanent — there is no retention period, backup window, or \"soft delete\" state we hold your data in afterward.",
+      "Deletion is immediate and permanent — your report file and analysis are removed right away, not held in a recoverable \"soft delete\" state. Residual copies in routine encrypted system backups expire automatically on a short cycle.",
     ],
   },
   {

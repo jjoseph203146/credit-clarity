@@ -2,26 +2,48 @@ import Link from "next/link";
 
 const MONO = "font-[family-name:var(--font-jetbrains-mono)]";
 
+const freeFeatures = [
+  "Credit snapshot",
+  "Report summary",
+  "Biggest opportunities",
+  "Initial Clarity AI findings",
+];
+
+const paidFeatures = [
+  "Everything in Free",
+  "Full AI account-by-account analysis",
+  "Personalized action plan",
+  "Items worth reviewing for accuracy",
+  "Professional PDF report you can save or share",
+  "Clarity AI Q&A",
+];
+
+const trustRow = [
+  "One-time payment",
+  "Secure Stripe checkout",
+  "No subscription",
+  "Delete your data anytime",
+];
+
 export default function PricingPage() {
   return (
-    <div className="mx-auto max-w-[980px] px-8 pb-24 pt-[72px]">
+    <div className="mx-auto max-w-[860px] px-8 pb-24 pt-[72px]">
       <h1 className="mb-3 text-center text-[40px] tracking-[-.03em]">
-        Simple, honest pricing
+        One report. One price.
       </h1>
       <p className="mb-12 text-center text-base text-muted">
-        No subscriptions required. No upsells mid-report.
+        Only pay when you need an analysis — no subscriptions, no upsells mid-report.
       </p>
-      <div className="grid grid-cols-[1fr_1.15fr_1fr] items-start gap-[18px] max-lg:grid-cols-1">
+      <div className="grid grid-cols-[1fr_1.2fr] items-start gap-[18px] max-md:grid-cols-1">
         {/* Free Preview */}
         <div className="rounded-[18px] border border-border bg-white p-7">
           <div className="text-[17px] font-bold">Free Preview</div>
           <div className={`my-3 text-[34px] font-semibold ${MONO}`}>$0</div>
           <div className="mb-[18px] text-[13px] text-[#8fa3ba]">with every upload</div>
           <div className="flex flex-col gap-2.5 text-sm text-[#3d5068]">
-            <div>✓ Credit snapshot &amp; score</div>
-            <div>✓ Account count &amp; summary</div>
-            <div>✓ Top factors affecting your score</div>
-            <div>✓ Basic insights</div>
+            {freeFeatures.map((f) => (
+              <div key={f}>✓ {f}</div>
+            ))}
           </div>
           <Link
             href="/upload"
@@ -40,15 +62,15 @@ export default function PricingPage() {
             </div>
           </div>
           <div className={`my-3 text-[40px] font-semibold ${MONO}`}>$5</div>
-          <div className="mb-[18px] text-[13px] text-[#8fa3ba]">one-time, per report</div>
+          <div className="mb-3.5 text-[13px] text-[#8fa3ba]">one-time, per report</div>
+          <p className="mb-[18px] border-l-2 border-mint/70 pl-3 text-[14.5px] leading-relaxed text-[#eaf2fa]">
+            Understand exactly what&apos;s helping your credit, what&apos;s holding it
+            back, and what to do next.
+          </p>
           <div className="flex flex-col gap-2.5 text-sm text-[#d6e1ee]">
-            <div>✓ Everything in Free</div>
-            <div>✓ Full AI account-by-account analysis</div>
-            <div>✓ Personalized 90-day action plan</div>
-            <div>✓ Collections &amp; dispute guidance</div>
-            <div>✓ Communication scripts &amp; letters</div>
-            <div>✓ Downloadable PDF report</div>
-            <div>✓ Clarity AI chat</div>
+            {paidFeatures.map((f) => (
+              <div key={f}>✓ {f}</div>
+            ))}
           </div>
           <Link
             href="/upload"
@@ -56,35 +78,22 @@ export default function PricingPage() {
           >
             Analyze My Credit Report
           </Link>
-        </div>
-
-        {/* Clarity Plus */}
-        <div className="rounded-[18px] border border-dashed border-[#c7d2df] bg-white p-7">
-          <div className="flex items-center gap-2 text-[17px] font-bold">
-            Clarity Plus
-            <span className="rounded-full bg-[#eef2f7] px-2 py-[3px] text-[10.5px] font-bold text-muted">
-              COMING SOON
-            </span>
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1.5 border-t border-white/[.12] pt-4 text-[12.5px] text-[#a9bcd2] max-sm:grid-cols-1">
+            {trustRow.map((t) => (
+              <div key={t}>
+                <span className="mr-1.5 text-mint">✓</span>
+                {t}
+              </div>
+            ))}
           </div>
-          <div className={`my-3 text-[34px] font-semibold ${MONO}`}>
-            $9<span className="text-base text-[#8fa3ba]">/mo</span>
-          </div>
-          <div className="mb-[18px] text-[13px] text-[#8fa3ba]">continuous monitoring</div>
-          <div className="flex flex-col gap-2.5 text-sm text-[#3d5068]">
-            <div>Quarterly re-analysis</div>
-            <div>Score change alerts</div>
-            <div>Unlimited Clarity AI chat</div>
-            <div>Progress tracking over time</div>
-          </div>
-          <button
-            disabled
-            className="mt-[22px] w-full cursor-not-allowed rounded-[11px] bg-[#eef2f7] py-3 text-[14.5px] font-semibold text-[#8fa3ba]"
-          >
-            Join Waitlist
-          </button>
         </div>
       </div>
-      <div className="mt-7 text-center text-[13px] text-[#8fa3ba]">
+      <p className="mx-auto mt-10 max-w-[520px] text-center text-[15px] leading-relaxed text-[#3d5068]">
+        <span className="font-semibold text-navy">Why only $5?</span> We believe everyone
+        should be able to understand their credit without paying hundreds for financial
+        coaching.
+      </p>
+      <div className="mt-6 text-center text-[13px] text-[#8fa3ba]">
         Payments processed securely by Stripe. Educational service — not credit repair.
       </div>
     </div>
