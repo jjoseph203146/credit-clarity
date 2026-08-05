@@ -17,6 +17,11 @@
     --border: #e4e9f0;
     --bg: #f4f6f9;
 
+    /* Brand gradients (brand_assets/credit-logobrand.jpg → Color Combinations) */
+    --grad-brand: linear-gradient(90deg, #0b1f3a 0%, #0e9f77 58%, #2ee6a8 100%);
+    --grad-teal: linear-gradient(135deg, #0e9f77 0%, #2ee6a8 100%);
+    --grad-navy-mint: linear-gradient(90deg, #081527 0%, #0b1f3a 45%, #2ee6a8 100%);
+
     /* shadcn/ui tokens (slate base, new-york style) */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;

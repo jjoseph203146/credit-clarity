@@ -71,6 +71,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-instrument-sans)", "sans-serif"],
+        display: ["var(--font-instrument-serif)", "Georgia", "serif"],
+        mono: ["var(--font-jetbrains-mono)", "monospace"],
       },
     },
   },
