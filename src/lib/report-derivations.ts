@@ -94,6 +94,77 @@ export function utilizationTone(pct: number | null): Tone {
   return "bad";
 }
 
+export interface ClarityArea {
+  label: string;
+  /** False when this area is one of the "needs attention" items. */
+  ok: boolean;
+}
+
+/**
+ * The Credit Clarity Score: an educational 0-100 read on the profile, derived
+ * purely from parsed report rows. Deliberately deterministic and AI-free so
+ * the free preview can show it before any Claude call or payment (BUILD.md
+ * step 3). It is NOT a FICO or VantageScore score and must always be labeled
+ * as such wherever it is displayed.
+ *
+ * Areas that can't be assessed from the parsed data (e.g. no revolving limits
+ * to compute utilization from) are omitted rather than counted against the
+ * profile — a missing field is not a negative signal.
+ */
+export function deriveClarityScore(
+  accounts: ReportAccount[],
+  collections: ReportCollection[],
+): { score: number; areas: ClarityArea[]; needsAttention: number } {
+  const areas: ClarityArea[] = [];
+  // Start from a neutral-good baseline and deduct against observed signals.
+  let score = 100;
+
+  const utilization = overallUtilization(accounts);
+  if (utilization != null) {
+    const ok = utilization <= 30;
+    areas.push({ label: "Credit card utilization", ok });
+    if (utilization > 90) score -= 32;
+    else if (utilization > 70) score -= 26;
+    else if (utilization > 50) score -= 18;
+    else if (utilization > 30) score -= 10;
+  }
+
+  const late = accounts.filter((a) => a.payment_history && /late/i.test(a.payment_history)).length;
+  areas.push({ label: "Payment history", ok: late === 0 });
+  score -= Math.min(28, late * 9);
+
+  if (collections.length > 0) {
+    areas.push({ label: "Collection accounts", ok: false });
+    score -= Math.min(22, 12 + (collections.length - 1) * 5);
+  } else if (accounts.length > 0) {
+    areas.push({ label: "Collection accounts", ok: true });
+  }
+
+  const oldest = [...accounts]
+    .filter((a) => a.opened_date)
+    .sort((a, b) => new Date(a.opened_date!).getTime() - new Date(b.opened_date!).getTime())[0];
+  if (oldest) {
+    const years =
+      (Date.now() - new Date(oldest.opened_date!).getTime()) / (365.25 * 24 * 3600 * 1000);
+    const ok = years >= 4;
+    areas.push({ label: "Length of credit history", ok });
+    if (years < 2) score -= 10;
+    else if (years < 4) score -= 5;
+  }
+
+  if (accounts.length > 0) {
+    const ok = accounts.length >= 3;
+    areas.push({ label: "Account mix", ok });
+    if (!ok) score -= 5;
+  }
+
+  return {
+    score: Math.max(1, Math.min(100, Math.round(score))),
+    areas,
+    needsAttention: areas.filter((a) => !a.ok).length,
+  };
+}
+
 export function impactTone(impact: ReportAccount["impact"]): Tone {
   if (impact === "high") return "bad";
   if (impact === "medium") return "warn";
