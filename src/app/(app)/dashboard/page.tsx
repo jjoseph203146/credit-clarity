@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ScoreRing } from "@/components/app/score-ring";
+import { ScoreGauge } from "@/components/ui/score-gauge";
 import { DashboardTodayTasks, type DisplayTask } from "@/components/app/dashboard-today-tasks";
 import { ReportAnalysisPoller } from "@/components/app/report-analysis-poller";
 import {
@@ -11,23 +11,9 @@ import {
   overallUtilization,
   type Tone,
 } from "@/lib/report-derivations";
-import type { ActionPlan, ActionPlanTask, Notification, Report, ReportAccount } from "@/lib/supabase/types";
+import type { ActionPlan, ActionPlanTask, Report, ReportAccount } from "@/lib/supabase/types";
 
 const mono = "font-[family-name:var(--font-jetbrains-mono)]";
-
-function notificationTone(kind: string | null): Tone {
-  if (kind === "deadline" || kind === "reupload_window") return "good";
-  if (kind === "task_overdue" || kind === "payment") return "warn";
-  return "neutral";
-}
-
-function notificationIcon(kind: string | null) {
-  if (kind === "deadline") return "✉";
-  if (kind === "task_overdue") return "!";
-  if (kind === "reupload_window") return "↻";
-  if (kind === "payment") return "$";
-  return "•";
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -83,7 +69,7 @@ export default async function DashboardPage() {
   const previous = reports[1] ?? null;
   const oldest = reports[reports.length - 1];
 
-  const [{ data: accounts }, { data: actionPlan }, { data: notifications }] = await Promise.all([
+  const [{ data: accounts }, { data: actionPlan }] = await Promise.all([
     supabase.from("report_accounts").select("*").eq("report_id", latest.id).returns<ReportAccount[]>(),
     supabase
       .from("action_plans")
@@ -94,13 +80,6 @@ export default async function DashboardPage() {
       .limit(1)
       .returns<ActionPlan[]>()
       .maybeSingle(),
-    supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(3)
-      .returns<Notification[]>(),
   ]);
 
   const util = overallUtilization(accounts ?? []);
@@ -142,7 +121,9 @@ export default async function DashboardPage() {
       {isAnalyzing && <ReportAnalysisPoller reportId={latest.id} />}
       <div className="mb-[22px] flex items-end justify-between">
         <div>
-          <h1 className="m-0 mb-1 text-2xl tracking-[-0.02em]">Good morning, {greetingName}</h1>
+          <h1 className="m-0 mb-1 font-display text-[38px] font-normal leading-[1.08] tracking-[-0.02em] text-[var(--navy)]">
+            Hello, {greetingName}
+          </h1>
           <div className="text-[13px] text-[var(--muted)]">
             {isAnalyzing ? (
               <>
@@ -182,39 +163,41 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div className="mb-3.5 grid grid-cols-[360px_1fr] gap-3.5">
-        <div className="flex items-center gap-5 rounded-[18px] bg-gradient-to-br from-[var(--navy)] to-[#134066] p-6 text-white">
+      <div className="mb-3.5 grid grid-cols-[360px_1fr] gap-3.5 max-lg:grid-cols-1">
+        <div className="rounded-[18px] border border-[var(--border)] bg-white p-6 shadow-[0_1px_2px_rgba(11,31,58,.04),0_12px_28px_-14px_rgba(11,31,58,.14)]">
           {isAnalyzing ? (
-            <div className="flex h-[116px] w-[116px] flex-none flex-col items-center justify-center gap-2 rounded-full border-4 border-white/10">
-              <span className="text-[12px] font-semibold text-[#d6e1ee]">Calculating…</span>
-              <span className="h-1.5 w-14 animate-pulse rounded-full bg-mint" />
+            <div className="flex h-[186px] flex-col items-center justify-center gap-2">
+              <span className="text-[13px] font-semibold text-[var(--muted)]">
+                Calculating your score…
+              </span>
+              <span className="h-1.5 w-14 animate-pulse rounded-full bg-teal" />
             </div>
           ) : (
-            <ScoreRing score={latest.clarity_score ?? 0} max={100} />
+            <ScoreGauge
+              score={latest.credit_score}
+              // Sweep from the previous report's score when we have one, so
+              // the animation shows the actual change rather than 300-up.
+              from={
+                scoreDelta != null && latest.credit_score != null
+                  ? latest.credit_score - scoreDelta
+                  : undefined
+              }
+              label={bureauLabel(latest.bureau)}
+              delta={scoreDelta}
+              size={288}
+              className="mx-auto"
+            />
           )}
-          <div>
-            <div className="mb-[5px] text-[11px] font-bold tracking-[0.08em] text-[var(--mint-light)]">
-              CLARITY SCORE
+          <div className="mt-4 border-t border-[#eef2f7] pt-3.5">
+            <div className="mb-1 text-[11px] font-bold tracking-[0.08em] text-[var(--teal-deep)]">
+              CLARITY SCORE {latest.clarity_score ?? "—"}/100
             </div>
-            <div className="text-[13.5px] leading-[1.5] text-[#d6e1ee]">{clarityNote}</div>
-            <div className="mt-2 flex gap-3 text-[12.5px]">
-              <span className="text-[#8fa3ba]">{bureauLabel(latest.bureau)}</span>
-              <span className={cn(mono, "font-semibold")}>{latest.credit_score ?? "—"}</span>
-              {scoreDelta != null && (
-                <span className="font-semibold text-[var(--mint-light)]">
-                  {scoreDelta >= 0 ? "▲" : "▼"} {scoreDelta >= 0 ? "+" : ""}
-                  {scoreDelta}
-                </span>
-              )}
-            </div>
+            <div className="text-[13px] leading-[1.6] text-[var(--muted)]">{clarityNote}</div>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3.5">
-          <Link
-            href="/goals"
-            className="rounded-[18px] border border-[var(--border)] bg-white p-5 hover:border-[var(--teal)]"
-          >
+          <div className="rounded-[18px] border border-[var(--border)] bg-white p-5">
             <div className="text-xs text-[var(--muted)]">Card Utilization</div>
             {isAnalyzing ? (
               <div className="mt-2 text-[14px] font-semibold text-[var(--muted)]">
@@ -231,10 +214,8 @@ export default async function DashboardPage() {
                 {util != null ? `${util}%` : "—"}
               </div>
             )}
-            <div className="mt-0.5 text-xs font-semibold text-[var(--teal)]">
-              Simulate a payment →
-            </div>
-          </Link>
+            <div className="mt-0.5 text-xs text-[var(--muted)]">of your total limits</div>
+          </div>
           <Link
             href="/plan"
             className="rounded-[18px] border border-[var(--border)] bg-white p-5 hover:border-[var(--teal)]"
@@ -252,10 +233,7 @@ export default async function DashboardPage() {
             )}
             <div className="mt-0.5 text-xs font-semibold text-[var(--teal)]">Open planner →</div>
           </Link>
-          <Link
-            href="/progress"
-            className="rounded-[18px] border border-[var(--border)] bg-white p-5 hover:border-[var(--teal)]"
-          >
+          <div className="rounded-[18px] border border-[var(--border)] bg-white p-5">
             <div className="text-xs text-[var(--muted)]">Score Trend</div>
             {isAnalyzing ? (
               <div className="mt-2 text-[14px] font-semibold text-[var(--muted)]">
@@ -266,14 +244,14 @@ export default async function DashboardPage() {
                 {scoreTrend != null ? `${scoreTrend >= 0 ? "+" : ""}${scoreTrend}` : "—"}
               </div>
             )}
-            <div className="mt-0.5 text-xs font-semibold text-[var(--teal)]">
-              {oldest ? `since ${formatDate(oldest.report_date, { month: "long" })}` : "—"} →
+            <div className="mt-0.5 text-xs text-[var(--muted)]">
+              {oldest ? `since ${formatDate(oldest.report_date, { month: "long" })}` : "—"}
             </div>
-          </Link>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-[1.15fr_.85fr] gap-3.5">
+      <div className="grid grid-cols-1 gap-3.5">
         <div className="rounded-[18px] border border-[var(--border)] bg-white p-[22px]">
           <div className="mb-3.5 flex items-baseline justify-between">
             <span className="text-base font-bold">Today&apos;s actions</span>
@@ -290,41 +268,6 @@ export default async function DashboardPage() {
                 : undefined
             }
           />
-        </div>
-
-        <div className="rounded-[18px] border border-[var(--border)] bg-white p-[22px]">
-          <div className="mb-3.5 flex items-baseline justify-between">
-            <span className="text-base font-bold">Notifications</span>
-            <Link href="/notifications" className="text-[12.5px] font-semibold text-[var(--teal)]">
-              All →
-            </Link>
-          </div>
-          <div className="flex flex-col gap-3">
-            {(!notifications || notifications.length === 0) && (
-              <div className="text-[13px] text-[var(--muted)]">You&apos;re all caught up.</div>
-            )}
-            {notifications?.map((n) => {
-              const tone = notificationTone(n.kind);
-              return (
-                <div key={n.id} className="flex gap-[11px]">
-                  <div
-                    className={cn(
-                      "flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] text-[13px]",
-                      tone === "good" && "bg-[#e6f5ef] text-[var(--teal-deep)]",
-                      tone === "warn" && "bg-[#fdf3e7] text-[#9a6314]",
-                      tone === "neutral" && "bg-[#eef2f7] text-[#3d5068]",
-                    )}
-                  >
-                    {notificationIcon(n.kind)}
-                  </div>
-                  <div>
-                    <div className="text-[13px] font-semibold">{n.title}</div>
-                    {n.body && <div className="text-[11.5px] text-[#8fa3ba]">{n.body}</div>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
     </div>

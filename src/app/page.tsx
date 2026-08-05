@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { ScoreGauge } from "@/components/ui/score-gauge";
 
 const MONO = "font-[family-name:var(--font-jetbrains-mono)]";
 
@@ -95,91 +96,120 @@ export default function Home() {
       <MarketingNav />
 
       {/* hero */}
-      <div className="bg-[linear-gradient(160deg,#081527_0%,#0b1f3a_55%,#134066_100%)] px-8 py-[88px] pb-24 text-white">
+      <div className="relative overflow-hidden px-8 pb-24 pt-[72px]">
+        {/* Layered radial washes — cool light ground, not a flat fill. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-[var(--bg)]"
+          style={{
+            backgroundImage:
+              "radial-gradient(900px 460px at 78% 8%, rgba(46,230,168,.16), transparent 62%), radial-gradient(760px 400px at 12% 0%, rgba(21,90,138,.10), transparent 60%), radial-gradient(600px 500px at 50% 100%, rgba(11,31,58,.05), transparent 70%)",
+          }}
+        />
         <div className="mx-auto grid max-w-[1120px] grid-cols-[1.05fr_.95fr] items-center gap-16 max-lg:grid-cols-1">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-mint/30 bg-mint/[.12] px-3.5 py-1.5 text-[13px] font-semibold text-[#7defc4]">
-              <span className="h-1.5 w-1.5 rounded-full bg-mint" />
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal/25 bg-white/70 px-3.5 py-1.5 text-[13px] font-semibold text-[var(--teal-deep)] shadow-[0_1px_2px_rgba(11,31,58,.04)] backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal" />
               Powered by Clarity AI
             </div>
-            <h1 className="mb-5 text-[52px] font-bold leading-[1.08] tracking-[-.03em]">
-              Understand your credit.
+            <h1 className="mb-5 font-display text-[64px] font-normal leading-[1.02] tracking-[-.03em] text-[var(--navy)] max-sm:text-[44px]">
+              Your credit report,
               <br />
-              <span className="text-mint-light">Build your future.</span>
+              <em className="italic text-[var(--teal-deep)]">finally legible.</em>
             </h1>
-            <p className="mb-8 max-w-[480px] text-lg leading-relaxed text-[#b9c8da]">
-              Upload your credit report and let Clarity AI explain what matters, identify
-              opportunities, and create your personalized roadmap.
+            <p className="mb-8 max-w-[470px] text-[17px] leading-[1.7] text-[var(--muted)]">
+              Upload the PDF you already have. Clarity AI reads every account and tells you, in
+              plain English, what it means and what to do next.
             </p>
-            <div className="flex items-center gap-3.5">
+            <div className="flex flex-wrap items-center gap-3.5">
               <Link
                 href="/upload"
-                className="rounded-xl bg-teal px-[26px] py-[15px] text-base font-semibold text-white shadow-[0_8px_24px_rgba(14,159,119,.35)] transition-colors hover:bg-[#0b8663]"
+                className="group relative isolate overflow-hidden rounded-full bg-[var(--navy)] px-7 py-[15px] text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(11,31,58,.20),0_10px_24px_-6px_rgba(11,31,58,.35)] transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--teal)] active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
-                Analyze My Credit Report
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -z-10 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-active:opacity-100 motion-reduce:transition-none"
+                  style={{ backgroundImage: "var(--grad-teal)" }}
+                />
+                Analyze my credit report
               </Link>
               <Link
                 href="/how-it-works"
-                className="rounded-xl border border-white/25 px-6 py-[15px] text-base font-semibold text-white transition-colors hover:border-white/60"
+                className="rounded-full border border-[#d6dfea] bg-white/80 px-6 py-[15px] text-[15px] font-semibold text-[var(--ink)] transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--teal)] active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
-                See How It Works
+                See how it works
               </Link>
             </div>
-            <div className="mt-9 flex flex-wrap gap-[22px] text-[12.5px] font-medium text-[#8fa3ba]">
-              <span>🔐 256-bit encryption</span>
-              <span>Reports deleted on request</span>
-              <span>Not a credit repair service</span>
+            <div className="mt-9 flex flex-wrap gap-x-[22px] gap-y-2 text-[12.5px] font-medium text-[var(--muted)]">
+              <span>No credit pull</span>
+              <span>·</span>
+              <span>No SSN required</span>
+              <span>·</span>
+              <span>Delete anytime</span>
             </div>
           </div>
 
-          {/* product preview card */}
-          <div className="rounded-[20px] bg-white p-[26px] text-ink shadow-[0_24px_64px_rgba(3,10,20,.45)]">
-            <div className="mb-[18px] flex items-center justify-between">
-              <div className="text-[15px] font-bold">Your Credit Snapshot</div>
-              <div className="rounded-full bg-[#e6f5ef] px-2.5 py-1 text-[11px] font-semibold text-teal">
-                Analyzed by Clarity AI
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-[14px] bg-[var(--bg)] p-4">
-                <div className="text-xs font-medium text-muted">Credit Score</div>
-                <div className={`mt-1 text-[34px] font-semibold ${MONO}`}>642</div>
-                <div className="text-xs font-semibold text-teal">▲ +14 since Jan</div>
-              </div>
-              <div className="rounded-[14px] bg-[var(--bg)] p-4">
-                <div className="text-xs font-medium text-muted">Clarity Score</div>
-                <div className={`mt-1 text-[34px] font-semibold ${MONO}`}>
-                  74<span className="text-base text-[#8fa3ba]">/100</span>
-                </div>
-                <div className="text-xs text-muted">Improving</div>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-3 rounded-[14px] bg-[#fdf3e7] px-4 py-3.5">
-              <div className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] bg-[#f6ddba] font-bold text-[#9a6314]">
-                !
-              </div>
-              <div>
-                <div className="text-[13.5px] font-semibold">
-                  Utilization is your biggest opportunity
-                </div>
-                <div className="text-[12.5px] text-muted">
-                  Cards at 72% — bring under 30% for the biggest lift.
+          {/* product preview — floating layer, gauge carries the proof */}
+          <div className="relative">
+            <div className="rounded-[24px] border border-white/80 bg-white/85 p-[26px] shadow-[0_1px_2px_rgba(11,31,58,.04),0_18px_40px_-12px_rgba(11,31,58,.16),0_40px_80px_-24px_rgba(11,31,58,.12)] backdrop-blur-sm">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-[13px] font-semibold text-[var(--muted)]">Your snapshot</div>
+                <div className="rounded-full bg-[#e6f5ef] px-2.5 py-1 text-[11px] font-semibold text-[var(--teal-deep)]">
+                  Analyzed by Clarity AI
                 </div>
               </div>
+
+              <ScoreGauge
+                score={800}
+                from={450}
+                label="Experian"
+                delta={350}
+                size={296}
+                className="mx-auto"
+              />
+
+              <div className="mt-5 grid grid-cols-3 gap-2.5">
+                {[
+                  { k: "Utilization", v: "72%", tone: "bad" as const },
+                  { k: "On-time", v: "94%", tone: "good" as const },
+                  { k: "Accounts", v: "8", tone: "flat" as const },
+                ].map((m) => (
+                  <div key={m.k} className="rounded-[14px] bg-[#f4f7fa] px-3.5 py-3">
+                    <div className="text-[11.5px] text-[var(--muted)]">{m.k}</div>
+                    <div
+                      className={`mt-0.5 font-mono text-[21px] font-semibold ${
+                        m.tone === "bad"
+                          ? "text-[#a94848]"
+                          : m.tone === "good"
+                            ? "text-[var(--teal-deep)]"
+                            : "text-[var(--ink)]"
+                      }`}
+                    >
+                      {m.v}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-2.5 flex items-start gap-3 rounded-[14px] bg-[#fdf6ec] px-4 py-3.5">
+                <div className="mt-px flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full bg-[#f6ddba] text-[13px] font-bold text-[#9a6314]">
+                  1
+                </div>
+                <div>
+                  <div className="text-[13.5px] font-semibold text-[var(--ink)]">
+                    Start with utilization
+                  </div>
+                  <div className="text-[12.5px] leading-relaxed text-[var(--muted)]">
+                    Your cards sit at 72%. Getting under 30% is the single biggest lever on this
+                    report.
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 flex flex-col gap-2">
-              <div className="flex justify-between text-[12.5px]">
-                <span className="text-muted">Payment history</span>
-                <span className="font-semibold text-[#c2731a]">Needs attention</span>
-              </div>
-              <div className="flex justify-between text-[12.5px]">
-                <span className="text-muted">Open accounts</span>
-                <span className="font-semibold">8</span>
-              </div>
-              <div className="flex justify-between text-[12.5px]">
-                <span className="text-muted">Collections</span>
-                <span className="font-semibold text-[#c23e3e]">1 account</span>
-              </div>
+
+            {/* Elevated chip breaking the card edge — establishes the depth ladder. */}
+            <div className="absolute -bottom-4 left-6 rounded-full border border-[#e4e9f0] bg-white px-4 py-2 text-[12.5px] font-semibold text-[var(--ink)] shadow-[0_8px_20px_-6px_rgba(11,31,58,.22)]">
+              90-day plan ready
             </div>
           </div>
         </div>
@@ -246,7 +276,10 @@ export default function Home() {
 
       {/* pricing preview */}
       <div className="mx-auto max-w-[1120px] px-8 pb-2 pt-16">
-        <div className="flex flex-wrap items-center justify-between gap-8 rounded-[22px] bg-[linear-gradient(135deg,#0b1f3a,#134066)] p-11 px-12 text-white">
+        <div
+          className="flex flex-wrap items-center justify-between gap-8 rounded-[22px] p-11 px-12 text-white"
+          style={{ backgroundImage: "var(--grad-navy-mint)" }}
+        >
           <div>
             <h2 className="mb-2 text-[28px] tracking-[-.02em]">
               One report. One clear plan. <span className="text-mint-light">$5.</span>
@@ -259,15 +292,15 @@ export default function Home() {
           <div className="flex flex-none gap-3">
             <Link
               href="/upload"
-              className="rounded-xl bg-teal px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#0b8663]"
+              className="rounded-full bg-[var(--navy)] px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(8,21,39,.24),0_10px_24px_-8px_rgba(8,21,39,.45)] transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--navy)] active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
-              Start Free
+              Start free
             </Link>
             <Link
               href="/pricing"
-              className="rounded-xl border border-white/30 px-[22px] py-3.5 text-[15px] font-semibold text-white transition-colors hover:border-white/60"
+              className="rounded-full border border-[var(--navy)]/25 bg-white/90 px-[22px] py-3.5 text-[15px] font-semibold text-[var(--navy)] transition-colors duration-150 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--navy)] active:bg-[#eef2f7]"
             >
-              See Pricing
+              See pricing
             </Link>
           </div>
         </div>
