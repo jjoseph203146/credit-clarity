@@ -21,16 +21,24 @@ AI-powered credit report analysis SaaS. This repo's `.dc.html` files are the des
 Tables: `users`, `organizations`, `reports`, `payments`, `report_accounts`, `report_collections`, `report_inquiries`, `action_plans`, `ai_conversations`, `learning_progress`, `notifications`. Full field lists and relationships in `Credit Clarity Architecture.dc.html`. RLS scoped to `user_id` on every table. Reports start with `user_id = null` (anonymous, pre-signup) and get claimed at account creation.
 
 ## Core flow (build in this order)
+Landing → Upload → Extract text → Free preview → Stripe → Claude analysis → Store → View report → Download PDF → Ask questions.
+
 1. Anonymous upload → signed Supabase Storage upload → `reports` row, status `uploaded`
 2. Server-side parse job (pdf-parse, no AI): detect bureau, extract score/accounts/balances/limits/inquiries/collections → populate `report_accounts`/`report_collections`/`report_inquiries`, status `parsed`
 3. Free preview renders directly from parsed data — no AI call, no paywall
 4. Stripe Checkout ($5) → webhook sets `payments` paid, `reports.status = paid`
 5. Claude API analysis call: structured report JSON in → structured JSON out (schema/tool-use), populates `ai_summary`/`recommended_action`/`confidence` per account, `action_plans.tasks` (90-day plan), collection scripts
 6. Post-payment signup (Supabase Auth) claims the anonymous report onto the new `user_id`
-7. Goal questionnaire → follow-up Claude call re-ranks the action plan
-8. Dashboard + report viewer render from Postgres (no AI at render time)
+7. Dashboard + report viewer render from Postgres (no AI at render time)
+8. PDF export: client-side render of the same data (reuse `doc-page` structure) → browser print
 9. Clarity AI chat: each message = one Claude call scoped with report JSON + conversation history, logged to `ai_conversations`
-10. PDF export: client-side render of the same data (reuse `doc-page` structure) → browser print
+
+## Cut pre-launch (restore from git when needed)
+Learning Center, Progress, Goals & Simulator, Notifications, the Billing page, and a custom admin dashboard were all removed before launch. Use the Stripe, Supabase, and Vercel dashboards for ops until a custom admin is genuinely needed.
+
+Goal is no longer its own section or a standalone questionnaire step — Clarity AI asks "What's your goal?" inside the report generation flow.
+
+Launch sidebar is exactly: **Dashboard · My Reports · Clarity AI · Profile**. Action Plan stays as a feature but is reached from the dashboard and report, not top-level nav.
 
 ## Product rules (do not violate)
 - Not credit repair. Never claim guaranteed score improvement or dispute-for-you.

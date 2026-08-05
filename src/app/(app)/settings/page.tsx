@@ -57,12 +57,6 @@ export default async function SettingsPage() {
     .eq("user_id", user.id)
     .is("deleted_at", null);
 
-  const { data: payments } = await supabase
-    .from("payments")
-    .select("id, created_at, amount_cents, status")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
   const email = profile?.email ?? user.email ?? "";
   const fullName = profile?.full_name ?? null;
   const memberSince = profile?.created_at
@@ -81,9 +75,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-[720px] px-9 pb-[72px] pt-7">
-      <h1 className="mb-5 text-2xl font-semibold tracking-[-.02em]">
-        Profile, Settings &amp; Billing
-      </h1>
+      <h1 className="mb-5 text-2xl font-semibold tracking-[-.02em]">Profile</h1>
 
       {/* Profile */}
       <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
@@ -120,14 +112,7 @@ export default async function SettingsPage() {
           {CONTEXT_ROWS.map((row) => (
             <div key={row.label} className="flex justify-between">
               <span className="text-[var(--muted)]">{row.label}</span>
-              <span className="font-semibold">
-                {row.value}
-                {row.label === "Financial goal" && (
-                  <a href="/goals" className="ml-1.5 cursor-pointer font-semibold text-[var(--teal)]">
-                    · change
-                  </a>
-                )}
-              </span>
+              <span className="font-semibold">{row.value}</span>
             </div>
           ))}
         </div>
@@ -143,60 +128,6 @@ export default async function SettingsPage() {
       <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
         <div className="mb-4 text-[15px] font-semibold">Notifications</div>
         <NotificationPreferences />
-      </div>
-
-      {/* Billing */}
-      <div className="mb-3.5 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-        <div className="rounded-[18px] border border-[var(--border)] bg-white p-6">
-          <div className="mb-1.5 text-xs font-medium text-[var(--muted)]">Current plan</div>
-          <div className="text-[17px] font-semibold">Pay per report</div>
-          <div className="mt-1 text-[13px] text-[var(--muted)]">$5 per analysis · no subscription</div>
-        </div>
-        <div className="rounded-[18px] bg-gradient-to-br from-[var(--navy)] to-[#134066] p-6 text-white">
-          <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-xs text-[#8fa3ba]">Upgrade</span>
-            <span className="rounded-full bg-[var(--teal)] px-2 py-0.5 text-[10px] font-bold">
-              SOON
-            </span>
-          </div>
-          <div className="text-[17px] font-semibold">Clarity Plus — $9/mo</div>
-          <div className="mt-1 text-[13px] text-[#b9c8da]">
-            Quarterly re-analysis + unlimited chat
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-3.5 rounded-[18px] border border-[var(--border)] bg-white p-6">
-        <div className="mb-3.5 flex items-center justify-between">
-          <span className="text-[15px] font-semibold">Payment history</span>
-          <span className="rounded-lg bg-[#f4f6f9] px-2.5 py-1 text-[11.5px] font-semibold text-[var(--muted)]">
-            via Stripe
-          </span>
-        </div>
-        {payments && payments.length > 0 ? (
-          <div className="flex flex-col">
-            {payments.map((p) => (
-              <div
-                key={p.id}
-                className="grid grid-cols-[1.2fr_1fr_.6fr] items-center gap-3 border-b border-[#eef2f7] py-3.5 text-[13.5px] last:border-b-0"
-              >
-                <span className="font-semibold">
-                  {new Date(p.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-                <span className="text-[var(--muted)] capitalize">{p.status}</span>
-                <span className="font-mono font-semibold">
-                  ${(p.amount_cents / 100).toFixed(2)}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-[13px] text-[var(--muted)]">No payments yet.</div>
-        )}
       </div>
 
       {/* Connected services */}

@@ -13,19 +13,17 @@ export interface NavItem {
   dot?: number;
 }
 
+// Launch sidebar. Learning Center, Progress, Goals & Simulator, and
+// Notifications were cut pre-launch — see the deletion commit to restore.
+// Action Plan is reachable from the dashboard and report, not top-level nav.
 export const navMain: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "◧" },
   { label: "My Reports", href: "/reports", icon: "⧉" },
-  { label: "Action Plan", href: "/plan", icon: "☑" },
   { label: "Clarity AI", href: "/chat", icon: "✦" },
-  { label: "Learning Center", href: "/learn", icon: "◈" },
-  { label: "Progress", href: "/progress", icon: "↗" },
-  { label: "Goals & Simulator", href: "/goals", icon: "◎" },
-  { label: "Notifications", href: "/notifications", icon: "◍", dot: 5 },
 ];
 
 export const navAccount: NavItem[] = [
-  { label: "Profile, Settings & Billing", href: "/settings", icon: "⚙" },
+  { label: "Profile", href: "/settings", icon: "⚙" },
 ];
 
 export const currentUser = {

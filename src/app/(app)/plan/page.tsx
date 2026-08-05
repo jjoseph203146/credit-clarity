@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { Button } from "@/components/ui/button";
 import { PlanBoard } from "@/components/app/plan-board";
 import type { ActionPlanTask, Goal } from "@/lib/supabase/types";
 
@@ -87,9 +85,6 @@ export default async function PlanPage() {
             <strong className="text-[var(--ink)]">{goalLabel}</strong>
           </div>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/goals">Change Goal</Link>
-        </Button>
       </div>
 
       {plan ? (

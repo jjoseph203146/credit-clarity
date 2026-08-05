@@ -60,12 +60,6 @@ export function ExplainPanel({
         </div>
         <div className="flex gap-2">
           <Link
-            href="/learn"
-            className="rounded-[9px] bg-[#e6f5ef] px-[14px] py-[9px] text-[12px] font-bold text-[var(--teal-deep)]"
-          >
-            Lesson: {entry.lesson} →
-          </Link>
-          <Link
             href="/chat"
             className="rounded-[9px] border-[1.5px] border-[#dbe3ec] px-[14px] py-[9px] text-[12px] font-semibold hover:border-[var(--navy)]"
           >

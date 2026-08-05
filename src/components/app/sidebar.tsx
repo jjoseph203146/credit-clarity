@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -83,9 +84,7 @@ export function AppSidebar() {
   return (
     <div className="sticky top-0 flex h-screen w-[224px] flex-none flex-col overflow-y-auto bg-[var(--navy-deep)] p-[18px_12px] text-[#b9c8da]">
       <div className="mb-[18px] flex items-center gap-[9px] px-[10px] py-[6px]">
-        <div className="flex h-[26px] w-[26px] items-center justify-center rounded-[8px] bg-gradient-to-br from-[var(--teal)] to-[var(--mint)]">
-          <div className="h-[10px] w-[10px] rounded-full bg-white" />
-        </div>
+        <Image src="/logo.png" alt="" width={309} height={235} className="h-[28px] w-auto" />
         <span className="text-[15px] font-bold tracking-[-0.01em] text-white">Credit Clarity</span>
       </div>
 

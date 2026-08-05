@@ -7,11 +7,7 @@ export const PROTECTED_ROUTES = [
   "/dashboard",
   "/reports",
   "/plan",
-  "/progress",
   "/chat",
-  "/learn",
-  "/goals",
-  "/notifications",
   "/settings",
 ] as const;
 
