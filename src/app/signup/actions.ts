@@ -20,6 +20,44 @@ export async function signup(formData: FormData) {
 
   const supabase = await createClient();
 
+  // Checkout now routes already-signed-in payers straight to /processing,
+  // but this page can still be reached while authenticated (stale link,
+  // back button). Don't run signUp() again in that case — it just errors
+  // on the existing email. Claim the report for the current session and
+  // continue instead of creating a second account.
+  const {
+    data: { user: existingUser },
+  } = await supabase.auth.getUser();
+
+  if (existingUser) {
+    if (reportId) {
+      const admin = createAdminClient();
+      const { error: claimError } = await admin
+        .from("reports")
+        .update({ user_id: existingUser.id })
+        .eq("id", reportId)
+        .is("user_id", null);
+
+      if (claimError) {
+        redirect(`/signup?error=${encodeURIComponent(claimError.message)}`);
+      }
+
+      const { error: paymentClaimError } = await admin
+        .from("payments")
+        .update({ user_id: existingUser.id })
+        .eq("report_id", reportId);
+      if (paymentClaimError) {
+        console.warn(
+          `[signup] failed to backfill payments.user_id for report ${reportId}: ${paymentClaimError.message}`,
+        );
+      }
+
+      redirect(`/processing?reportId=${reportId}`);
+    }
+
+    redirect("/dashboard");
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
