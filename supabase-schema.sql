@@ -212,3 +212,38 @@ create policy "notifications owner" on notifications for all using (user_id = au
 -- Note: inserts/updates on reports & report_* detail tables during the anonymous
 -- upload → parse → analyze pipeline should run via the Supabase service-role key
 -- (server-side only), bypassing RLS, until the report is claimed at signup.
+
+-- ============ STORAGE & RETENTION ============
+-- Mirrors supabase/migrations/0003_storage_limits_and_cleanup.sql. See that
+-- file for the full rationale.
+
+-- Private bucket with a real server-side size/MIME ceiling — the 15MB
+-- PDF-only check in src/app/upload/page.tsx is client-side only.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('reports', 'reports', false, 15728640, array['application/pdf'])
+on conflict (id) do update
+  set public             = false,
+      file_size_limit    = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+-- Retention for abandoned anonymous uploads. Returns storage_paths so the
+-- caller (src/app/api/cleanup/route.ts) can remove the Storage objects.
+-- Never touches claimed rows (user_id is not null).
+create or replace function delete_stale_anonymous_reports(older_than interval default interval '48 hours')
+returns table (id uuid, storage_path text)
+language sql
+security definer
+set search_path = public
+as $$
+  delete from reports
+  where user_id is null
+    and created_at < now() - older_than
+  returning reports.id, reports.storage_path;
+$$;
+
+revoke all on function delete_stale_anonymous_reports(interval) from public, anon, authenticated;
+grant execute on function delete_stale_anonymous_reports(interval) to service_role;
+
+create index if not exists idx_reports_anonymous_created_at
+  on reports (created_at)
+  where user_id is null;

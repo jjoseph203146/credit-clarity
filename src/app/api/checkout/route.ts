@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { clientIp, hit, tooManyRequests } from "@/lib/rate-limit";
+
+// Unauthenticated by design (payment precedes signup for new users). Each
+// call creates a live Stripe Checkout Session plus a `payments` row, so
+// unbounded access means unbounded junk in both systems.
+const CHECKOUT_LIMIT = 10;
+const CHECKOUT_WINDOW_MS = 10 * 60 * 1000;
 
 // Step 4 of the core flow (BUILD.md): Stripe Checkout ($5 one-time payment).
 //
@@ -11,6 +18,13 @@ import { createClient } from "@/lib/supabase/server";
 // webhook (src/app/api/webhooks/stripe/route.ts) marks both `succeeded`
 // once Stripe confirms payment.
 export async function POST(req: Request) {
+  const limit = hit(
+    `checkout:${clientIp(req)}`,
+    CHECKOUT_LIMIT,
+    CHECKOUT_WINDOW_MS,
+  );
+  if (!limit.ok) return tooManyRequests(limit);
+
   // Constructed inside the handler (not at module scope) so this route
   // doesn't require STRIPE_SECRET_KEY to be set at build time — only when
   // the route actually runs, matching the lazy-client pattern in

@@ -221,6 +221,14 @@ export interface Database {
       notifications: Table<Notification>;
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      // supabase/migrations/0003_storage_limits_and_cleanup.sql — deletes
+      // abandoned anonymous reports and returns their storage_paths so the
+      // caller (src/app/api/cleanup/route.ts) can remove the Storage objects.
+      delete_stale_anonymous_reports: {
+        Args: { older_than?: string };
+        Returns: { id: string; storage_path: string }[];
+      };
+    };
   };
 }

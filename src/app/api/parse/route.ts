@@ -6,6 +6,12 @@ import { extractScore } from "@/lib/parsing/extract-score";
 import { extractAccounts } from "@/lib/parsing/extract-accounts";
 import { extractCollections } from "@/lib/parsing/extract-collections";
 import { extractInquiries } from "@/lib/parsing/extract-inquiries";
+import { clientIp, hit, tooManyRequests } from "@/lib/rate-limit";
+
+// Unauthenticated and CPU-heavy (downloads the PDF and runs pdf-parse on
+// it), so it gets a tighter ceiling than the routes that only touch the DB.
+const PARSE_LIMIT = 10;
+const PARSE_WINDOW_MS = 10 * 60 * 1000;
 
 // Step 2 of the core flow (BUILD.md): server-side parse job.
 //
@@ -36,6 +42,9 @@ import { extractInquiries } from "@/lib/parsing/extract-inquiries";
 // free-preview screen are both designed to work from whatever subset of
 // structured fields (plus the raw free text) actually got extracted.
 export async function POST(req: Request) {
+  const limit = hit(`parse:${clientIp(req)}`, PARSE_LIMIT, PARSE_WINDOW_MS);
+  if (!limit.ok) return tooManyRequests(limit);
+
   const { reportId } = (await req.json()) as { reportId: string };
 
   const admin = createAdminClient();
