@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 // Step 4 of the core flow (BUILD.md): Stripe Checkout ($5 one-time payment).
 //
@@ -22,6 +23,34 @@ export async function POST(req: Request) {
 
   const origin = req.headers.get("origin")!;
 
+  // If the buyer is already signed in, claim the report onto their account
+  // now and send them straight back to /processing after payment instead of
+  // through /signup — otherwise an existing user gets forced through
+  // account creation again (and signUp() errors on their already-used
+  // email).
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const admin = createAdminClient();
+
+  if (user) {
+    const { error: claimError } = await admin
+      .from("reports")
+      .update({ user_id: user.id })
+      .eq("id", reportId)
+      .is("user_id", null);
+
+    if (claimError) {
+      return NextResponse.json({ error: claimError.message }, { status: 500 });
+    }
+  }
+
+  const successPath = user
+    ? `/processing?reportId=${reportId}`
+    : `/signup?reportId=${reportId}`;
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [
@@ -36,14 +65,13 @@ export async function POST(req: Request) {
         quantity: 1,
       },
     ],
-    success_url: `${origin}/signup?reportId=${reportId}`,
+    success_url: `${origin}${successPath}`,
     cancel_url: `${origin}/preview`,
   });
 
-  const admin = createAdminClient();
-
   const { error: insertError } = await admin.from("payments").insert({
     report_id: reportId,
+    user_id: user?.id ?? null,
     stripe_session_id: session.id,
     amount_cents: 500,
     status: "pending",
