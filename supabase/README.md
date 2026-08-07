@@ -9,15 +9,22 @@ on every table.
 | File | What it does |
 | --- | --- |
 | `0001_init.sql` | Base schema — tables, indexes, RLS policies. |
-| `0002_security_hardening.sql` | **Empty placeholder — applies nothing.** See below. |
 | `0003_storage_limits_and_cleanup.sql` | `reports` bucket size/MIME limits + anonymous-report retention function. |
 
-### ⚠️ `0002_security_hardening.sql` is a stub
+`0002_security_hardening.sql` used to sit between these two. It only ever
+contained the literal text `ok` and applied no SQL — a placeholder nobody
+filled in, not a migration that failed. `verify-schema.sql` confirmed the live
+database has every table, RLS policy, and bucket limit this repo expects, so
+the stub was removed rather than kept as a phantom gap. The numbering skip is
+deliberate; don't reuse `0002`.
 
-The file contains the literal text `ok` and applies no SQL. If a database was
-migrated from this folder, that step silently no-opped. Diff your live schema
-against `0001_init.sql` before trusting it, and either write the intended
-hardening into `0002` or delete it so the gap isn't mistaken for applied work.
+## Verifying a database
+
+`verify-schema.sql` is a read-only check (catalog `SELECT`s only, safe against
+production) that every table exists, RLS is enabled on each, every named policy
+is present, the storage bucket limits are applied, and the retention function
+exists. Every row it returns should read `OK`. Run it after applying migrations
+to a new environment.
 
 ### `0003` — storage limits and retention
 
