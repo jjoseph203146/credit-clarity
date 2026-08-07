@@ -72,17 +72,15 @@ done, and most take minutes.
 
 These are judgement calls, not tasks. Each one is a real liability question.
 
-- [ ] **Store-forever vs store-temporarily.** Today: claimed reports are kept
-      until the user deletes them; unclaimed uploads are auto-deleted after 48
-      hours. The alternative — generate the analysis, then let the user
-      explicitly choose to save the underlying report — materially lowers the
-      cost of a breach, because the most sensitive artifact stops being
-      retained by default. Worth deciding deliberately rather than by omission.
-- [ ] **Does a refund revoke access to the analysis?** The webhook records
-      `refunded` but deliberately does not delete or hide anything, on the
-      grounds that silently removing something someone paid for is the worse
-      default. If the policy should be otherwise, the hook is `settle()` in
-      `src/app/api/webhooks/stripe/route.ts`.
+- [x] **DECIDED — data is kept until the client deletes it.** Claimed reports
+      are retained until the user deletes the report or their account;
+      unclaimed uploads are still auto-deleted after 48 hours. This is what the
+      Privacy Policy already states, and the code already implements. No change
+      required.
+- [x] **DECIDED — a refund does not revoke access.** Someone who is refunded
+      keeps their analysis. This is the existing behaviour: the webhook records
+      `refunded` and changes nothing else. Documented in `settle()` in
+      `src/app/api/webhooks/stripe/route.ts`. No change required.
 - [ ] **Reconcile `deleted_at` with hard deletes.** Seven pages filter
       `.is("deleted_at", null)`, but nothing ever sets the column — deletion is
       a hard delete. The filters are harmless dead weight today and actively
@@ -93,17 +91,13 @@ These are judgement calls, not tasks. Each one is a real liability question.
 
 ## 3. Product gaps
 
-- [ ] **`/questionnaire` is disconnected, and it takes personalization with
-      it.** This is bigger than a dead route. Nothing links to the page, it
-      persists nothing, and it redirects to `/processing` without a `reportId`
-      (an infinite spinner). Downstream: **`users.goal`, `users.timeline` and
-      `users.challenge` are never written by anything.** So
-      `action_plans.goal_snapshot` is always null, `/goals` shows no goal, and
-      every action plan is generic despite `src/lib/analyze.ts` being built to
-      personalize from it. The Privacy Policy also tells users their
-      questionnaire answers personalize their plan — which is not currently
-      true. Either wire it up (into signup or first dashboard visit) or remove
-      the route and the privacy claim.
+- [x] **DONE — `/questionnaire` is wired into the funnel.** It now sits between
+      the free preview and checkout, writes to the report (migration 0006), and
+      is copied onto the users row when the report is claimed. It had to run
+      before payment, not after signup: the webhook starts the analysis the
+      moment payment succeeds, which in the anonymous flow is before any
+      account exists. `action_plans.goal_snapshot` and `/goals` now populate,
+      and the Privacy Policy's claim about questionnaire answers is true.
 - [ ] **An abandoned checkout leaves a report on the dashboard.** Since
       checkout claims the report up front for signed-in users, someone who
       clicks Pay and then abandons Stripe ends up with a `parsed` report in

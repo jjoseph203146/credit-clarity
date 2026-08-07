@@ -280,3 +280,15 @@ alter table audit_log enable row level security;
 alter table payments add column if not exists stripe_payment_intent_id text;
 create index if not exists idx_payments_stripe_payment_intent_id on payments (stripe_payment_intent_id);
 create index if not exists idx_payments_stripe_session_id on payments (stripe_session_id);
+
+-- ============ REPORT QUESTIONNAIRE ============
+-- Mirrors supabase/migrations/0006_report_questionnaire.sql. The analysis runs
+-- before signup in the anonymous flow, so these must live on the report to
+-- reach it; they are copied onto the users row when the report is claimed.
+alter table reports
+  add column if not exists goal text
+    check (goal in ('build_credit','recover_mistakes','pay_down_debt','major_purchase','understand_finances')),
+  add column if not exists timeline text
+    check (timeline in ('30_days','90_days','6_months','long_term')),
+  add column if not exists challenge text
+    check (challenge in ('debt','missed_payments','collections','low_score','lack_of_understanding'));

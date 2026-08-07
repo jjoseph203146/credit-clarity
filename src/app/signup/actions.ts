@@ -33,14 +33,32 @@ export async function signup(formData: FormData) {
   if (existingUser) {
     if (reportId) {
       const admin = createAdminClient();
-      const { error: claimError } = await admin
+      const { data: claimed, error: claimError } = await admin
         .from("reports")
         .update({ user_id: existingUser.id })
         .eq("id", reportId)
-        .is("user_id", null);
+        .is("user_id", null)
+        .select()
+        .maybeSingle();
 
       if (claimError) {
         redirect(`/signup?error=${encodeURIComponent(claimError.message)}`);
+      }
+
+      if (claimed && (claimed.goal || claimed.timeline || claimed.challenge)) {
+        const { error: profileError } = await admin
+          .from("users")
+          .update({
+            goal: claimed.goal,
+            timeline: claimed.timeline,
+            challenge: claimed.challenge,
+          })
+          .eq("id", existingUser.id);
+        if (profileError) {
+          console.warn(
+            `[signup] failed to copy questionnaire answers onto user ${existingUser.id}: ${profileError.message}`,
+          );
+        }
       }
 
       const { error: paymentClaimError } = await admin
@@ -121,6 +139,25 @@ export async function signup(formData: FormData) {
       );
     } else {
       claimedReportId = claimedReport.id;
+
+      // The questionnaire runs before checkout, so the answers live on the
+      // report. Copy them onto the account now that one exists — /goals and
+      // any future report read them from there.
+      if (claimedReport.goal || claimedReport.timeline || claimedReport.challenge) {
+        const { error: profileError } = await admin
+          .from("users")
+          .update({
+            goal: claimedReport.goal,
+            timeline: claimedReport.timeline,
+            challenge: claimedReport.challenge,
+          })
+          .eq("id", data.user.id);
+        if (profileError) {
+          console.warn(
+            `[signup] failed to copy questionnaire answers onto user ${data.user.id}: ${profileError.message}`,
+          );
+        }
+      }
 
       // `payments.user_id` is null at insert time (checkout happens before
       // an account exists) and nothing else ever backfills it — without

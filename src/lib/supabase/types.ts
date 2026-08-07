@@ -94,6 +94,12 @@ export type Report = {
   credit_score: number | null;
   clarity_score: number | null;
   status: ReportStatus;
+  // Captured between the free preview and checkout, so runAnalysis() can read
+  // them — see supabase/migrations/0006_report_questionnaire.sql. Copied onto
+  // the users row when the report is claimed.
+  goal: Goal | null;
+  timeline: Timeline | null;
+  challenge: Challenge | null;
   storage_path: string;
   error_message: string | null;
   deleted_at: string | null;

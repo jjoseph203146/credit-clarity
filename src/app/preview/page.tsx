@@ -352,7 +352,7 @@ function PreviewPageInner() {
                             {f.learnMore}
                             <div className="mt-2">
                               <Link
-                                href={`/checkout?reportId=${report.id}`}
+                                href={`/questionnaire?reportId=${report.id}`}
                                 className="font-semibold text-teal"
                               >
                                 🔒 View my personalized guidance
@@ -467,7 +467,7 @@ function PreviewPageInner() {
           </div>
           <div className="flex flex-none flex-col items-center gap-2">
             <Link
-              href={`/checkout?reportId=${report.id}`}
+              href={`/questionnaire?reportId=${report.id}`}
               className="rounded-xl bg-teal px-[26px] py-[15px] text-base font-semibold text-white shadow-[0_8px_24px_rgba(14,159,119,.4)] transition-colors hover:bg-[#0b8663]"
             >
               Unlock My Complete Credit Roadmap — $5

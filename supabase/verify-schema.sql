@@ -116,7 +116,20 @@ where table_schema = 'public'
 
 union all
 
--- ---------- 6. Retention function (migration 0003) ----------
+-- ---------- 6. reports questionnaire columns (migration 0006) ----------
+select
+  'column',
+  'reports.' || expected.name,
+  case when c.column_name is null then 'MISSING' else 'OK' end
+from (values ('goal'), ('timeline'), ('challenge')) as expected(name)
+left join information_schema.columns c
+  on c.table_schema = 'public'
+ and c.table_name = 'reports'
+ and c.column_name = expected.name
+
+union all
+
+-- ---------- 7. Retention function (migration 0003) ----------
 select
   'function',
   'delete_stale_anonymous_reports',
