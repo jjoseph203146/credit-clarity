@@ -247,3 +247,36 @@ grant execute on function delete_stale_anonymous_reports(interval) to service_ro
 create index if not exists idx_reports_anonymous_created_at
   on reports (created_at)
   where user_id is null;
+
+-- ============ AUDIT LOG ============
+-- Mirrors supabase/migrations/0005_audit_log.sql.
+
+create table audit_log (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references users(id) on delete set null,
+  action text not null check (action in (
+    'report_uploaded','report_parsed','report_purchased','report_analyzed',
+    'report_downloaded','report_deleted','account_deleted',
+    'payment_refunded','payment_failed'
+  )),
+  -- Intentionally not a foreign key: the record must outlive the report.
+  report_id uuid,
+  ip text,
+  user_agent text,
+  metadata jsonb not null default '{}',
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_audit_log_user_id on audit_log (user_id);
+create index if not exists idx_audit_log_report_id on audit_log (report_id);
+create index if not exists idx_audit_log_created_at on audit_log (created_at desc);
+create index if not exists idx_audit_log_action on audit_log (action);
+
+-- RLS on, no policies: service-role access only.
+alter table audit_log enable row level security;
+
+-- ============ PAYMENT CORRELATION ============
+-- Mirrors supabase/migrations/0004_payment_intent_correlation.sql.
+alter table payments add column if not exists stripe_payment_intent_id text;
+create index if not exists idx_payments_stripe_payment_intent_id on payments (stripe_payment_intent_id);
+create index if not exists idx_payments_stripe_session_id on payments (stripe_session_id);

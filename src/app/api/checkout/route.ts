@@ -57,7 +57,11 @@ export async function POST(req: Request) {
       .is("user_id", null);
 
     if (claimError) {
-      return NextResponse.json({ error: claimError.message }, { status: 500 });
+      console.error(`[checkout] failed to claim report ${reportId}:`, claimError);
+      return NextResponse.json(
+        { error: "We couldn't start checkout. Please try again — you have not been charged." },
+        { status: 500 },
+      );
     }
   }
 
@@ -92,7 +96,11 @@ export async function POST(req: Request) {
   });
 
   if (insertError) {
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
+    console.error("[checkout] failed to record payment row:", insertError);
+    return NextResponse.json(
+      { error: "We couldn't start checkout. Please try again — you have not been charged." },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ url: session.url });

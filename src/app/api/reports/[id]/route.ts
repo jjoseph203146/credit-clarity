@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
+import { audit } from "@/lib/audit";
 
 // GET /api/reports/[id] — fetches a report plus its accounts/collections/
 // inquiries. Supports both the anonymous pre-signup flow (free preview,
@@ -54,13 +55,7 @@ export async function GET(
 
   if (accountsError || collectionsError || inquiriesError) {
     return NextResponse.json(
-      {
-        error:
-          accountsError?.message ??
-          collectionsError?.message ??
-          inquiriesError?.message ??
-          "Failed to fetch report data",
-      },
+      { error: "We couldn't load your report. Please try again." },
       { status: 500 },
     );
   }
@@ -113,7 +108,11 @@ export async function DELETE(
     .remove([report.storage_path]);
 
   if (storageError) {
-    return NextResponse.json({ error: storageError.message }, { status: 500 });
+    console.error(`[reports] failed to remove storage for ${report.id}:`, storageError);
+    return NextResponse.json(
+      { error: "We couldn't delete your report. Please try again." },
+      { status: 500 },
+    );
   }
 
   const { error: deleteError } = await admin
@@ -122,8 +121,19 @@ export async function DELETE(
     .eq("id", report.id);
 
   if (deleteError) {
-    return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    console.error(`[reports] failed to delete report ${report.id}:`, deleteError);
+    return NextResponse.json(
+      { error: "We couldn't delete your report. Please try again." },
+      { status: 500 },
+    );
   }
+
+  void audit({
+    action: "report_deleted",
+    userId: user.id,
+    reportId: report.id,
+    req: _req,
+  });
 
   return NextResponse.json({ deleted: true });
 }

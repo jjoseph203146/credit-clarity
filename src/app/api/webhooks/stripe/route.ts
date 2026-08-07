@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runAnalysis } from "@/lib/analyze";
+import { audit } from "@/lib/audit";
 
 // Stripe webhook: keeps `payments.status` and `reports.status` in sync with
 // what actually happened in Stripe, and kicks off the AI analysis once a
@@ -120,6 +121,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    void audit({
+      action: status === "refunded" ? "payment_refunded" : "payment_failed",
+      reportId: payment.report_id,
+      req,
+      metadata: { label },
+    });
+
     console.warn(`[stripe] payment ${payment.id} marked ${status} (${label})`);
     return NextResponse.json({ received: true, status });
   }
@@ -178,6 +186,14 @@ export async function POST(req: Request) {
         console.error(`[stripe] failed to mark report ${payment.report_id} paid:`, reportError);
         return NextResponse.json({ error: reportError.message }, { status: 500 });
       }
+
+      void audit({
+        action: "report_purchased",
+        userId: payment.user_id,
+        reportId: payment.report_id,
+        req,
+        metadata: { amount_cents: payment.amount_cents, stripe_session_id: session.id },
+      });
 
       // Step 5 of the core flow (BUILD.md): analysis runs in-process right
       // after payment succeeds. A failure here must NOT fail the webhook —

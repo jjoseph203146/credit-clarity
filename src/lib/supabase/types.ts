@@ -3,6 +3,28 @@
 
 export type Bureau = "experian" | "equifax" | "transunion";
 export type ReportStatus = "uploaded" | "parsed" | "paid" | "analyzed" | "error";
+export type AuditAction =
+  | "report_uploaded"
+  | "report_parsed"
+  | "report_purchased"
+  | "report_analyzed"
+  | "report_downloaded"
+  | "report_deleted"
+  | "account_deleted"
+  | "payment_refunded"
+  | "payment_failed";
+
+export type AuditLog = {
+  id: string;
+  user_id: string | null;
+  action: AuditAction;
+  report_id: string | null;
+  ip: string | null;
+  user_agent: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
 export type PaymentStatus = "pending" | "succeeded" | "failed" | "refunded";
 export type AccountType =
   | "credit_card"
@@ -223,6 +245,7 @@ export interface Database {
       ai_conversations: Table<AiConversation>;
       learning_progress: Table<LearningProgress>;
       notifications: Table<Notification>;
+      audit_log: Table<AuditLog>;
     };
     Views: Record<string, never>;
     Functions: {

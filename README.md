@@ -104,7 +104,17 @@ only by whoever holds the unguessable UUID, and auto-deleted after 48 hours.
   tags and instruct the model to treat it as data, never instructions. Keep
   that framing on any new AI call that touches report content.
 - **Rate limits** on the unauthenticated routes (`/api/upload`, `/api/parse`,
-  `/api/checkout`) — see the deployment caveat in `src/lib/rate-limit.ts`.
+  `/api/checkout`) and per-user on chat — see the deployment caveat in
+  `src/lib/rate-limit.ts`.
+- **Cost controls.** `src/lib/limits.ts` caps parsed rows per report, field
+  lengths, prompt size, chat message length and replayed history. Without
+  these one unusual PDF can become an unbounded Anthropic bill.
+- **Audit log.** Uploads, purchases, analyses, downloads and deletions are
+  recorded to `audit_log` (service-role only, never user-visible). See
+  `src/lib/audit.ts`.
+- **User-facing errors are generic.** Raw Supabase/Stripe/Anthropic messages
+  go to the logs; users get plain-language text. Keep it that way — provider
+  errors leak schema detail and mean nothing to the person reading them.
 - **Security claims are commitments.** Copy on `/security`, `/upload` and the
   Privacy Policy is deliberately worded to attribute infrastructure guarantees
   to the provider that actually makes them. Don't upgrade those claims without
@@ -140,7 +150,8 @@ Tracked but not yet done:
   PostCSS issues; the fix requires a breaking upgrade to Next 16.
 - **No malware scanning.** Uploads are validated by extension, size, declared
   MIME type and `%PDF-` header, but not scanned for malicious payloads.
-- **No error tracking.** Failures reach `console.error` and nothing else.
+- **No error tracking.** Failures reach `console.error` and the audit log,
+  but nothing pages anyone — no Sentry or equivalent.
 - **Rate limiting is per-instance** and resets on cold start.
 - **`/questionnaire` is orphaned** — nothing links to it, it persists nothing,
   and it redirects to `/processing` without a `reportId`.

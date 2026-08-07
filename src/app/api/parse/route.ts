@@ -7,6 +7,14 @@ import { extractAccounts } from "@/lib/parsing/extract-accounts";
 import { extractCollections } from "@/lib/parsing/extract-collections";
 import { extractInquiries } from "@/lib/parsing/extract-inquiries";
 import { clientIp, hit, tooManyRequests } from "@/lib/rate-limit";
+import { audit } from "@/lib/audit";
+import {
+  MAX_ACCOUNTS,
+  MAX_COLLECTIONS,
+  MAX_INQUIRIES,
+  clampField,
+  clampRows,
+} from "@/lib/limits";
 
 // Unauthenticated and CPU-heavy (downloads the PDF and runs pdf-parse on
 // it), so it gets a tighter ceiling than the routes that only touch the DB.
@@ -57,7 +65,7 @@ export async function POST(req: Request) {
 
   if (reportError || !report) {
     return NextResponse.json(
-      { error: reportError?.message ?? "Report not found" },
+      { error: "We couldn't find that upload. Please upload your report again." },
       { status: 404 },
     );
   }
@@ -74,8 +82,9 @@ export async function POST(req: Request) {
     .download(report.storage_path);
 
   if (downloadError || !file) {
+    console.error(`[parse] report ${reportId}: storage download failed:`, downloadError);
     return NextResponse.json(
-      { error: downloadError?.message ?? "Report file not found in storage" },
+      { error: "We couldn't read your uploaded file. Please try uploading it again." },
       { status: 404 },
     );
   }
@@ -116,9 +125,28 @@ export async function POST(req: Request) {
 
     const bureau = detectBureau(rawText);
     const creditScore = extractScore(rawText);
-    const accounts = extractAccounts(rawText);
-    const collections = extractCollections(rawText);
-    const inquiries = extractInquiries(rawText);
+
+    // Cap what a single PDF can produce. An unusual layout can make the
+    // regex heuristics match hundreds of spurious rows, and every one is
+    // later serialized into a billed Claude prompt — so bound it here, at
+    // the point of extraction, rather than downstream.
+    const accountsRaw = clampRows(extractAccounts(rawText), MAX_ACCOUNTS);
+    const collectionsRaw = clampRows(extractCollections(rawText), MAX_COLLECTIONS);
+    const inquiriesRaw = clampRows(extractInquiries(rawText), MAX_INQUIRIES);
+
+    const totalDropped =
+      accountsRaw.dropped + collectionsRaw.dropped + inquiriesRaw.dropped;
+    if (totalDropped > 0) {
+      console.warn(
+        `[parse] report ${reportId}: dropped ${totalDropped} parsed rows over the per-report cap ` +
+          `(accounts ${accountsRaw.dropped}, collections ${collectionsRaw.dropped}, inquiries ${inquiriesRaw.dropped}) — ` +
+          `likely an unusual layout the heuristics over-matched.`,
+      );
+    }
+
+    const accounts = accountsRaw.kept;
+    const collections = collectionsRaw.kept;
+    const inquiries = inquiriesRaw.kept;
 
     const extractedAnything =
       bureau != null ||
@@ -144,13 +172,13 @@ export async function POST(req: Request) {
       const { error: accountsError } = await admin.from("report_accounts").insert(
         accounts.map((account) => ({
           report_id: reportId,
-          name: account.name,
+          name: clampField(account.name),
           type: account.type,
           status: account.status,
           balance: account.balance,
           credit_limit: account.credit_limit,
           utilization: account.utilization,
-          payment_history: account.payment_history,
+          payment_history: clampField(account.payment_history),
           opened_date: account.opened_date,
         })),
       );
@@ -167,8 +195,8 @@ export async function POST(req: Request) {
         .insert(
           collections.map((collection) => ({
             report_id: reportId,
-            original_creditor: collection.original_creditor,
-            agency_name: collection.agency_name,
+            original_creditor: clampField(collection.original_creditor),
+            agency_name: clampField(collection.agency_name),
             amount: collection.amount,
             opened_date: collection.opened_date,
             first_delinquency_date: collection.first_delinquency_date,
@@ -188,8 +216,8 @@ export async function POST(req: Request) {
         .insert(
           inquiries.map((inquiry) => ({
             report_id: reportId,
-            lender_name: inquiry.lender_name,
-            inquiry_type: inquiry.inquiry_type,
+            lender_name: clampField(inquiry.lender_name),
+            inquiry_type: clampField(inquiry.inquiry_type),
             inquiry_date: inquiry.inquiry_date,
             impact: inquiry.impact,
           })),
@@ -211,8 +239,25 @@ export async function POST(req: Request) {
       .eq("id", reportId);
 
     if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
+      console.error(`[parse] report ${reportId}: status update failed:`, updateError);
+      return NextResponse.json(
+        { error: "We couldn't finish processing your report. Please try again." },
+        { status: 500 },
+      );
     }
+
+    void audit({
+      action: "report_parsed",
+      reportId,
+      req,
+      metadata: {
+        bureau,
+        accounts: accounts.length,
+        collections: collections.length,
+        inquiries: inquiries.length,
+        dropped: totalDropped,
+      },
+    });
 
     return NextResponse.json({
       status: "parsed",

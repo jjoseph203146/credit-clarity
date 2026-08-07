@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { audit } from "@/lib/audit";
 
 // Permanently deletes the signed-in user's account and all associated data.
 // Per BUILD.md: "Users can permanently delete reports/account at any time
@@ -20,6 +21,15 @@ export async function deleteAccount() {
   if (!user) redirect("/login");
 
   const admin = createAdminClient();
+
+  // Recorded before anything is removed. `audit_log.user_id` is ON DELETE SET
+  // NULL, so once the users row goes the reference is severed — the id is
+  // duplicated into metadata so the trail still says whose account this was.
+  await audit({
+    action: "account_deleted",
+    userId: user.id,
+    metadata: { deleted_user_id: user.id },
+  });
 
   // 1. Remove Storage objects for every report this user owns — DB cascades
   // below remove the rows, but never touch Storage.

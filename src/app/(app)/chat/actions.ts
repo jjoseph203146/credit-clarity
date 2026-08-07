@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import type { AiConversationMessage, AiConversationSource } from "@/lib/supabase/types";
+import { hit } from "@/lib/rate-limit";
+import {
+  CHAT_RATE_LIMIT,
+  CHAT_RATE_WINDOW_MS,
+  MAX_CHAT_HISTORY_TURNS,
+  MAX_CHAT_MESSAGE_CHARS,
+} from "@/lib/limits";
 
 const FALLBACK_ERROR_MESSAGE =
   "Clarity AI is temporarily unavailable — please try again.";
@@ -133,11 +140,28 @@ export async function sendChatMessage(conversationId: string, text: string) {
   const trimmed = text.trim();
   if (!trimmed) return { error: "Message is empty" };
 
+  // Each chat message is a billed Claude call, so cap the input rather than
+  // letting a single paste drive an arbitrarily large request.
+  if (trimmed.length > MAX_CHAT_MESSAGE_CHARS) {
+    return {
+      error: `That message is too long. Please keep it under ${MAX_CHAT_MESSAGE_CHARS.toLocaleString()} characters.`,
+    };
+  }
+
   const supabase = (await createClient()) as unknown as SupabaseClient<Database>;
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  // Per-user, not per-IP: this action requires a session, and the cost being
+  // protected is the Anthropic bill, which is driven per account.
+  const limit = hit(`chat:${user.id}`, CHAT_RATE_LIMIT, CHAT_RATE_WINDOW_MS);
+  if (!limit.ok) {
+    return {
+      error: "You're sending messages faster than we can keep up. Please wait a moment and try again.",
+    };
+  }
 
   const { data: convo, error: fetchError } = await supabase
     .from("ai_conversations")
@@ -186,10 +210,14 @@ export async function sendChatMessage(conversationId: string, text: string) {
     // Conversation history mapped to {role, content} turns. The report JSON
     // is prepended to the new user turn (not persisted to `messages` in the
     // DB) so the model always has current report data as context.
-    const priorTurns: Anthropic.MessageParam[] = history.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
+    // History is replayed on every message, so an unbounded conversation
+    // costs quadratically in tokens. Keep the most recent turns only.
+    const priorTurns: Anthropic.MessageParam[] = history
+      .slice(-MAX_CHAT_HISTORY_TURNS)
+      .map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
 
     const newUserTurn: Anthropic.MessageParam = {
       role: "user",

@@ -1,11 +1,10 @@
 -- Read-only schema verification. Safe to run against production — this only
 -- SELECTs from catalog views and changes nothing.
 --
--- Purpose: 0002_security_hardening.sql is an empty stub (it contains the
--- literal text `ok` and applies no SQL), so a database migrated from this
--- folder may be missing whatever that step was meant to add. There is no
--- lost SQL to recover — instead, this confirms that the security-relevant
--- parts of 0001_init.sql and 0003 are actually present.
+-- Purpose: confirm a database actually matches this repo — every table
+-- present, RLS enabled on each, every named policy in place, the storage
+-- bucket limits applied, and the migration-added columns and functions
+-- created. Run it after applying migrations to any environment.
 --
 -- Every row returned should read status = 'OK'. Anything marked MISSING is a
 -- real gap between this repo and the live database.
@@ -19,7 +18,7 @@ from (values
   ('organizations'), ('users'), ('reports'), ('payments'),
   ('report_accounts'), ('report_collections'), ('report_inquiries'),
   ('action_plans'), ('ai_conversations'), ('learning_progress'),
-  ('notifications')
+  ('notifications'), ('audit_log')
 ) as expected(name)
 left join pg_class c
   on c.relname = expected.name
@@ -43,7 +42,7 @@ from (values
   ('organizations'), ('users'), ('reports'), ('payments'),
   ('report_accounts'), ('report_collections'), ('report_inquiries'),
   ('action_plans'), ('ai_conversations'), ('learning_progress'),
-  ('notifications')
+  ('notifications'), ('audit_log')
 ) as expected(name)
 left join pg_class c
   on c.relname = expected.name
@@ -105,7 +104,19 @@ from (
 
 union all
 
--- ---------- 5. Retention function (migration 0003) ----------
+-- ---------- 5. payments.stripe_payment_intent_id (migration 0004) ----------
+select
+  'column',
+  'payments.stripe_payment_intent_id',
+  case when count(*) = 0 then 'MISSING' else 'OK' end
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'payments'
+  and column_name = 'stripe_payment_intent_id'
+
+union all
+
+-- ---------- 6. Retention function (migration 0003) ----------
 select
   'function',
   'delete_stale_anonymous_reports',
