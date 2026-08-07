@@ -293,10 +293,16 @@ function PreviewPageInner() {
             Preview generated
           </span>
           <span className="h-px w-6 bg-border" />
-          <span className="flex items-center gap-1.5">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border"><LockIcon className="h-2.5 w-2.5" /></span>
+          {/* The one incomplete step is also the next action, so it links. */}
+          <Link
+            href={`/checkout?reportId=${report.id}`}
+            className="flex items-center gap-1.5 rounded-full transition-colors duration-150 hover:text-navy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
+          >
+            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border">
+              <LockIcon className="h-2.5 w-2.5" />
+            </span>
             Unlock full report
-          </span>
+          </Link>
         </div>
 
         {/* Clarity Score: a personalized read, not another extracted fact.
@@ -332,10 +338,13 @@ function PreviewPageInner() {
                 </span>
               ))}
             </div>
-            <div className="mt-4 flex items-center gap-2 text-[13px] text-muted">
+            <Link
+              href={`/checkout?reportId=${report.id}`}
+              className="mt-4 inline-flex items-center gap-2 self-start rounded text-[13px] text-muted transition-colors duration-150 hover:text-teal-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
+            >
               <LockIcon />
               Unlock to see how each area was scored and what moves it.
-            </div>
+            </Link>
           </div>
         </div>
 
@@ -593,9 +602,12 @@ function PreviewPageInner() {
               </div>
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent" />
               <div className="absolute inset-x-0 bottom-4 flex justify-center">
-                <span className="inline-flex items-center gap-2 rounded-full bg-navy/90 px-4 py-2 text-[12.5px] font-semibold text-white backdrop-blur">
+                <Link
+                  href={`/checkout?reportId=${report.id}`}
+                  className="inline-flex items-center gap-2 rounded-full bg-navy/90 px-4 py-2 text-[12.5px] font-semibold text-white backdrop-blur transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-navy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                >
                   <LockIcon /> Unlock full report
-                </span>
+                </Link>
               </div>
             </div>
           </div>
@@ -620,9 +632,10 @@ function PreviewPageInner() {
 
         <div className="mb-7 grid grid-cols-3 gap-3.5 max-md:grid-cols-1">
           {lockedCards.map((l) => (
-            <div
+            <Link
               key={l.t}
-              className="relative overflow-hidden rounded-2xl border border-border bg-white p-5"
+              href={`/checkout?reportId=${report.id}`}
+              className="group relative block overflow-hidden rounded-2xl border border-border bg-white p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:border-teal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <div className="mb-2 flex items-center gap-2">
                 <LockIcon className="mt-0.5 h-4 w-4 flex-none" />
@@ -631,7 +644,10 @@ function PreviewPageInner() {
               <div className="text-[13.5px] leading-relaxed text-muted">{l.d}</div>
               <div className="mt-3 h-2 w-4/5 rounded-full bg-[linear-gradient(90deg,#eef2f7,#e4e9f0)]" />
               <div className="mt-1.5 h-2 w-[55%] rounded-full bg-[linear-gradient(90deg,#eef2f7,#e4e9f0)]" />
-            </div>
+              <div className="mt-3 text-[12.5px] font-semibold text-teal opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+                Unlock for $5 →
+              </div>
+            </Link>
           ))}
         </div>
 

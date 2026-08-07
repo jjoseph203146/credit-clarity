@@ -11,10 +11,19 @@ import { login } from "./actions";
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string; message?: string };
+  searchParams: { error?: string; message?: string; reportId?: string };
 }) {
+  const reportId = searchParams.reportId;
+
   return (
-    <AuthSplit title="Welcome back" subtitle="Log in to your Credit Clarity account">
+    <AuthSplit
+      title="Welcome back"
+      subtitle={
+        reportId
+          ? "Log in and we'll add the report you just paid for to your account."
+          : "Log in to your Credit Clarity account"
+      }
+    >
       {searchParams.error && <AuthError>{searchParams.error}</AuthError>}
       {searchParams.message && (
         <div className="mb-4 rounded-lg bg-[#e6f5ef] px-3 py-2 text-[13px] font-medium text-teal-deep">
@@ -22,6 +31,8 @@ export default function LoginPage({
         </div>
       )}
       <form action={login} className="flex flex-col gap-3">
+        {/* Carries the just-paid report through sign-in so it can be claimed. */}
+        {reportId && <input type="hidden" name="reportId" value={reportId} />}
         <div>
           <AuthLabel>Email</AuthLabel>
           <Input name="email" type="email" placeholder="you@email.com" required />

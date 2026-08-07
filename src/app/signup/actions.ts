@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { claimReportForUser } from "@/lib/claim-report";
 
 // Server Action for the post-payment signup page. Per BUILD.md step 6, this
 // signup happens after Stripe checkout and claims the anonymous report
@@ -49,41 +50,16 @@ export async function signup(formData: FormData) {
     redirect(`/signup?error=${encodeURIComponent(insertError.message)}`);
   }
 
-  let claimedReportId: string | null = null;
+  // Shared with the login path — see src/lib/claim-report.ts. Both doors out
+  // of Stripe checkout must claim the report, or it is orphaned.
+  const claimedReportId = reportId
+    ? await claimReportForUser(reportId, data.user.id)
+    : null;
 
-  if (reportId) {
-    const { data: claimedReport, error: claimError } = await admin
-      .from("reports")
-      .update({ user_id: data.user.id })
-      .eq("id", reportId)
-      .is("user_id", null)
-      .select()
-      .maybeSingle();
-
-    if (claimError) {
-      redirect(`/signup?error=${encodeURIComponent(claimError.message)}`);
-    } else if (!claimedReport) {
-      console.warn(
-        `[signup] report ${reportId} could not be claimed for user ${data.user.id} — already claimed or not found`,
-      );
-    } else {
-      claimedReportId = claimedReport.id;
-
-      // `payments.user_id` is null at insert time (checkout happens before
-      // an account exists) and nothing else ever backfills it — without
-      // this, the settings page's payment history would show "no payments"
-      // forever even for a user who just paid. Best-effort: a failure here
-      // shouldn't block signup, just log it.
-      const { error: paymentClaimError } = await admin
-        .from("payments")
-        .update({ user_id: data.user.id })
-        .eq("report_id", claimedReportId);
-      if (paymentClaimError) {
-        console.warn(
-          `[signup] failed to backfill payments.user_id for report ${claimedReportId}: ${paymentClaimError.message}`,
-        );
-      }
-    }
+  if (reportId && !claimedReportId) {
+    console.warn(
+      `[signup] report ${reportId} could not be claimed for user ${data.user.id} — already claimed or not found`,
+    );
   }
 
   // supabase.auth.signUp() only returns an active session immediately when
