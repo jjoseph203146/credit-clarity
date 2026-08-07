@@ -45,15 +45,22 @@ export async function POST(req: Request) {
     payment_intent_data: {
       metadata: { report_id: reportId },
     },
+    // Shows Checkout's "Add promotion code" field. The code itself (and its
+    // discount, redemption limit, expiry) is created entirely in the Stripe
+    // Dashboard under Coupons/Promotion codes — no code change needed there.
+    allow_promotion_codes: true,
     success_url: `${origin}/signup?reportId=${reportId}`,
     cancel_url: `${origin}/preview`,
   });
 
   const admin = createAdminClient();
 
-  // session.payment_intent is populated at creation time for mode: "payment".
-  // Recording it here is what lets charge.updated / charge.refunded find this
-  // row later — charge events carry a payment_intent but no session id.
+  // Usually still null here — for hosted Checkout, Stripe doesn't create the
+  // PaymentIntent until the customer actually submits payment, not at
+  // session creation. Recorded when non-null anyway (harmless either way);
+  // the real backfill happens in the webhook (src/app/api/webhooks/stripe/
+  // route.ts) once Stripe confirms success, which is when this value
+  // actually exists.
   const paymentIntentId =
     typeof session.payment_intent === "string"
       ? session.payment_intent

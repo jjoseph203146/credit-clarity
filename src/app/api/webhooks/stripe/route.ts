@@ -71,7 +71,12 @@ async function findPaymentByCharge(admin: Admin, charge: Stripe.Charge) {
 // first one to land matches a pending row, so analysis runs exactly once and a
 // later event can never flip an already-refunded payment back to succeeded.
 // Returns the row if this call performed the transition, otherwise null.
-async function markSucceeded(admin: Admin, paymentId: string, paymentIntentId?: string) {
+async function markSucceeded(
+  admin: Admin,
+  paymentId: string,
+  paymentIntentId?: string,
+  amountCents?: number,
+) {
   const { data, error } = await admin
     .from("payments")
     .update({
@@ -81,6 +86,12 @@ async function markSucceeded(admin: Admin, paymentId: string, paymentIntentId?: 
       // it up front) — backfilled here so later charge.* events can resolve
       // this payment directly instead of falling back to report_id metadata.
       ...(paymentIntentId ? { stripe_payment_intent_id: paymentIntentId } : {}),
+      // /api/checkout records a flat 500 (the full $5 price) at session
+      // creation, before the customer has had a chance to enter a promotion
+      // code — so a discounted or fully comped redemption would otherwise be
+      // recorded as a full-price charge forever. This is the first point
+      // where the real, final amount is known.
+      ...(amountCents != null ? { amount_cents: amountCents } : {}),
     })
     .eq("id", paymentId)
     .eq("status", "pending")
@@ -91,8 +102,13 @@ async function markSucceeded(admin: Admin, paymentId: string, paymentIntentId?: 
   return data;
 }
 
-async function fulfill(admin: Admin, paymentId: string, paymentIntentId?: string) {
-  const payment = await markSucceeded(admin, paymentId, paymentIntentId);
+async function fulfill(
+  admin: Admin,
+  paymentId: string,
+  paymentIntentId?: string,
+  amountCents?: number,
+) {
+  const payment = await markSucceeded(admin, paymentId, paymentIntentId, amountCents);
 
   if (!payment) {
     // Already succeeded/refunded/failed — a redelivery or a duplicate event.
@@ -182,7 +198,12 @@ export async function POST(req: Request) {
           console.error(`Stripe webhook: no payment row for session ${session.id} (${event.type})`);
           break;
         }
-        await fulfill(admin, payment.id, paymentIntentId(session.payment_intent) ?? undefined);
+        await fulfill(
+          admin,
+          payment.id,
+          paymentIntentId(session.payment_intent) ?? undefined,
+          session.amount_total ?? undefined,
+        );
         break;
       }
 
@@ -225,7 +246,12 @@ export async function POST(req: Request) {
         if (charge.refunded) {
           await setStatus(admin, payment.id, "refunded");
         } else if (charge.status === "succeeded" && charge.paid) {
-          await fulfill(admin, payment.id, paymentIntentId(charge.payment_intent) ?? undefined);
+          await fulfill(
+            admin,
+            payment.id,
+            paymentIntentId(charge.payment_intent) ?? undefined,
+            charge.amount ?? undefined,
+          );
         }
         break;
       }
