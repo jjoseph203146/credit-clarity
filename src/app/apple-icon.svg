@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Credit Clarity">
+  <!--
+    Apple touch icon. Same "clarity lens" mark as icon.svg, redrawn at 180x180
+    with a full-bleed background — iOS applies its own corner mask, so this
+    one must not have its own rounded corners or it double-rounds.
+  -->
+  <defs>
+    <linearGradient id="sweep" x1="0" y1="180" x2="180" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0e9f77"/>
+      <stop offset="1" stop-color="#2ee6a8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="180" height="180" fill="#0b1f3a"/>
+
+  <circle cx="90" cy="90" r="48" fill="none" stroke="#155a8a" stroke-width="17"/>
+
+  <path d="M90 42 a48 48 0 1 1 -33.94 14.06"
+        fill="none" stroke="url(#sweep)" stroke-width="17" stroke-linecap="round"/>
+
+  <circle cx="90" cy="90" r="17" fill="#ffffff"/>
+</svg>

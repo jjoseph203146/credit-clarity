@@ -83,6 +83,10 @@ export type Payment = {
   user_id: string | null;
   report_id: string;
   stripe_session_id: string | null;
+  // Recorded on checkout.session.completed. Refund and failure events carry
+  // only a PaymentIntent id, so this is how those are matched back to a row.
+  // See supabase/migrations/0004_payment_intent_correlation.sql.
+  stripe_payment_intent_id: string | null;
   stripe_customer_id: string | null;
   amount_cents: number;
   status: PaymentStatus;

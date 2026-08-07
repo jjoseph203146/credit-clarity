@@ -220,7 +220,8 @@ export default async function SettingsPage() {
           retention period. This action cannot be undone.
         </div>
         <div className="mb-4 text-[13.5px] leading-relaxed text-[var(--muted)]">
-          Your uploaded credit reports are not used to train AI models.
+          Your uploaded credit reports are not used to train AI models — analysis runs on
+          Anthropic&apos;s Claude API, which does not train on data submitted through it.
         </div>
         <div className="flex flex-wrap gap-2.5">
           <Button variant="outline">Export My Data</Button>

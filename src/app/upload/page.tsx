@@ -199,7 +199,7 @@ export default function UploadPage() {
               />
             </div>
             <div className="mt-3.5 text-[12.5px] text-[#8fa3ba]">
-              🔐 Encrypted in transit with TLS 1.3 · Encrypted at rest with AES-256
+              🔐 Encrypted in transit with TLS · Encrypted at rest by our storage provider
             </div>
           </div>
         )}

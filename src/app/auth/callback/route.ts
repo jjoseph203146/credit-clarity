@@ -5,10 +5,20 @@ import { createClient } from "@/lib/supabase/server";
 // confirmation, magic link) for a real session cookie, then continues on to
 // `next`. Both resetPasswordForEmail's redirectTo and Supabase's default
 // email-confirmation link point here.
+// `next` arrives from a link in an email, so treat it as untrusted: only
+// allow same-site absolute paths. Rejecting "//evil.example" matters
+// specifically — appending it to origin yields a protocol-relative URL that
+// some clients follow off-site.
+function safeNext(raw: string | null): string {
+  if (!raw) return "/dashboard";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+  return raw;
+}
+
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next = safeNext(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();

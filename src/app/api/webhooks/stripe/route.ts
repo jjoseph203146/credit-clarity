@@ -3,9 +3,26 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runAnalysis } from "@/lib/analyze";
 
-// Stripe webhook: confirms payment for the Checkout Session created in
-// src/app/api/checkout/route.ts. Signature verification requires the raw
-// request body, so this reads it via req.text() rather than req.json().
+// Stripe webhook: keeps `payments.status` and `reports.status` in sync with
+// what actually happened in Stripe, and kicks off the AI analysis once a
+// payment succeeds. Signature verification requires the raw request body, so
+// this reads it via req.text() rather than req.json().
+//
+// Events handled (subscribe to exactly these in the Stripe dashboard):
+//   checkout.session.completed          -> payment succeeded, run analysis
+//   checkout.session.async_payment_failed -> delayed payment method failed
+//   payment_intent.payment_failed       -> payment attempt failed
+//   charge.refunded                     -> full or partial refund issued
+//
+// RESPONSE CONTRACT: Stripe retries any non-2xx for days. A 2xx means "I have
+// durably handled or deliberately ignored this event" — so unmatched or
+// irrelevant events return 200 with a log line, and only genuine transient
+// failures (our DB is down) return 5xx to earn a retry. The previous version
+// returned 404 for unmatched events, which made Stripe retry them until they
+// expired and showed the endpoint as failing.
+
+type PaymentStatus = "succeeded" | "failed" | "refunded";
+
 export async function POST(req: Request) {
   // Constructed inside the handler (not at module scope) so this route
   // doesn't require STRIPE_SECRET_KEY to be set at build time.
@@ -14,7 +31,11 @@ export async function POST(req: Request) {
   });
 
   const body = await req.text();
-  const signature = req.headers.get("stripe-signature")!;
+  const signature = req.headers.get("stripe-signature");
+
+  if (!signature) {
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+  }
 
   let event: Stripe.Event;
   try {
@@ -25,93 +46,192 @@ export async function POST(req: Request) {
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Invalid signature";
-    return NextResponse.json({ error: `Webhook signature verification failed: ${message}` }, { status: 400 });
+    return NextResponse.json(
+      { error: `Webhook signature verification failed: ${message}` },
+      { status: 400 },
+    );
   }
 
-  if (event.type === "charge.updated" || event.type === "checkout.session.completed") {
-    const admin = createAdminClient();
-    let paymentId: string | null = null;
+  const admin = createAdminClient();
 
-    // Handle both charge.updated and checkout.session.completed events
-    if (event.type === "charge.updated") {
-      const charge = event.data.object as Stripe.Charge;
-
-      // For charge.updated, try to find payment via metadata
-      if (charge.metadata?.payment_id) {
-        paymentId = charge.metadata.payment_id;
-      } else if (charge.metadata?.session_id) {
-        // Try searching by session ID from metadata
-        const { data: payment } = await admin
-          .from("payments")
-          .select("id")
-          .eq("stripe_session_id", charge.metadata.session_id)
-          .maybeSingle();
-        paymentId = payment?.id ?? null;
-      }
-
-      if (!paymentId) {
-        return NextResponse.json(
-          { error: "Could not find payment for charge (no metadata)" },
-          { status: 404 },
-        );
-      }
-    } else {
-      // checkout.session.completed: find by session ID
-      const session = event.data.object as Stripe.Checkout.Session;
-      const { data: payment } = await admin
+  // Resolves the `payments` row an event refers to. Checkout events carry a
+  // session id; charge/PaymentIntent events carry only a PaymentIntent id,
+  // which is why stripe_payment_intent_id is recorded on success (see
+  // supabase/migrations/0004_payment_intent_correlation.sql).
+  async function findPayment(opts: {
+    sessionId?: string | null;
+    paymentIntentId?: string | null;
+  }) {
+    if (opts.sessionId) {
+      const { data } = await admin
         .from("payments")
-        .select("id")
-        .eq("stripe_session_id", session.id)
+        .select("*")
+        .eq("stripe_session_id", opts.sessionId)
         .maybeSingle();
-      paymentId = payment?.id ?? null;
+      if (data) return data;
+    }
+    if (opts.paymentIntentId) {
+      const { data } = await admin
+        .from("payments")
+        .select("*")
+        .eq("stripe_payment_intent_id", opts.paymentIntentId)
+        .maybeSingle();
+      if (data) return data;
+    }
+    return null;
+  }
 
-      if (!paymentId) {
-        return NextResponse.json(
-          { error: "Matching payment not found" },
-          { status: 404 },
-        );
-      }
+  function paymentIntentIdOf(
+    value: string | Stripe.PaymentIntent | null | undefined,
+  ): string | null {
+    if (!value) return null;
+    return typeof value === "string" ? value : value.id;
+  }
+
+  // Shared tail for the non-success outcomes (failed, refunded): records the
+  // payment status and leaves it there.
+  //
+  // Deliberately does NOT revoke access to an already-analyzed report on
+  // refund. Whether a refunded user keeps their analysis is a policy call,
+  // not a technical one, and silently deleting something someone paid for is
+  // the worse default of the two. The `refunded` status is recorded, so
+  // revocation can be layered on here later if that's the policy.
+  async function settle(
+    payment: { id: string; report_id: string; status: string } | null,
+    status: PaymentStatus,
+    label: string,
+  ) {
+    if (!payment) {
+      console.error(`[stripe] no payments row for ${label} (status ${status})`);
+      return NextResponse.json({ received: true, matched: false });
     }
 
-    const { data: payment, error: paymentError } = await admin
-      .from("payments")
-      .update({ status: "succeeded" })
-      .eq("id", paymentId)
-      .select()
-      .single();
+    if (payment.status === status) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
 
-    if (paymentError || !payment) {
-      return NextResponse.json(
-        { error: paymentError?.message ?? "Failed to update payment" },
-        { status: 500 },
+    const { error } = await admin
+      .from("payments")
+      .update({ status })
+      .eq("id", payment.id);
+
+    if (error) {
+      console.error(`[stripe] failed to mark payment ${payment.id} ${status}:`, error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.warn(`[stripe] payment ${payment.id} marked ${status} (${label})`);
+    return NextResponse.json({ received: true, status });
+  }
+
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+
+      // A session can complete without being paid (e.g. a delayed payment
+      // method still processing). Only treat genuinely-paid sessions as
+      // success — async_payment_failed/succeeded covers the rest.
+      if (session.payment_status !== "paid") {
+        console.warn(
+          `[stripe] session ${session.id} completed with payment_status=${session.payment_status} — not marking paid`,
+        );
+        return NextResponse.json({ received: true });
+      }
+
+      const payment = await findPayment({ sessionId: session.id });
+      if (!payment) {
+        // Nothing to reconcile against — a session created outside this app,
+        // or a row deleted since. Retrying won't conjure the row, so ack it.
+        console.error(`[stripe] no payments row for completed session ${session.id}`);
+        return NextResponse.json({ received: true, matched: false });
+      }
+
+      // Idempotency: Stripe delivers duplicates, and re-running a paid
+      // analysis would burn another Claude call and overwrite good output.
+      if (payment.status === "succeeded") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      const { error: paymentError } = await admin
+        .from("payments")
+        .update({
+          status: "succeeded",
+          stripe_payment_intent_id: paymentIntentIdOf(session.payment_intent),
+          stripe_customer_id:
+            typeof session.customer === "string" ? session.customer : null,
+        })
+        .eq("id", payment.id);
+
+      if (paymentError) {
+        // Transient DB failure — let Stripe retry rather than silently
+        // leaving a paid customer marked pending.
+        console.error(`[stripe] failed to mark payment ${payment.id} succeeded:`, paymentError);
+        return NextResponse.json({ error: paymentError.message }, { status: 500 });
+      }
+
+      const { error: reportError } = await admin
+        .from("reports")
+        .update({ status: "paid" })
+        .eq("id", payment.report_id);
+
+      if (reportError) {
+        console.error(`[stripe] failed to mark report ${payment.report_id} paid:`, reportError);
+        return NextResponse.json({ error: reportError.message }, { status: 500 });
+      }
+
+      // Step 5 of the core flow (BUILD.md): analysis runs in-process right
+      // after payment succeeds. A failure here must NOT fail the webhook —
+      // Stripe would retry the whole payment event and re-run a successful
+      // payment's side effects just because a downstream AI call failed.
+      // runAnalysis marks the report `error` on failure (so /processing can
+      // surface it) and it can be re-run via the internal /api/analyze route.
+      try {
+        const result = await runAnalysis(payment.report_id);
+        if (!result.ok) {
+          console.error(
+            `[stripe] runAnalysis failed for paid report ${payment.report_id}: ${result.error}`,
+          );
+        }
+      } catch (err) {
+        console.error("[stripe] runAnalysis threw unexpectedly", err);
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    case "checkout.session.async_payment_failed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      return settle(
+        await findPayment({
+          sessionId: session.id,
+          paymentIntentId: paymentIntentIdOf(session.payment_intent),
+        }),
+        "failed",
+        `session ${session.id}`,
       );
     }
 
-    const { error: reportError } = await admin
-      .from("reports")
-      .update({ status: "paid" })
-      .eq("id", payment.report_id);
-
-    if (reportError) {
-      return NextResponse.json({ error: reportError.message }, { status: 500 });
+    case "payment_intent.payment_failed": {
+      const intent = event.data.object as Stripe.PaymentIntent;
+      return settle(
+        await findPayment({ paymentIntentId: intent.id }),
+        "failed",
+        `payment_intent ${intent.id}`,
+      );
     }
 
-    // Step 5 of the core flow (BUILD.md): trigger analysis in-process right
-    // after payment succeeds. Called directly (no HTTP hop, no internal
-    // secret needed since this is a same-process server-to-server call). A
-    // failure here must not fail the webhook response — Stripe should not
-    // retry the payment webhook just because the downstream AI analysis
-    // failed; that can be retried later via the internal-secret-gated
-    // /api/analyze route.
-    try {
-      const result = await runAnalysis(payment.report_id);
-      if (!result.ok) {
-        console.error("Stripe webhook: runAnalysis failed", result.error);
-      }
-    } catch (err) {
-      console.error("Stripe webhook: runAnalysis threw unexpectedly", err);
+    case "charge.refunded": {
+      const charge = event.data.object as Stripe.Charge;
+      return settle(
+        await findPayment({ paymentIntentId: paymentIntentIdOf(charge.payment_intent) }),
+        "refunded",
+        `charge ${charge.id}`,
+      );
     }
+
+    default:
+      // Subscribed to an event we don't act on. Ack so Stripe stops sending.
+      return NextResponse.json({ received: true, ignored: event.type });
   }
 
-  return NextResponse.json({ received: true });
 }

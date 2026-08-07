@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Credit Clarity">
+  <!--
+    Favicon: the "clarity lens" concept — a navy aperture ring with a
+    teal-to-mint gradient sweep, matching the brand palette in
+    tailwind.config.ts (navy #0b1f3a, teal #0e9f77, mint #2ee6a8) and the
+    navy->mint gradient used throughout the app.
+
+    Built to survive 16x16: one bold ring, one solid center dot, no fine
+    detail or text. Next.js serves this from src/app/icon.svg automatically —
+    no <link> tag needed.
+  -->
+  <defs>
+    <linearGradient id="sweep" x1="0" y1="64" x2="64" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0e9f77"/>
+      <stop offset="1" stop-color="#2ee6a8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="#0b1f3a"/>
+
+  <!-- Full ring in muted navy-blue: reads as the lens body at any size. -->
+  <circle cx="32" cy="32" r="17" fill="none" stroke="#155a8a" stroke-width="6"/>
+
+  <!-- Gradient arc over three quarters of the ring — the "clarity" sweep.
+       Drawn on top so the mint edge is what catches the eye in a tab. -->
+  <path d="M32 15 a17 17 0 1 1 -12.02 4.98"
+        fill="none" stroke="url(#sweep)" stroke-width="6" stroke-linecap="round"/>
+
+  <circle cx="32" cy="32" r="6" fill="#ffffff"/>
+</svg>

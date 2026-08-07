@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { logout } from "@/app/logout/actions";
 import { navMain, navAccount, type NavItem } from "@/lib/demo-data";
 import { createClient } from "@/lib/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -104,14 +105,28 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto flex items-center gap-2.5 border-t border-white/[0.08] px-2.5 pt-3">
-        <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-gradient-to-br from-[var(--blue)] to-[var(--teal)] text-[11.5px] font-bold text-white">
-          {identity?.initials ?? ""}
+      <div className="mt-auto border-t border-white/[0.08] pt-3">
+        <div className="flex items-center gap-2.5 px-2.5">
+          <div className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-gradient-to-br from-[var(--blue)] to-[var(--teal)] text-[11.5px] font-bold text-white">
+            {identity?.initials ?? ""}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-[13px] font-semibold text-white">
+              {identity?.name ?? ""}
+            </div>
+            <div className="text-[11px] text-[#8fa3ba]">{PLAN_LABEL}</div>
+          </div>
         </div>
-        <div>
-          <div className="text-[13px] font-semibold text-white">{identity?.name ?? ""}</div>
-          <div className="text-[11px] text-[#8fa3ba]">{PLAN_LABEL}</div>
-        </div>
+
+        <form action={logout} className="mt-2">
+          <button
+            type="submit"
+            className="flex w-full items-center rounded-[10px] px-3 py-2.5 text-[13.5px] font-semibold text-[#b9c8da] transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <span className="mr-2 inline-block w-[18px] text-center opacity-80">⏻</span>
+            Sign out
+          </button>
+        </form>
       </div>
     </div>
   );

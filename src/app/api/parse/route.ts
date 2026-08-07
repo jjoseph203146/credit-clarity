@@ -82,6 +82,36 @@ export async function POST(req: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Server-side content check. The bucket's allowed_mime_types gate (see
+    // migration 0003) trusts the Content-Type the uploading client supplied,
+    // and the extension check on the upload page is client-side only — so
+    // this is the first point where what was actually stored gets inspected.
+    // A real PDF begins with the %PDF- header; anything else is either a
+    // mislabelled file or a deliberate attempt to smuggle other content into
+    // the bucket, and must not reach the parser or a later download.
+    if (!buffer.subarray(0, 5).equals(Buffer.from("%PDF-"))) {
+      await admin
+        .from("reports")
+        .update({
+          status: "error",
+          error_message: "Uploaded file is not a PDF (missing %PDF- header)",
+        })
+        .eq("id", reportId);
+
+      // Don't leave the rejected bytes sitting in storage.
+      await admin.storage.from("reports").remove([report.storage_path]);
+
+      console.warn(
+        `[parse] report ${reportId}: rejected non-PDF upload (bad magic bytes)`,
+      );
+
+      return NextResponse.json(
+        { error: "That file isn't a valid PDF. Please upload your credit report as a PDF." },
+        { status: 400 },
+      );
+    }
+
     const { text: rawText } = await pdfParse(buffer);
 
     const bureau = detectBureau(rawText);

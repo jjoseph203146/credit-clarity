@@ -106,7 +106,7 @@ function CheckoutPageInner() {
               {paying ? "Redirecting to Stripe…" : "Pay $5.00"}
             </button>
             <div className="text-center text-xs text-[#8fa3ba]">
-              🔐 Encrypted &amp; PCI-compliant. We never store card numbers.
+              🔐 Card details go directly to Stripe, a PCI-DSS Level 1 service provider. We never see or store them.
             </div>
           </div>
         </div>

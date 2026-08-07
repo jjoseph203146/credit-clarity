@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/site-config";
+
 export const metadata = {
   title: "Terms of Service — Credit Clarity",
 };
@@ -26,10 +28,11 @@ const sections = [
     ],
   },
   {
-    h: "4. Payment",
+    h: "4. Payment and refunds",
     body: [
-      "The paid analysis is a one-time fee processed by Stripe. Card details are handled entirely by Stripe and never stored on our servers.",
-      "Refund requests are handled case by case — contact us using the details below.",
+      "The paid analysis is a one-time $5 fee processed by Stripe. It is not a subscription and does not renew. Card details are handled entirely by Stripe and never stored on our servers.",
+      "If the analysis is not useful to you, email us within 7 days of your payment and we will refund it in full. Refunds are returned to the original payment method and typically appear within 5-10 business days, depending on your bank.",
+      "Requesting a refund does not automatically delete your report or analysis — you can delete those yourself at any time from Settings.",
     ],
   },
   {
@@ -48,14 +51,40 @@ const sections = [
     ],
   },
   {
-    h: "7. Changes to these terms",
+    h: "7. Acceptable use",
+    body: [
+      "Upload only a credit report that is yours. Do not upload another person's report, or any document you do not have the right to share with us.",
+      "Do not attempt to disrupt, overload, reverse engineer, or gain unauthorized access to the service or to other users' data.",
+      "Do not use the service to attempt to manipulate the AI into producing output that violates these terms.",
+      "We may suspend or terminate an account that violates these terms, or where required by law.",
+    ],
+  },
+  {
+    h: "8. Limitation of liability",
+    body: [
+      "To the maximum extent permitted by law, our total liability arising out of or relating to the service is limited to the amount you paid us in the twelve months preceding the claim.",
+      "We are not liable for indirect, incidental, special, consequential, or punitive damages, including lost profits, lost data, or financial outcomes such as a declined loan or a change in your credit score.",
+      "Some jurisdictions do not allow these limitations, in which case they apply to the fullest extent permitted there.",
+    ],
+  },
+  {
+    h: "9. Governing law",
+    body: [
+      `These terms are governed by the laws of ${siteConfig.governingLaw}, without regard to its conflict-of-laws rules. The courts located there have exclusive jurisdiction over any dispute arising from these terms or the service.`,
+    ],
+  },
+  {
+    h: "10. Changes to these terms",
     body: [
       "We may update these terms from time to time. Continued use of Credit Clarity after a change constitutes acceptance of the updated terms.",
     ],
   },
   {
-    h: "8. Contact us",
-    body: ["Questions about these terms? Email legal@creditclarity.example."],
+    h: "11. Contact us",
+    body: [
+      `These terms are between you and ${siteConfig.legalEntity}, which operates Credit Clarity.`,
+      `Questions about these terms? Email ${siteConfig.legalEmail}.`,
+    ],
   },
 ];
 
@@ -63,7 +92,7 @@ export default function TermsPage() {
   return (
     <div className="mx-auto max-w-[760px] px-8 pb-24 pt-[72px]">
       <h1 className="mb-3 text-[36px] tracking-[-.03em]">Terms of Service</h1>
-      <p className="mb-10 text-sm text-muted">Last updated: July 26, 2026</p>
+      <p className="mb-10 text-sm text-muted">Last updated: August 7, 2026</p>
       <div className="flex flex-col gap-8">
         {sections.map((s) => (
           <section key={s.h}>

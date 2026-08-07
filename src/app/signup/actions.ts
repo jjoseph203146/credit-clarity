@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -58,11 +59,25 @@ export async function signup(formData: FormData) {
     redirect("/dashboard");
   }
 
+  // When "Confirm email" is ON, the emailed link lands on /auth/callback.
+  // Carry the report through `next` so a user who just paid is returned to
+  // their report after confirming, instead of a dashboard that doesn't
+  // explain where the thing they bought went.
+  const origin = (await headers()).get("origin");
+  const confirmNext = reportId
+    ? `/processing?reportId=${encodeURIComponent(reportId)}`
+    : "/dashboard";
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { full_name: fullName },
+      ...(origin
+        ? {
+            emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(confirmNext)}`,
+          }
+        : {}),
     },
   });
 
@@ -133,8 +148,16 @@ export async function signup(formData: FormData) {
   // fails until they confirm. Detect this and send them to a clear
   // "check your email" message on /login instead.
   if (!data.session) {
+    // The report was already claimed above, so it's safely attached to this
+    // account and waiting — say so explicitly. A user who just paid $5 and
+    // is then bounced to a login screen needs to know their money and their
+    // report are accounted for.
     redirect(
-      `/login?message=${encodeURIComponent("Account created — check your email to confirm it before logging in.")}`,
+      `/login?message=${encodeURIComponent(
+        claimedReportId
+          ? "Account created and your report is saved to it. Check your email to confirm your address — the confirmation link takes you straight to your report."
+          : "Account created — check your email to confirm it before logging in.",
+      )}`,
     );
   }
 

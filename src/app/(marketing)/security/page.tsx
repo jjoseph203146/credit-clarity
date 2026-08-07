@@ -1,13 +1,22 @@
+// Security claims are commitments, not marketing copy — each line here is
+// worded to say only what can actually be verified, and to attribute
+// infrastructure guarantees to the provider that makes them rather than
+// asserting them ourselves.
 const securityItems = [
   {
     ic: "AES",
     t: "Encrypted everywhere",
-    d: "TLS 1.3 in transit, AES-256 at rest. Your report is never stored unencrypted, and never used to train AI models.",
+    d: "Encrypted in transit with TLS, and encrypted at rest by our infrastructure provider, Supabase. Your report is never stored in plain text.",
+  },
+  {
+    ic: "AI",
+    t: "Not used for training",
+    d: "Analysis runs on Anthropic's Claude API, which under Anthropic's commercial terms does not train models on data submitted through it.",
   },
   {
     ic: "⌫",
     t: "Delete anytime",
-    d: 'One click permanently removes your reports, analysis, and account. No retention period, no "soft delete."',
+    d: 'One click permanently removes your reports, analysis, and account — a hard delete, not a "soft delete" we could restore. Uploads that are never claimed by an account are auto-deleted within 48 hours.',
   },
   {
     ic: "∅",
@@ -27,7 +36,7 @@ const securityItems = [
   {
     ic: "✓",
     t: "You stay in control",
-    d: "No data sold, no marketing lists, no third-party sharing. Your report exists for one purpose: your analysis.",
+    d: "No data sold, no marketing lists, no advertising trackers. Your report is shared only with the providers that run the product — Supabase, Anthropic, and Stripe — and only to produce your analysis. See the Privacy Policy for exactly what each one receives.",
   },
 ];
 
