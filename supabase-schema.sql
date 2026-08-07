@@ -47,6 +47,7 @@ create table payments (
   report_id uuid references reports(id) on delete cascade,
   stripe_session_id text,
   stripe_customer_id text,
+  stripe_payment_intent_id text, -- resolves charge.* webhook events back to this row
   amount_cents int not null default 500,
   status text check (status in ('pending','succeeded','failed','refunded')) default 'pending',
   created_at timestamptz default now()

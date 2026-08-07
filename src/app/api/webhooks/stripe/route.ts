@@ -6,6 +6,132 @@ import { runAnalysis } from "@/lib/analyze";
 // Stripe webhook: confirms payment for the Checkout Session created in
 // src/app/api/checkout/route.ts. Signature verification requires the raw
 // request body, so this reads it via req.text() rather than req.json().
+//
+// Subscribe exactly these five event types on the endpoint (Stripe Dashboard >
+// Developers > Webhooks). Anything else is acknowledged and ignored:
+//
+//   checkout.session.completed                 -> payment succeeded, run analysis
+//   checkout.session.async_payment_succeeded   -> same, for delayed methods (ACH)
+//   checkout.session.async_payment_failed      -> mark payment failed
+//   charge.refunded                            -> mark payment refunded
+//   charge.updated                             -> secondary confirmation / refund catch
+//
+// Response-code policy: Stripe retries any non-2xx for ~3 days and disables
+// endpoints that keep failing. So a 2xx here means "received and decided" —
+// including cases where we deliberately do nothing. Only genuine transient
+// infrastructure failures (a DB write that could succeed on retry) return 5xx.
+// An unrecognised payment is logged and 200'd, never 404'd.
+type Admin = ReturnType<typeof createAdminClient>;
+
+function paymentIntentId(
+  intent: string | Stripe.PaymentIntent | null,
+): string | null {
+  if (!intent) return null;
+  return typeof intent === "string" ? intent : intent.id;
+}
+
+async function findPaymentBySession(admin: Admin, sessionId: string) {
+  const { data } = await admin
+    .from("payments")
+    .select("id, report_id, status")
+    .eq("stripe_session_id", sessionId)
+    .maybeSingle();
+  return data;
+}
+
+async function findPaymentByCharge(admin: Admin, charge: Stripe.Charge) {
+  const intentId = paymentIntentId(charge.payment_intent);
+  if (intentId) {
+    const { data } = await admin
+      .from("payments")
+      .select("id, report_id, status")
+      .eq("stripe_payment_intent_id", intentId)
+      .maybeSingle();
+    if (data) return data;
+  }
+
+  // Fallback for charges created before stripe_payment_intent_id was recorded
+  // (migration 0003). The report_id metadata comes from /api/checkout.
+  const reportId = charge.metadata?.report_id;
+  if (!reportId) return null;
+
+  const { data } = await admin
+    .from("payments")
+    .select("id, report_id, status")
+    .eq("report_id", reportId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
+// Idempotent success transition. The `.eq("status", "pending")` filter is the
+// idempotency guard: Stripe redelivers events, and checkout.session.completed
+// plus charge.updated can both describe the same successful payment. Only the
+// first one to land matches a pending row, so analysis runs exactly once and a
+// later event can never flip an already-refunded payment back to succeeded.
+// Returns the row if this call performed the transition, otherwise null.
+async function markSucceeded(admin: Admin, paymentId: string) {
+  const { data, error } = await admin
+    .from("payments")
+    .update({ status: "succeeded" })
+    .eq("id", paymentId)
+    .eq("status", "pending")
+    .select("id, report_id")
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to update payment: ${error.message}`);
+  return data;
+}
+
+async function fulfill(admin: Admin, paymentId: string) {
+  const payment = await markSucceeded(admin, paymentId);
+
+  if (!payment) {
+    // Already succeeded/refunded/failed — a redelivery or a duplicate event.
+    return;
+  }
+
+  const { error: reportError } = await admin
+    .from("reports")
+    .update({ status: "paid" })
+    .eq("id", payment.report_id);
+
+  if (reportError) {
+    throw new Error(`Failed to update report: ${reportError.message}`);
+  }
+
+  // Step 5 of the core flow (BUILD.md): trigger analysis in-process right
+  // after payment succeeds. Called directly (no HTTP hop, no internal secret
+  // needed since this is a same-process server-to-server call). A failure here
+  // must not fail the webhook response — Stripe should not retry the payment
+  // webhook just because the downstream AI analysis failed; that can be
+  // retried later via the internal-secret-gated /api/analyze route.
+  try {
+    const result = await runAnalysis(payment.report_id);
+    if (!result.ok) {
+      console.error("Stripe webhook: runAnalysis failed", result.error);
+    }
+  } catch (err) {
+    console.error("Stripe webhook: runAnalysis threw unexpectedly", err);
+  }
+}
+
+async function setStatus(
+  admin: Admin,
+  paymentId: string,
+  status: "failed" | "refunded",
+) {
+  const { error } = await admin
+    .from("payments")
+    .update({ status })
+    .eq("id", paymentId);
+
+  if (error) {
+    throw new Error(`Failed to mark payment ${status}: ${error.message}`);
+  }
+}
+
 export async function POST(req: Request) {
   // Constructed inside the handler (not at module scope) so this route
   // doesn't require STRIPE_SECRET_KEY to be set at build time.
@@ -14,7 +140,11 @@ export async function POST(req: Request) {
   });
 
   const body = await req.text();
-  const signature = req.headers.get("stripe-signature")!;
+  const signature = req.headers.get("stripe-signature");
+
+  if (!signature) {
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+  }
 
   let event: Stripe.Event;
   try {
@@ -28,89 +158,82 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Webhook signature verification failed: ${message}` }, { status: 400 });
   }
 
-  if (event.type === "charge.updated" || event.type === "checkout.session.completed") {
-    const admin = createAdminClient();
-    let paymentId: string | null = null;
+  const admin = createAdminClient();
 
-    // Handle both charge.updated and checkout.session.completed events
-    if (event.type === "charge.updated") {
-      const charge = event.data.object as Stripe.Charge;
+  try {
+    switch (event.type) {
+      case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object as Stripe.Checkout.Session;
 
-      // For charge.updated, try to find payment via metadata
-      if (charge.metadata?.payment_id) {
-        paymentId = charge.metadata.payment_id;
-      } else if (charge.metadata?.session_id) {
-        // Try searching by session ID from metadata
-        const { data: payment } = await admin
-          .from("payments")
-          .select("id")
-          .eq("stripe_session_id", charge.metadata.session_id)
-          .maybeSingle();
-        paymentId = payment?.id ?? null;
+        // A completed session with an unpaid payment_status is an async method
+        // still clearing; async_payment_succeeded will arrive later.
+        if (session.payment_status === "unpaid") break;
+
+        const payment = await findPaymentBySession(admin, session.id);
+        if (!payment) {
+          console.error(`Stripe webhook: no payment row for session ${session.id} (${event.type})`);
+          break;
+        }
+        await fulfill(admin, payment.id);
+        break;
       }
 
-      if (!paymentId) {
-        return NextResponse.json(
-          { error: "Could not find payment for charge (no metadata)" },
-          { status: 404 },
-        );
+      case "checkout.session.async_payment_failed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const payment = await findPaymentBySession(admin, session.id);
+        if (!payment) {
+          console.error(`Stripe webhook: no payment row for session ${session.id} (${event.type})`);
+          break;
+        }
+        await setStatus(admin, payment.id, "failed");
+        break;
       }
-    } else {
-      // checkout.session.completed: find by session ID
-      const session = event.data.object as Stripe.Checkout.Session;
-      const { data: payment } = await admin
-        .from("payments")
-        .select("id")
-        .eq("stripe_session_id", session.id)
-        .maybeSingle();
-      paymentId = payment?.id ?? null;
 
-      if (!paymentId) {
-        return NextResponse.json(
-          { error: "Matching payment not found" },
-          { status: 404 },
-        );
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const payment = await findPaymentByCharge(admin, charge);
+        if (!payment) {
+          console.error(`Stripe webhook: no payment row for charge ${charge.id} (${event.type})`);
+          break;
+        }
+        // Report data is deliberately left in place — revoking access on
+        // refund is a product decision, not a webhook one.
+        await setStatus(admin, payment.id, "refunded");
+        break;
       }
-    }
 
-    const { data: payment, error: paymentError } = await admin
-      .from("payments")
-      .update({ status: "succeeded" })
-      .eq("id", paymentId)
-      .select()
-      .single();
+      case "charge.updated": {
+        // Fires on any charge mutation (metadata edits included), so it is only
+        // a backstop: it confirms success if checkout.session.completed was
+        // missed, and catches a refund reflected on the charge. markSucceeded's
+        // pending-only filter makes the success path a no-op in the normal case.
+        const charge = event.data.object as Stripe.Charge;
+        const payment = await findPaymentByCharge(admin, charge);
+        if (!payment) {
+          console.error(`Stripe webhook: no payment row for charge ${charge.id} (${event.type})`);
+          break;
+        }
 
-    if (paymentError || !payment) {
-      return NextResponse.json(
-        { error: paymentError?.message ?? "Failed to update payment" },
-        { status: 500 },
-      );
-    }
-
-    const { error: reportError } = await admin
-      .from("reports")
-      .update({ status: "paid" })
-      .eq("id", payment.report_id);
-
-    if (reportError) {
-      return NextResponse.json({ error: reportError.message }, { status: 500 });
-    }
-
-    // Step 5 of the core flow (BUILD.md): trigger analysis in-process right
-    // after payment succeeds. Called directly (no HTTP hop, no internal
-    // secret needed since this is a same-process server-to-server call). A
-    // failure here must not fail the webhook response — Stripe should not
-    // retry the payment webhook just because the downstream AI analysis
-    // failed; that can be retried later via the internal-secret-gated
-    // /api/analyze route.
-    try {
-      const result = await runAnalysis(payment.report_id);
-      if (!result.ok) {
-        console.error("Stripe webhook: runAnalysis failed", result.error);
+        if (charge.refunded) {
+          await setStatus(admin, payment.id, "refunded");
+        } else if (charge.status === "succeeded" && charge.paid) {
+          await fulfill(admin, payment.id);
+        }
+        break;
       }
-    } catch (err) {
-      console.error("Stripe webhook: runAnalysis threw unexpectedly", err);
+
+      default:
+        // Acknowledged and ignored — keeps an over-broad endpoint subscription
+        // from generating retries.
+        break;
     }
+  } catch (err) {
+    // Reached only for database failures, which a Stripe retry may well
+    // resolve. Signature is already verified at this point, so 500 is safe.
+    const message = err instanceof Error ? err.message : "Unhandled webhook error";
+    console.error(`Stripe webhook: ${event.type} failed`, err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

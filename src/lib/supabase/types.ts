@@ -84,6 +84,7 @@ export type Payment = {
   report_id: string;
   stripe_session_id: string | null;
   stripe_customer_id: string | null;
+  stripe_payment_intent_id: string | null;
   amount_cents: number;
   status: PaymentStatus;
   created_at: string;

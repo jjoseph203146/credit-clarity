@@ -36,3 +36,6 @@ temporary screenshots/
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*
+supabase/.temp

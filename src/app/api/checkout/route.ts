@@ -36,15 +36,33 @@ export async function POST(req: Request) {
         quantity: 1,
       },
     ],
+    // Stamped on both the session and the underlying PaymentIntent (which
+    // propagates to the Charge). The webhook resolves session-level events by
+    // stripe_session_id and charge-level events by payment intent id; this
+    // metadata is the human-readable fallback when reading events in the
+    // Stripe dashboard.
+    metadata: { report_id: reportId },
+    payment_intent_data: {
+      metadata: { report_id: reportId },
+    },
     success_url: `${origin}/signup?reportId=${reportId}`,
     cancel_url: `${origin}/preview`,
   });
 
   const admin = createAdminClient();
 
+  // session.payment_intent is populated at creation time for mode: "payment".
+  // Recording it here is what lets charge.updated / charge.refunded find this
+  // row later — charge events carry a payment_intent but no session id.
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
   const { error: insertError } = await admin.from("payments").insert({
     report_id: reportId,
     stripe_session_id: session.id,
+    stripe_payment_intent_id: paymentIntentId,
     amount_cents: 500,
     status: "pending",
   });
