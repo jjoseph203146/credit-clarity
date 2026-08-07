@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
 import { audit } from "@/lib/audit";
+import { reportError } from "@/lib/report-error";
 
 // GET /api/reports/[id]/file — returns a short-lived signed URL for the
 // user's own uploaded PDF.
@@ -65,7 +66,12 @@ export async function GET(
     .createSignedUrl(report.storage_path, SIGNED_URL_TTL_SECONDS);
 
   if (signError || !signed) {
-    console.error(`[reports] failed to sign download for ${report.id}:`, signError);
+    void reportError({
+      event: "report_download_sign_failed",
+      severity: "error",
+      error: signError,
+      context: { reportId: report.id },
+    });
     return NextResponse.json(
       { error: "We couldn't prepare your file for download. Please try again." },
       { status: 500 },

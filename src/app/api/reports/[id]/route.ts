@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
 import { audit } from "@/lib/audit";
+import { reportError } from "@/lib/report-error";
 
 // GET /api/reports/[id] — fetches a report plus its accounts/collections/
 // inquiries. Supports both the anonymous pre-signup flow (free preview,
@@ -25,13 +26,13 @@ export async function GET(
 
   const admin = createAdminClient();
 
-  const { data: report, error: reportError } = await admin
+  const { data: report, error: reportLookupError } = await admin
     .from("reports")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (reportError || !report) {
+  if (reportLookupError || !report) {
     return NextResponse.json({ error: "Report not found" }, { status: 404 });
   }
 
@@ -94,13 +95,13 @@ export async function DELETE(
   // RLS ("reports read own") scopes this select to rows owned by the
   // current user — a report belonging to someone else, or still anonymous,
   // comes back as no row.
-  const { data: report, error: reportError } = await supabase
+  const { data: report, error: reportLookupError } = await supabase
     .from("reports")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (reportError || !report || report.user_id !== user.id) {
+  if (reportLookupError || !report || report.user_id !== user.id) {
     return NextResponse.json({ error: "Report not found" }, { status: 404 });
   }
 
@@ -114,7 +115,12 @@ export async function DELETE(
     .remove([report.storage_path]);
 
   if (storageError) {
-    console.error(`[reports] failed to remove storage for ${report.id}:`, storageError);
+    void reportError({
+      event: "report_delete_storage_failed",
+      severity: "error",
+      error: storageError,
+      context: { reportId: report.id },
+    });
     return NextResponse.json(
       { error: "We couldn't delete your report. Please try again." },
       { status: 500 },
@@ -127,7 +133,12 @@ export async function DELETE(
     .eq("id", report.id);
 
   if (deleteError) {
-    console.error(`[reports] failed to delete report ${report.id}:`, deleteError);
+    void reportError({
+      event: "report_delete_failed",
+      severity: "error",
+      error: deleteError,
+      context: { reportId: report.id },
+    });
     return NextResponse.json(
       { error: "We couldn't delete your report. Please try again." },
       { status: 500 },

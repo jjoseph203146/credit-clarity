@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIp, hit, tooManyRequests } from "@/lib/rate-limit";
 import { audit } from "@/lib/audit";
+import { reportError } from "@/lib/report-error";
 
 // Unauthenticated by design (anonymous upload), so it needs its own abuse
 // ceiling: each call mints a report row plus a signed Storage upload URL.
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
   if (insertError || !report) {
     // Raw provider messages go to the logs, never to the user — they leak
     // schema/infrastructure detail and mean nothing to someone uploading a PDF.
-    console.error("[upload] failed to create report row:", insertError);
+    void reportError({ event: "upload_row_create_failed", severity: "error", error: insertError });
     return NextResponse.json(
       { error: "We couldn't start your upload. Please try again." },
       { status: 500 },
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
     .createSignedUploadUrl(storagePath);
 
   if (signError || !signedUpload) {
-    console.error("[upload] failed to create signed upload URL:", signError);
+    void reportError({ event: "upload_sign_failed", severity: "error", error: signError });
     return NextResponse.json(
       { error: "We couldn't start your upload. Please try again." },
       { status: 500 },

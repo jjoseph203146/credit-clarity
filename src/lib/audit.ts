@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AuditAction } from "@/lib/supabase/types";
+import { reportError } from "@/lib/report-error";
 
 // Append-only record of security-sensitive actions on credit report data.
 // See supabase/migrations/0005_audit_log.sql.
@@ -48,9 +49,21 @@ export async function audit(input: AuditInput): Promise<void> {
       });
 
     if (error) {
-      console.error(`[audit] failed to record ${input.action}:`, error.message);
+      // A missing audit trail is its own incident — it is the record relied on
+      // to answer what happened after the fact.
+      void reportError({
+        event: "audit_write_failed",
+        severity: "error",
+        error,
+        context: { action: input.action, reportId: input.reportId ?? null },
+      });
     }
   } catch (err) {
-    console.error(`[audit] threw while recording ${input.action}:`, err);
+    void reportError({
+      event: "audit_threw",
+      severity: "error",
+      error: err,
+      context: { action: input.action },
+    });
   }
 }

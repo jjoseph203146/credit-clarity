@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runAnalysis } from "@/lib/analyze";
 import { audit } from "@/lib/audit";
+import { reportError } from "@/lib/report-error";
 
 // Stripe webhook: keeps `payments.status` and `reports.status` in sync with
 // what actually happened in Stripe, and kicks off the AI analysis once a
@@ -103,7 +104,12 @@ export async function POST(req: Request) {
     label: string,
   ) {
     if (!payment) {
-      console.error(`[stripe] no payments row for ${label} (status ${status})`);
+      void reportError({
+        event: "stripe_unmatched_event",
+        severity: "error",
+        error: `No payments row for ${label}`,
+        context: { label, status },
+      });
       return NextResponse.json({ received: true, matched: false });
     }
 
@@ -117,7 +123,12 @@ export async function POST(req: Request) {
       .eq("id", payment.id);
 
     if (error) {
-      console.error(`[stripe] failed to mark payment ${payment.id} ${status}:`, error);
+      void reportError({
+        event: "payment_status_update_failed",
+        severity: "error",
+        error,
+        context: { paymentId: payment.id, targetStatus: status },
+      });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -150,7 +161,14 @@ export async function POST(req: Request) {
       if (!payment) {
         // Nothing to reconcile against — a session created outside this app,
         // or a row deleted since. Retrying won't conjure the row, so ack it.
-        console.error(`[stripe] no payments row for completed session ${session.id}`);
+        void reportError({
+          event: "stripe_paid_session_unmatched",
+          // A completed Checkout Session with no local row means someone paid
+          // and there is nothing here to fulfil.
+          severity: "fatal",
+          error: `No payments row for completed session ${session.id}`,
+          context: { sessionId: session.id },
+        });
         return NextResponse.json({ received: true, matched: false });
       }
 
@@ -173,18 +191,28 @@ export async function POST(req: Request) {
       if (paymentError) {
         // Transient DB failure — let Stripe retry rather than silently
         // leaving a paid customer marked pending.
-        console.error(`[stripe] failed to mark payment ${payment.id} succeeded:`, paymentError);
+        void reportError({
+          event: "payment_success_write_failed",
+          severity: "fatal",
+          error: paymentError,
+          context: { paymentId: payment.id, reportId: payment.report_id },
+        });
         return NextResponse.json({ error: paymentError.message }, { status: 500 });
       }
 
-      const { error: reportError } = await admin
+      const { error: reportUpdateError } = await admin
         .from("reports")
         .update({ status: "paid" })
         .eq("id", payment.report_id);
 
-      if (reportError) {
-        console.error(`[stripe] failed to mark report ${payment.report_id} paid:`, reportError);
-        return NextResponse.json({ error: reportError.message }, { status: 500 });
+      if (reportUpdateError) {
+        void reportError({
+          event: "report_paid_write_failed",
+          severity: "fatal",
+          error: reportUpdateError,
+          context: { reportId: payment.report_id },
+        });
+        return NextResponse.json({ error: reportUpdateError.message }, { status: 500 });
       }
 
       void audit({
@@ -202,14 +230,16 @@ export async function POST(req: Request) {
       // runAnalysis marks the report `error` on failure (so /processing can
       // surface it) and it can be re-run via the internal /api/analyze route.
       try {
-        const result = await runAnalysis(payment.report_id);
-        if (!result.ok) {
-          console.error(
-            `[stripe] runAnalysis failed for paid report ${payment.report_id}: ${result.error}`,
-          );
-        }
+        // runAnalysis reports its own failures as fatal and marks the report
+        // errored, so the returned result needs no handling here.
+        await runAnalysis(payment.report_id);
       } catch (err) {
-        console.error("[stripe] runAnalysis threw unexpectedly", err);
+        void reportError({
+          event: "analysis_threw",
+          severity: "fatal",
+          error: err,
+          context: { reportId: payment.report_id },
+        });
       }
 
       return NextResponse.json({ received: true });

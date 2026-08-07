@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { reportError } from "@/lib/report-error";
 
 // Retention job for abandoned anonymous uploads. Every upload that never
 // reaches signup leaves a `reports` row (user_id null) plus the PDF in
@@ -58,7 +59,12 @@ export async function POST(req: Request) {
   );
 
   if (error) {
-    console.error("[cleanup] failed to delete stale anonymous reports:", error);
+    void reportError({
+      event: "cleanup_failed",
+      severity: "error",
+      error,
+      context: { retentionHours },
+    });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -78,10 +84,15 @@ export async function POST(req: Request) {
       // bucket. Surface it loudly rather than reporting a clean run — this
       // needs manual reconciliation against the bucket.
       storageError = removeError.message;
-      console.error(
-        `[cleanup] deleted ${rows.length} report rows but failed to remove ` +
-          `${storagePaths.length} Storage objects (now orphaned): ${removeError.message}`,
-      );
+      // The rows are gone, so these objects can no longer be found by any
+      // later run — they are orphaned credit reports sitting in the bucket,
+      // which is a privacy problem, not just a cleanup miss.
+      void reportError({
+        event: "cleanup_orphaned_storage",
+        severity: "error",
+        error: removeError,
+        context: { rowsDeleted: rows.length, orphanedObjects: storagePaths.length },
+      });
     } else {
       storageRemoved = storagePaths.length;
     }

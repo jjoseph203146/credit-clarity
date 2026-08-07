@@ -16,7 +16,7 @@ AI system prompts and stated in the Terms — keep it that way.
 
 | Concern | Choice |
 | --- | --- |
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Database / auth / storage | Supabase (Postgres + RLS) |
 | Payments | Stripe Checkout |
 | AI | Anthropic Claude (`claude-sonnet-5`) |
@@ -46,6 +46,7 @@ npm run dev
 | `STRIPE_WEBHOOK_SECRET` | yes | From the Stripe webhook endpoint config. |
 | `ANTHROPIC_API_KEY` | yes | Server only. |
 | `INTERNAL_API_SECRET` | yes | Gates `/api/analyze` and `/api/cleanup`. |
+| `ERROR_WEBHOOK_URL` | recommended | Slack/Discord incoming webhook for error alerts. Without it errors are logged but nobody is paged. |
 
 Anything not prefixed `NEXT_PUBLIC_` must stay server-side. The service-role
 key and the Anthropic key in particular grant full data access and billable
@@ -115,6 +116,15 @@ only by whoever holds the unguessable UUID, and auto-deleted after 48 hours.
 - **User-facing errors are generic.** Raw Supabase/Stripe/Anthropic messages
   go to the logs; users get plain-language text. Keep it that way — provider
   errors leak schema detail and mean nothing to the person reading them.
+- **Error reporting.** `src/lib/report-error.ts` is the single sink. It always
+  emits structured JSON to stderr for log aggregators, and POSTs to
+  `ERROR_WEBHOOK_URL` for `error`/`fatal` when set. `fatal` is reserved for
+  failures where a user paid and got nothing. Repeat alerts for the same event
+  are throttled to one per 5 minutes so a failing dependency can't drown the
+  channel, and context values are redacted by key name so credentials and PII
+  never leave the process. `src/instrumentation.ts` catches anything that
+  throws out of a route, Server Component or Server Action that the explicit
+  call sites did not anticipate.
 - **Security claims are commitments.** Copy on `/security`, `/upload` and the
   Privacy Policy is deliberately worded to attribute infrastructure guarantees
   to the provider that actually makes them. Don't upgrade those claims without
@@ -144,14 +154,13 @@ npm test        # vitest
 
 ## Known gaps
 
-Tracked but not yet done:
+Deferred to phase 2:
 
-- **Dependency advisories.** `npm audit` reports high-severity Next.js and
-  PostCSS issues; the fix requires a breaking upgrade to Next 16.
 - **No malware scanning.** Uploads are validated by extension, size, declared
   MIME type and `%PDF-` header, but not scanned for malicious payloads.
-- **No error tracking.** Failures reach `console.error` and the audit log,
-  but nothing pages anyone — no Sentry or equivalent.
 - **Rate limiting is per-instance** and resets on cold start.
 - **`/questionnaire` is orphaned** — nothing links to it, it persists nothing,
   and it redirects to `/processing` without a `reportId`.
+- **Retention policy is store-until-deleted** for claimed reports. Storing
+  credit reports only as long as a user actively wants them would materially
+  lower the liability of holding this data.

@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { reportClientError } from "@/lib/report-client-error";
+
 // Next.js App Router error boundary for everything under the (app) group
 // (dashboard, reports, plan, progress, chat, learn, goals, notifications,
 // settings). Catches render/data errors in that subtree without taking down
@@ -15,6 +17,9 @@ export default function AppError({
 }) {
   useEffect(() => {
     console.error(error);
+    // Also send it server-side — a console.error in someone else's browser
+    // is not something anyone finds out about.
+    reportClientError(error, "app");
   }, [error]);
 
   return (

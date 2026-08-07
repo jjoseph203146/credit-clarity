@@ -8,6 +8,7 @@ import { extractCollections } from "@/lib/parsing/extract-collections";
 import { extractInquiries } from "@/lib/parsing/extract-inquiries";
 import { clientIp, hit, tooManyRequests } from "@/lib/rate-limit";
 import { audit } from "@/lib/audit";
+import { reportError } from "@/lib/report-error";
 import {
   MAX_ACCOUNTS,
   MAX_COLLECTIONS,
@@ -57,13 +58,13 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient();
 
-  const { data: report, error: reportError } = await admin
+  const { data: report, error: reportLookupError } = await admin
     .from("reports")
     .select("*")
     .eq("id", reportId)
     .single();
 
-  if (reportError || !report) {
+  if (reportLookupError || !report) {
     return NextResponse.json(
       { error: "We couldn't find that upload. Please upload your report again." },
       { status: 404 },
@@ -239,7 +240,12 @@ export async function POST(req: Request) {
       .eq("id", reportId);
 
     if (updateError) {
-      console.error(`[parse] report ${reportId}: status update failed:`, updateError);
+      void reportError({
+        event: "parse_status_update_failed",
+        severity: "error",
+        error: updateError,
+        context: { reportId },
+      });
       return NextResponse.json(
         { error: "We couldn't finish processing your report. Please try again." },
         { status: 500 },
@@ -271,7 +277,12 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`[parse] report ${reportId}: parsing failed:`, err);
+    void reportError({
+      event: "parse_failed",
+      severity: "error",
+      error: err,
+      context: { reportId },
+    });
     await admin
       .from("reports")
       .update({ status: "error", error_message: message.slice(0, 500) })

@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { clientIp, hit, tooManyRequests } from "@/lib/rate-limit";
+import { reportError } from "@/lib/report-error";
 
 // Unauthenticated by design (payment precedes signup for new users). Each
 // call creates a live Stripe Checkout Session plus a `payments` row, so
@@ -57,7 +58,12 @@ export async function POST(req: Request) {
       .is("user_id", null);
 
     if (claimError) {
-      console.error(`[checkout] failed to claim report ${reportId}:`, claimError);
+      void reportError({
+        event: "checkout_claim_failed",
+        severity: "error",
+        error: claimError,
+        context: { reportId },
+      });
       return NextResponse.json(
         { error: "We couldn't start checkout. Please try again — you have not been charged." },
         { status: 500 },
@@ -96,7 +102,14 @@ export async function POST(req: Request) {
   });
 
   if (insertError) {
-    console.error("[checkout] failed to record payment row:", insertError);
+    void reportError({
+      event: "checkout_payment_row_failed",
+      // A live Stripe session now exists with no local row to reconcile it
+      // against — if the user pays anyway, the webhook will not find them.
+      severity: "fatal",
+      error: insertError,
+      context: { reportId, stripeSessionId: session.id },
+    });
     return NextResponse.json(
       { error: "We couldn't start checkout. Please try again — you have not been charged." },
       { status: 500 },

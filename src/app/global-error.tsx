@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { reportClientError } from "@/lib/report-client-error";
+
 // Root-level error boundary. Only triggers when an error escapes the root
 // layout itself (very rare — normally src/app/(app)/error.tsx or a
 // route-level boundary catches first). Per Next.js convention this must
@@ -15,6 +17,9 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error);
+    // Also send it server-side — a console.error in someone else's browser
+    // is not something anyone finds out about.
+    reportClientError(error, "global");
   }, [error]);
 
   return (

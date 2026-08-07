@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionPlanTask, Goal } from "@/lib/supabase/types";
 import { MAX_PROMPT_CHARS } from "@/lib/limits";
 import { audit } from "@/lib/audit";
+import { reportError } from "@/lib/report-error";
 
 // Structured-output schema for the analysis call: per-account summaries and
 // recommendations, per-collection validation-letter scripts, and a 90-day
@@ -182,13 +183,19 @@ export async function runAnalysis(
       .update({ status: "error", error_message: error.slice(0, 500) })
       .eq("id", reportId);
 
-    if (statusError) {
-      console.error(
-        `runAnalysis: report ${reportId} failed (${error}) AND could not be marked errored: ${statusError.message}`,
-      );
-    } else {
-      console.error(`runAnalysis: report ${reportId} failed: ${error}`);
-    }
+    // Severity is fatal, not error: by the time analysis runs the user has
+    // already been charged, so every failure here is someone who paid and
+    // received nothing. That is the case most worth waking up for.
+    void reportError({
+      event: "analysis_failed",
+      severity: "fatal",
+      error,
+      context: {
+        reportId,
+        markedErrored: !statusError,
+        ...(statusError ? { statusUpdateError: statusError.message } : {}),
+      },
+    });
 
     return { ok: false as const, error };
   };
