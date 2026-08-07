@@ -46,21 +46,15 @@ npm run dev
 | `STRIPE_WEBHOOK_SECRET` | yes | From the Stripe webhook endpoint config. |
 | `ANTHROPIC_API_KEY` | yes | Server only. |
 | `INTERNAL_API_SECRET` | yes | Gates `/api/analyze` and `/api/cleanup`. |
-| `NEXT_PUBLIC_LEGAL_EMAIL` | before launch | Shown in the Terms. |
-| `NEXT_PUBLIC_PRIVACY_EMAIL` | before launch | Shown in the Privacy Policy. |
-| `NEXT_PUBLIC_SUPPORT_EMAIL` | before launch | |
-| `NEXT_PUBLIC_LEGAL_ENTITY` | before launch | Registered entity named in the Terms. |
-| `NEXT_PUBLIC_GOVERNING_LAW` | before launch | Jurisdiction named in the Terms. |
 
 Anything not prefixed `NEXT_PUBLIC_` must stay server-side. The service-role
 key and the Anthropic key in particular grant full data access and billable
 API calls respectively.
 
-The five launch-gated values fall back to loud placeholders
-(`SET_NEXT_PUBLIC_CONTACT_EMAIL@example.invalid`, `[LEGAL ENTITY NAME — NOT
-YET SET]`) so an unconfigured deploy reads as unfinished rather than shipping
-a dead contact address that looks real. `hasPlaceholderContact` in
-`src/lib/site-config.ts` reports whether any are still unset.
+Outward-facing legal details — contact addresses, the contracting entity, and
+the governing-law jurisdiction — are static values in
+[`src/lib/site-config.ts`](src/lib/site-config.ts), not environment variables.
+They render verbatim in the Terms and Privacy Policy, so edit them there.
 
 ### Database
 
