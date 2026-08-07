@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { fullNameStorageKey } from "@/lib/utils";
 
 const MONO = "font-[family-name:var(--font-jetbrains-mono)]";
 
@@ -29,6 +31,8 @@ export default function UploadPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [showRetrievalHelp, setShowRetrievalHelp] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   function openFilePicker() {
@@ -101,6 +105,13 @@ export default function UploadPage() {
         throw new Error(parseData.error ?? "Couldn't process your report. Please try again.");
       }
 
+      // Carried through Stripe Checkout's external redirect via localStorage
+      // (see fullNameStorageKey) so the signup form can autofill "Full name"
+      // instead of asking again.
+      if (fullName.trim()) {
+        localStorage.setItem(fullNameStorageKey(reportId), fullName.trim());
+      }
+
       router.push(`/preview?reportId=${reportId}`);
     } catch (err) {
       setErrorMessage(
@@ -130,6 +141,19 @@ export default function UploadPage() {
             No account needed to get your free preview. Your file is encrypted the
             moment it arrives.
           </p>
+        </div>
+
+        <div className="mb-5">
+          <label htmlFor="full-name" className="mb-[5px] block text-[12.5px] font-semibold text-[#3d5068]">
+            Your name <span className="font-normal text-[#8fa3ba]">(optional — saves you typing it again later)</span>
+          </label>
+          <Input
+            id="full-name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Jordan Ellis"
+            autoComplete="name"
+          />
         </div>
 
         <input
@@ -238,7 +262,14 @@ export default function UploadPage() {
         <div className="mt-7 grid grid-cols-3 gap-3 text-center max-sm:grid-cols-1">
           <div className="text-[12.5px] text-muted">
             <div className="mb-0.5 font-bold text-ink">Where to get your report</div>
-            annualcreditreport.com — free weekly
+            <button
+              type="button"
+              onClick={() => setShowRetrievalHelp((v) => !v)}
+              aria-expanded={showRetrievalHelp}
+              className="rounded text-teal underline decoration-teal/40 underline-offset-2 transition-colors duration-150 hover:text-teal-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
+            >
+              annualcreditreport.com — free weekly
+            </button>
           </div>
           <div className="text-[12.5px] text-muted">
             <div className="mb-0.5 font-bold text-ink">We never pull your credit</div>
@@ -249,6 +280,49 @@ export default function UploadPage() {
             One click removes your data
           </div>
         </div>
+
+        {showRetrievalHelp && (
+          <div className="mt-4 rounded-[16px] border border-border bg-white p-6 text-left">
+            <div className="mb-3.5 text-[15px] font-bold">How to get your credit report as a PDF</div>
+            <ol className="flex flex-col gap-2.5 text-[13.5px] leading-relaxed text-muted">
+              <li className="flex gap-2.5">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#e6f5ef] text-[11px] font-bold text-teal-deep">1</span>
+                <span>
+                  Go to{" "}
+                  <a
+                    href="https://www.annualcreditreport.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-teal underline decoration-teal/40 underline-offset-2 hover:text-teal-deep"
+                  >
+                    annualcreditreport.com
+                  </a>{" "}
+                  — the only site authorized by federal law to give you free reports from all three bureaus.
+                </span>
+              </li>
+              <li className="flex gap-2.5">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#e6f5ef] text-[11px] font-bold text-teal-deep">2</span>
+                <span>Request your report and pick one bureau — Experian, Equifax, or TransUnion. Any one works here.</span>
+              </li>
+              <li className="flex gap-2.5">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#e6f5ef] text-[11px] font-bold text-teal-deep">3</span>
+                <span>Verify your identity with the on-screen questions, then your report opens in the browser.</span>
+              </li>
+              <li className="flex gap-2.5">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#e6f5ef] text-[11px] font-bold text-teal-deep">4</span>
+                <span>
+                  Save it as a PDF: press <span className={`${MONO} font-semibold text-ink`}>Ctrl+P</span> (Windows) or{" "}
+                  <span className={`${MONO} font-semibold text-ink`}>⌘P</span> (Mac), then choose &ldquo;Save as PDF&rdquo; as the
+                  destination.
+                </span>
+              </li>
+              <li className="flex gap-2.5">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#e6f5ef] text-[11px] font-bold text-teal-deep">5</span>
+                <span>Come back here and upload that PDF.</span>
+              </li>
+            </ol>
+          </div>
+        )}
       </div>
     </div>
   );

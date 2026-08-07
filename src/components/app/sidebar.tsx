@@ -67,7 +67,16 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppSidebar() {
+// Below md, the sidebar is an off-canvas drawer (opened via the hamburger in
+// MobileTopBar) rather than a permanently docked 224px column — there isn't
+// room for both the nav and real content on a phone-width screen.
+export function AppSidebar({
+  mobileOpen = false,
+  onNavigate,
+}: {
+  mobileOpen?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [identity, setIdentity] = useState<{ name: string; initials: string } | null>(null);
@@ -110,13 +119,19 @@ export function AppSidebar() {
   }, []);
 
   return (
-    <div className="sticky top-0 flex h-screen w-[224px] flex-none flex-col overflow-y-auto bg-[var(--navy-deep)] p-[18px_12px] text-[#b9c8da]">
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 flex h-screen w-[224px] flex-none flex-col overflow-y-auto bg-[var(--navy-deep)] p-[18px_12px] text-[#b9c8da] transition-transform duration-200 ease-out motion-reduce:transition-none",
+        "md:sticky md:top-0 md:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full",
+      )}
+    >
       <div className="mb-[18px] flex items-center gap-[9px] px-[10px] py-[6px]">
         <Image src="/logo.png" alt="" width={309} height={235} className="h-[28px] w-auto" />
         <span className="text-[15px] font-bold tracking-[-0.01em] text-white">Credit Clarity</span>
       </div>
 
-      <nav className="flex flex-col gap-0.5">
+      <nav className="flex flex-col gap-0.5" onClick={onNavigate}>
         {navMain.map((item) => (
           <NavRow key={item.href} item={item} active={isActive(pathname, item.href)} />
         ))}
@@ -125,7 +140,7 @@ export function AppSidebar() {
       <div className="px-3 pb-1.5 pt-[18px] text-[10.5px] font-bold tracking-[0.1em] text-[#5b6f89]">
         ACCOUNT
       </div>
-      <nav className="flex flex-col gap-0.5">
+      <nav className="flex flex-col gap-0.5" onClick={onNavigate}>
         {navAccount.map((item) => (
           <NavRow key={item.href} item={item} active={isActive(pathname, item.href)} />
         ))}

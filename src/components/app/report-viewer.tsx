@@ -249,7 +249,7 @@ export function ReportViewer({
                 No accounts found on this report.
               </div>
             )}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2.5 overflow-x-auto">
               {accounts.map((a, i) => {
                 const pill = accountPill(a);
                 const uTone = utilizationTone(a.utilization);
@@ -258,7 +258,7 @@ export function ReportViewer({
                     key={a.id}
                     id={`account-${a.id}`}
                     onClick={() => setSelectedAccount(i)}
-                    className="grid grid-cols-[1.5fr_.7fr_.6fr_.8fr_auto] items-center gap-3.5 rounded-[14px] border border-[var(--border)] bg-white px-5 py-4 text-left hover:border-[var(--teal)] scroll-mt-24"
+                    className="grid min-w-[560px] grid-cols-[1.5fr_.7fr_.6fr_.8fr_auto] items-center gap-3.5 rounded-[14px] border border-[var(--border)] bg-white px-5 py-4 text-left hover:border-[var(--teal)] scroll-mt-24"
                   >
                     <div>
                       <div className="text-sm font-bold">{a.name}</div>

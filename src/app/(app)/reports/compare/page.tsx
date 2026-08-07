@@ -159,11 +159,11 @@ export default async function ReportComparePage() {
         What changed between your last two reports.
       </div>
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2.5 overflow-x-auto">
         {rows.map((c, i) => (
           <div
             key={i}
-            className="grid grid-cols-[1.2fr_1fr_40px_1fr_.9fr] items-center gap-3.5 rounded-[14px] border border-[var(--border)] bg-white px-6 py-[18px]"
+            className="grid min-w-[560px] grid-cols-[1.2fr_1fr_40px_1fr_.9fr] items-center gap-3.5 rounded-[14px] border border-[var(--border)] bg-white px-6 py-[18px]"
           >
             <div className="text-sm font-bold">{c.metric}</div>
             <div className="text-center">

@@ -1,13 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { AuthLabel, AuthSubmitButton } from "@/components/marketing/auth-ui";
+import { fullNameStorageKey } from "@/lib/utils";
 import { signup } from "./actions";
 
 export function SignupForm({ reportId }: { reportId: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [fullName, setFullName] = useState("");
+
+  // Prefills from the name typed at /upload (see fullNameStorageKey) — read
+  // client-side since it only exists in this browser's localStorage, never
+  // sent to the server. Cleared immediately after reading so it can't
+  // autofill a later, unrelated signup in the same browser.
+  useEffect(() => {
+    if (!reportId) return;
+    const key = fullNameStorageKey(reportId);
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      setFullName(stored);
+      localStorage.removeItem(key);
+    }
+  }, [reportId]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     const formData = new FormData(e.currentTarget);
@@ -30,7 +46,13 @@ export function SignupForm({ reportId }: { reportId: string }) {
       <input type="hidden" name="reportId" value={reportId} />
       <div>
         <AuthLabel>Full name</AuthLabel>
-        <Input name="full_name" placeholder="Jordan Ellis" required />
+        <Input
+          name="full_name"
+          placeholder="Jordan Ellis"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
       </div>
       <div>
         <AuthLabel>Email</AuthLabel>

@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -30,6 +31,17 @@ export const metadata: Metadata = {
   title: "Credit Clarity",
   description:
     "AI-powered credit report analysis. Educational insights, not credit repair.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Credit Clarity",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#081527",
 };
 
 export default function RootLayout({
@@ -43,6 +55,7 @@ export default function RootLayout({
       className={`${instrumentSans.variable} ${instrumentSerif.variable} ${jetBrainsMono.variable}`}
     >
       <body className="font-sans antialiased bg-[var(--bg)] text-[var(--ink)]">
+        <ServiceWorkerRegistration />
         {children}
       </body>
     </html>

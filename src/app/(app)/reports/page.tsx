@@ -61,7 +61,7 @@ export default async function ReportsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 overflow-x-auto">
         {reports?.map((r, i) => {
           const older = reports[i + 1];
           const change =
@@ -71,7 +71,7 @@ export default async function ReportsPage() {
           return (
             <div
               key={r.id}
-              className="grid grid-cols-[44px_1.3fr_.8fr_.8fr_.9fr_auto] items-center gap-4 rounded-2xl border border-[var(--border)] bg-white px-6 py-5"
+              className="grid min-w-[620px] grid-cols-[44px_1.3fr_.8fr_.8fr_.9fr_auto] items-center gap-4 rounded-2xl border border-[var(--border)] bg-white px-6 py-5"
             >
               <div
                 className="flex h-11 w-11 items-center justify-center rounded-xl text-[10px] font-bold tracking-[0.02em] text-white"

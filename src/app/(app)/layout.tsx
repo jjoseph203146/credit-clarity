@@ -1,14 +1,9 @@
-import { AppSidebar } from "@/components/app/sidebar";
+import { AppShell } from "@/components/app/app-shell";
 
 export default function AppShellLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className="flex min-h-screen">
-      <AppSidebar />
-      <div className="min-w-0 flex-1">{children}</div>
-    </div>
-  );
+  return <AppShell>{children}</AppShell>;
 }
