@@ -159,7 +159,9 @@ configuration steps required before the first real user (Stripe production
 keys, webhook event subscriptions, `ERROR_WEBHOOK_URL`, and the cleanup
 schedule).
 
-The largest open items: no malware scanning on upload, per-instance rate
-limiting that resets on cold start, `/questionnaire` being disconnected (which
-leaves `users.goal` unwritten and every action plan generic), and an undecided
-retention policy for claimed reports.
+The largest open items: **the PDF parser has never been run against a real
+bureau PDF** (the fixtures in `src/lib/parsing/__fixtures__/` are hand-written
+approximations, not real layouts), no malware scanning on upload, per-instance
+rate limiting that resets on cold start, and no tests above the unit level —
+in particular nothing verifies that RLS actually isolates one user's data from
+another's.

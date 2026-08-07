@@ -30,9 +30,24 @@ done, and most take minutes.
       runs, every abandoned upload keeps a real credit report indefinitely,
       contradicting the 48-hour promise now written into the Privacy Policy.
 - [ ] **Click through the whole flow once against production.** Upload →
-      preview → pay → analysis → report → delete. Client-side hydration was
-      never verified after the Next 16 upgrade; `src/app/preview/page.tsx`
-      changed the most and deserves the closest look.
+      preview → questionnaire → pay → analysis → report → delete.
+      **This application has never been run in a browser by anyone.** Every
+      check so far has been build, typecheck, lint, unit tests and curl against
+      a server with placeholder credentials — the end-to-end path has never
+      executed. Client-side hydration in particular was never verified after
+      the Next 16 upgrade, and `src/app/preview/page.tsx` changed the most
+      (its loading state and effect were reworked). It is also the page every
+      user sees immediately before deciding whether to pay.
+- [ ] **Test with at least one real bureau PDF — ideally all three.** The
+      parser has never been run against a genuine export. The fixtures in
+      `src/lib/parsing/__fixtures__/` say so themselves: hand-written
+      approximations, "not a substitute for testing against real PDFs", and
+      they are not even in the test suite. So the core value proposition is
+      unvalidated — a real Experian export may extract zero accounts, in which
+      case a tester pays $5 for an analysis of nothing. The code degrades
+      gracefully rather than crashing, but the experience is bad and you would
+      be charging for it. If extraction is poor, fixing it outranks everything
+      else on this list.
 - [ ] **Decide: Supabase "Confirm email" on or off.** Both paths work, but they
       are different first-run experiences. Off is smoother (straight into the
       report after paying); on is safer against typo'd and disposable emails,
