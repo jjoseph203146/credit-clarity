@@ -71,10 +71,17 @@ async function findPaymentByCharge(admin: Admin, charge: Stripe.Charge) {
 // first one to land matches a pending row, so analysis runs exactly once and a
 // later event can never flip an already-refunded payment back to succeeded.
 // Returns the row if this call performed the transition, otherwise null.
-async function markSucceeded(admin: Admin, paymentId: string) {
+async function markSucceeded(admin: Admin, paymentId: string, paymentIntentId?: string) {
   const { data, error } = await admin
     .from("payments")
-    .update({ status: "succeeded" })
+    .update({
+      status: "succeeded",
+      // Only known once Stripe has actually processed the payment (absent at
+      // Checkout Session creation time, which is why /api/checkout can't set
+      // it up front) — backfilled here so later charge.* events can resolve
+      // this payment directly instead of falling back to report_id metadata.
+      ...(paymentIntentId ? { stripe_payment_intent_id: paymentIntentId } : {}),
+    })
     .eq("id", paymentId)
     .eq("status", "pending")
     .select("id, report_id")
@@ -84,8 +91,8 @@ async function markSucceeded(admin: Admin, paymentId: string) {
   return data;
 }
 
-async function fulfill(admin: Admin, paymentId: string) {
-  const payment = await markSucceeded(admin, paymentId);
+async function fulfill(admin: Admin, paymentId: string, paymentIntentId?: string) {
+  const payment = await markSucceeded(admin, paymentId, paymentIntentId);
 
   if (!payment) {
     // Already succeeded/refunded/failed — a redelivery or a duplicate event.
@@ -175,7 +182,7 @@ export async function POST(req: Request) {
           console.error(`Stripe webhook: no payment row for session ${session.id} (${event.type})`);
           break;
         }
-        await fulfill(admin, payment.id);
+        await fulfill(admin, payment.id, paymentIntentId(session.payment_intent) ?? undefined);
         break;
       }
 
@@ -218,7 +225,7 @@ export async function POST(req: Request) {
         if (charge.refunded) {
           await setStatus(admin, payment.id, "refunded");
         } else if (charge.status === "succeeded" && charge.paid) {
-          await fulfill(admin, payment.id);
+          await fulfill(admin, payment.id, paymentIntentId(charge.payment_intent) ?? undefined);
         }
         break;
       }
