@@ -154,13 +154,12 @@ npm test        # vitest
 
 ## Known gaps
 
-Deferred to phase 2:
+See [`PHASE2.md`](PHASE2.md) for the full outstanding list, including the
+configuration steps required before the first real user (Stripe production
+keys, webhook event subscriptions, `ERROR_WEBHOOK_URL`, and the cleanup
+schedule).
 
-- **No malware scanning.** Uploads are validated by extension, size, declared
-  MIME type and `%PDF-` header, but not scanned for malicious payloads.
-- **Rate limiting is per-instance** and resets on cold start.
-- **`/questionnaire` is orphaned** — nothing links to it, it persists nothing,
-  and it redirects to `/processing` without a `reportId`.
-- **Retention policy is store-until-deleted** for claimed reports. Storing
-  credit reports only as long as a user actively wants them would materially
-  lower the liability of holding this data.
+The largest open items: no malware scanning on upload, per-instance rate
+limiting that resets on cold start, `/questionnaire` being disconnected (which
+leaves `users.goal` unwritten and every action plan generic), and an undecided
+retention policy for claimed reports.
