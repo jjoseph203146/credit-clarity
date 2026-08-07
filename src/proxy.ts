@@ -6,7 +6,11 @@ import { isProtectedPath } from "@/lib/auth-guard";
 // gates the authenticated-app routes behind a signed-in user. This is a
 // second layer of defense — pages under (app) also check auth server-side —
 // but it stops unauthenticated requests before any page code runs.
-export async function middleware(request: NextRequest) {
+//
+// Named `proxy` in `src/proxy.ts`: Next 16 renamed the `middleware` file
+// convention, and the old name logs a deprecation warning on every build.
+// Behaviour and the `config.matcher` below are unchanged.
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,

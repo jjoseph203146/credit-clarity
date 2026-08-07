@@ -48,20 +48,25 @@ function PreviewPageInner() {
   const reportId = searchParams.get("reportId");
 
   const [data, setData] = useState<ReportData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedFactor, setExpandedFactor] = useState<string | null>(null);
 
+  // Captured when the report data arrives rather than read during render:
+  // Date.now() during render is impure, differs between the server and client
+  // passes, and can shift between re-renders of the same data.
+  const [loadedAt, setLoadedAt] = useState<number | null>(null);
+
+  // Derived rather than held in state. `loading` is fully determined by what
+  // we already know at render time — whether there is a report to fetch, and
+  // whether the fetch has produced data or an error yet — so tracking it
+  // separately just means setting state synchronously inside the effect and
+  // paying an extra render pass for something the first render knew.
+  const loading = Boolean(reportId) && !data && !error;
+
   useEffect(() => {
-    if (!reportId) {
-      setError("We couldn't find your report. Please start over from the upload page.");
-      setLoading(false);
-      return;
-    }
+    if (!reportId) return;
 
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     fetch(`/api/reports/${reportId}`)
       .then(async (res) => {
@@ -72,7 +77,10 @@ function PreviewPageInner() {
         return body as ReportData;
       })
       .then((body) => {
-        if (!cancelled) setData(body);
+        if (!cancelled) {
+          setData(body);
+          setLoadedAt(Date.now());
+        }
       })
       .catch((err) => {
         if (!cancelled) {
@@ -83,9 +91,6 @@ function PreviewPageInner() {
           );
         }
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
 
     return () => {
       cancelled = true;
@@ -104,7 +109,7 @@ function PreviewPageInner() {
     );
   }
 
-  if (error || !data) {
+  if (!reportId || error || !data) {
     return (
       <div>
         <MarketingNav />
@@ -144,13 +149,14 @@ function PreviewPageInner() {
   const oldestAccount = [...accounts]
     .filter((a) => a.opened_date)
     .sort((a, b) => new Date(a.opened_date!).getTime() - new Date(b.opened_date!).getTime())[0];
-  const creditHistoryYears = oldestAccount
-    ? Math.max(
-        0,
-        (Date.now() - new Date(oldestAccount.opened_date!).getTime()) /
-          (365.25 * 24 * 3600 * 1000),
-      )
-    : null;
+  const creditHistoryYears =
+    oldestAccount && loadedAt != null
+      ? Math.max(
+          0,
+          (loadedAt - new Date(oldestAccount.opened_date!).getTime()) /
+            (365.25 * 24 * 3600 * 1000),
+        )
+      : null;
 
   const lateAccounts = accounts.filter(
     (a) => a.payment_history && /late/i.test(a.payment_history),

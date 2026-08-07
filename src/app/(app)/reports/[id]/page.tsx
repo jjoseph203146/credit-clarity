@@ -4,7 +4,10 @@ import { ReportViewer } from "@/components/app/report-viewer";
 import { bureauLabel, formatDate, statusLabel } from "@/lib/report-derivations";
 import type { Report, ReportAccount, ReportCollection, ReportInquiry } from "@/lib/supabase/types";
 
-export default async function ReportViewerPage({ params }: { params: { id: string } }) {
+export default async function ReportViewerPage({ params }: { params: Promise<{ id: string }> }) {
+  // Next 16: route params are async.
+  const { id } = await params;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -14,7 +17,7 @@ export default async function ReportViewerPage({ params }: { params: { id: strin
   const { data: report } = await supabase
     .from("reports")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", user.id)
     .is("deleted_at", null)
     .returns<Report[]>()

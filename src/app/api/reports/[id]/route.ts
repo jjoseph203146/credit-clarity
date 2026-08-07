@@ -18,14 +18,17 @@ import { audit } from "@/lib/audit";
 //     not 403, so the response doesn't confirm the report's existence.
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Next 16: route params are async.
+  const { id } = await params;
+
   const admin = createAdminClient();
 
   const { data: report, error: reportError } = await admin
     .from("reports")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (reportError || !report) {
@@ -68,13 +71,16 @@ export async function GET(
 // reports/account at any time (no retention period)."
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   // @supabase/ssr's bundled types (createServerClient's `Schema` generic)
   // resolve against an older @supabase/supabase-js internal path than the
   // version installed here, which collapses table typing to `never`. The
   // client returned at runtime is a real SupabaseClient<Database>, so this
   // cast restores accurate typing without touching src/lib/supabase/server.ts.
+  // Next 16: route params are async.
+  const { id } = await params;
+
   const supabase = (await createClient()) as unknown as SupabaseClient<Database>;
 
   const {
@@ -91,7 +97,7 @@ export async function DELETE(
   const { data: report, error: reportError } = await supabase
     .from("reports")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (reportError || !report || report.user_id !== user.id) {

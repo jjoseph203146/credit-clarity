@@ -1,4 +1,4 @@
-// Pure helper for route protection, used by middleware.ts. Kept dependency-free
+// Pure helper for route protection, used by proxy.ts. Kept dependency-free
 // (no next/server imports) so it can be unit tested in isolation.
 
 // Top-level segments of the authenticated app — everything nested under these

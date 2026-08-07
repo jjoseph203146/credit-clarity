@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 // Ends the session and clears the Supabase auth cookies. Server Action
 // rather than a client-side supabase.auth.signOut() so the cookie removal
 // happens on the response the browser is already receiving — a client-side
-// sign-out leaves the httpOnly cookies for middleware to keep refreshing
+// sign-out leaves the httpOnly cookies for the proxy to keep refreshing
 // until the next navigation.
 export async function logout() {
   const supabase = await createClient();

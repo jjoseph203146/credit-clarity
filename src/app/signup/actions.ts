@@ -144,7 +144,7 @@ export async function signup(formData: FormData) {
   // default), data.session is null here — the user must click the emailed
   // confirmation link (which lands on /auth/callback) before they can sign
   // in at all. Redirecting straight to /dashboard in that case just bounces
-  // them back out via middleware with no explanation, and any login attempt
+  // them back out via the proxy with no explanation, and any login attempt
   // fails until they confirm. Detect this and send them to a clear
   // "check your email" message on /login instead.
   if (!data.session) {

@@ -23,7 +23,7 @@ export async function createClient() {
             );
           } catch {
             // Called from a Server Component — ignore. Session refresh is
-            // handled by middleware, which can write cookies.
+            // handled by src/proxy.ts, which can write cookies.
           }
         },
       },

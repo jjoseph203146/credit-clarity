@@ -30,7 +30,10 @@ import type {
  * from the real, signed-in user's `reports/:id` data — fetched with the
  * same RLS-scoped-client + ownership pattern as `reports/[id]/page.tsx`.
  */
-export default async function PdfReportPage({ params }: { params: { id: string } }) {
+export default async function PdfReportPage({ params }: { params: Promise<{ id: string }> }) {
+  // Next 16: route params are async.
+  const { id } = await params;
+
   const supabase = await createClient();
   const {
     data: { user: authUser },
@@ -40,7 +43,7 @@ export default async function PdfReportPage({ params }: { params: { id: string }
   const { data: report } = await supabase
     .from("reports")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", authUser.id)
     .is("deleted_at", null)
     .returns<Report[]>()

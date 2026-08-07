@@ -83,12 +83,20 @@ export default async function GoalsPage() {
       .filter((a) => a.opened_date)
       .sort((a, b) => new Date(a.opened_date!).getTime() - new Date(b.opened_date!).getTime())[0];
 
+    // Server Component: this renders once per request on the server and is
+    // never hydrated against a client pass, so there is no instability for
+    // the purity rule to guard against. The equivalent computation in the
+    // client component at src/app/preview/page.tsx does capture the timestamp
+    // in state, because there it genuinely matters.
+    // eslint-disable-next-line react-hooks/purity
+    const now = Date.now();
+
     readiness = {
       utilization: totalLimit > 0 ? Math.round((totalBalance / totalLimit) * 100) : null,
       hasCollections: (collections?.length ?? 0) > 0,
       hasLatePayment: (accounts ?? []).some((a) => a.payment_history && /late/i.test(a.payment_history)),
       oldestAccountYears: oldest
-        ? Math.max(0, (Date.now() - new Date(oldest.opened_date!).getTime()) / (365.25 * 24 * 3600 * 1000))
+        ? Math.max(0, (now - new Date(oldest.opened_date!).getTime()) / (365.25 * 24 * 3600 * 1000))
         : null,
     };
   }

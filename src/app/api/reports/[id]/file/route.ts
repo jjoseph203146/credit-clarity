@@ -25,8 +25,11 @@ const SIGNED_URL_TTL_SECONDS = 60;
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Next 16: route params are async.
+  const { id } = await params;
+
   // @supabase/ssr's bundled types collapse table typing to `never` against
   // the installed @supabase/supabase-js; the runtime client is a real
   // SupabaseClient<Database>. Same cast as the DELETE handler one level up.
@@ -46,7 +49,7 @@ export async function GET(
   const { data: report, error } = await supabase
     .from("reports")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .maybeSingle();
 
   if (error || !report || report.user_id !== user.id) {
