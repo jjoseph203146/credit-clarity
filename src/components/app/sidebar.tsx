@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { navMain, navAccount, type NavItem } from "@/lib/demo-data";
@@ -20,6 +20,24 @@ function initialsOf(name: string | null, email: string) {
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return source.slice(0, 2).toUpperCase() || "?";
+}
+
+function LogOutIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </svg>
+  );
 }
 
 function NavRow({ item, active }: { item: NavItem; active: boolean }) {
@@ -51,7 +69,17 @@ function isActive(pathname: string, href: string) {
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [identity, setIdentity] = useState<{ name: string; initials: string } | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    const supabase = createClient() as unknown as SupabaseClient<Database>;
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -104,13 +132,23 @@ export function AppSidebar() {
       </nav>
 
       <div className="mt-auto flex items-center gap-2.5 border-t border-white/[0.08] px-2.5 pt-3">
-        <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-gradient-to-br from-[var(--blue)] to-[var(--teal)] text-[11.5px] font-bold text-white">
+        <div className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-gradient-to-br from-[var(--blue)] to-[var(--teal)] text-[11.5px] font-bold text-white">
           {identity?.initials ?? ""}
         </div>
-        <div>
-          <div className="text-[13px] font-semibold text-white">{identity?.name ?? ""}</div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[13px] font-semibold text-white">{identity?.name ?? ""}</div>
           <div className="text-[11px] text-[#8fa3ba]">{PLAN_LABEL}</div>
         </div>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          aria-label="Log out"
+          title="Log out"
+          className="flex h-7 w-7 flex-none items-center justify-center rounded-[8px] text-[#8fa3ba] transition-colors duration-150 hover:bg-white/[0.08] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mint-light)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <LogOutIcon />
+        </button>
       </div>
     </div>
   );
