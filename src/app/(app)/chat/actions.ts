@@ -10,6 +10,36 @@ import type { AiConversationMessage, AiConversationSource } from "@/lib/supabase
 const FALLBACK_ERROR_MESSAGE =
   "Clarity AI is temporarily unavailable — please try again.";
 
+// Cost/abuse guardrail for the beta: each message is a billed Claude call
+// with no other cap in front of it (the only other AI path, runAnalysis, is
+// gated behind Stripe payment or INTERNAL_API_SECRET). Generous enough for
+// real usage, cheap insurance against one script running unattended.
+const DAILY_CHAT_MESSAGE_LIMIT = 50;
+
+// Counts this user's own chat turns in the last rolling 24h across all their
+// conversations. `messages` is a jsonb array per conversation row rather than
+// one row per message, so this reads each conversation once and counts
+// client-side — fine at beta scale (a handful of users, sparse history);
+// revisit with a dedicated counter/table if usage grows enough to matter.
+async function countMessagesLast24h(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<number> {
+  const { data: conversations } = await supabase
+    .from("ai_conversations")
+    .select("messages")
+    .eq("user_id", userId);
+
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  return (conversations ?? []).reduce((count, c) => {
+    const messages = c.messages as AiConversationMessage[];
+    const recentUserTurns = messages.filter(
+      (m) => m.role === "user" && new Date(m.created_at).getTime() >= cutoff,
+    ).length;
+    return count + recentUserTurns;
+  }, 0);
+}
+
 // Chat-appropriate variant of the SYSTEM_PROMPT in src/lib/analyze.ts,
 // following the same product-safety rules but for a conversational reply.
 // Forces tool use so the reply comes with real, grounded citations (the
@@ -125,6 +155,13 @@ export async function sendChatMessage(conversationId: string, text: string) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  const messagesLast24h = await countMessagesLast24h(supabase, user.id);
+  if (messagesLast24h >= DAILY_CHAT_MESSAGE_LIMIT) {
+    return {
+      error: `You've reached today's limit of ${DAILY_CHAT_MESSAGE_LIMIT} Clarity AI messages. Try again tomorrow.`,
+    };
+  }
 
   const { data: convo, error: fetchError } = await supabase
     .from("ai_conversations")
